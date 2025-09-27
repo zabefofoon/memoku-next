@@ -1,0 +1,36 @@
+{
+  "plugins": ["stylelint-scss"],
+  "extends": [
+    "stylelint-config-standard-scss",
+    "stylelint-config-prettier-scss",
+    "stylelint-config-recess-order",
+    "stylelint-config-tailwindcss"
+  ],
+  "ignoreFiles": [
+    "**/*.{js,jsx,ts,tsx}",
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/dist/**",
+    "**/out/**",
+    "**/eslint.config.mjs",
+    "**/tailwind.config.mjs"
+  ],
+  "overrides": [
+    {
+      "files": ["**/*.{scss,sass}"],
+      "customSyntax": "postcss-scss"
+    },
+    {
+      "files": ["**/*.{js,jsx,ts,tsx}"],
+      "customSyntax": "postcss-styled-syntax"
+    }
+  ],
+  "rules": {
+    "at-rule-no-unknown": null,
+    "scss/at-rule-no-unknown": true,
+    "declaration-block-no-duplicate-custom-properties": true,
+    "declaration-block-no-duplicate-properties": true,
+    "selector-max-type": 0,
+    "media-feature-range-notation": null
+  }
+}
