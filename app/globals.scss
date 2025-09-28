@@ -1,8 +1,34 @@
 @use 'tailwindcss';
+
+/* stylelint-disable-next-line scss/at-rule-no-unknown */
 @custom-variant dark (&:where(.dark *));
 
 @layer utilities {
   * > * {
     color: inherit;
   }
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+.dark {
+  ::-webkit-scrollbar-track {
+    @apply bg-zinc-900;
+  }
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  @apply bg-zinc-600;
+
+  border-radius: 100px;
 }
