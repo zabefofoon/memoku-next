@@ -20,15 +20,20 @@
   @apply bg-gray-100;
 }
 
-.dark {
-  ::-webkit-scrollbar-track {
-    @apply bg-zinc-900;
-  }
-}
-
 /* Handle */
 ::-webkit-scrollbar-thumb {
   @apply bg-zinc-600;
 
   border-radius: 100px;
+}
+
+.tag {
+  color: var(--tag-color);
+  border-color: var(--tag-color);
+}
+
+.dark {
+  ::-webkit-scrollbar-track {
+    @apply bg-zinc-900;
+  }
 }

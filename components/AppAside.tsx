@@ -4,7 +4,7 @@ import etcUtil from '@/utils/etc.util'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCookies } from 'react-cookie'
-import packageJson from '../../package.json'
+import packageJson from '../package.json'
 
 import { AGE_1_YEAR, COOKIE_EXPAND, COOKIE_THEME } from '@/const'
 import { useState } from 'react'
@@ -55,7 +55,7 @@ export function AppAside(props: Props) {
       <div
         className={etcUtil.classNames([
           'relative | hidden lg:flex flex-col | sticky top-[24px] | h-[calc(100dvh-48px)] | bg-white dark:bg-zinc-700 | rounded-l-2xl rounded-b-2xl | shadow-lg transition-[width]',
-          isExpand ? 'w-[240px]' : 'w-[64px]',
+          isExpand ? 'w-[240px]' : 'w-[62px]',
         ])}>
         <button
           className='cursor-pointer | absolute right-0 top-0 translate-x-full | bg-white dark:bg-zinc-700 rounded-r-full | py-[12px]'
@@ -94,7 +94,7 @@ export function AppAside(props: Props) {
                 ])}>
                 <Icon
                   name={menu.icon}
-                  className='text-[24px]'
+                  className='text-[20px]'
                 />
                 {isExpand && (
                   <span className='text-[14px] align-top whitespace-nowrap'>{menu.name}</span>
