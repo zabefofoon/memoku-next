@@ -3,19 +3,21 @@ import { Todo } from '@/models/Todo'
 import { create } from 'zustand'
 
 interface TodosStore {
-  recentTodos: Todo[]
-  loadRecentTodos: () => Promise<void>
+  getRecentTodos: () => Promise<Todo[]>
+  getTodosDateRange: (start: Date, end: Date) => Promise<Todo[]>
 }
 
-export const useTodosStore = create<TodosStore>((set) => {
-  const recentTodos: Todo[] = []
-  const loadRecentTodos = async (): Promise<void> => {
-    const recentTodos = await db.todos.orderBy('modified').limit(10).reverse().toArray()
-    set({ recentTodos })
+export const useTodosStore = create<TodosStore>(() => {
+  const getRecentTodos = async (): Promise<Todo[]> => {
+    return db.todos.orderBy('modified').limit(10).reverse().toArray()
+  }
+
+  const getTodosDateRange = (start: Date, end: Date): Promise<Todo[]> => {
+    return db.todos.where('created').between(start.getTime(), end.getTime(), true, true).toArray()
   }
 
   return {
-    recentTodos,
-    loadRecentTodos,
+    getRecentTodos,
+    getTodosDateRange,
   }
 })
