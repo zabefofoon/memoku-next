@@ -46,43 +46,41 @@ export default function HomeCalendar() {
   }
 
   return (
-    <div className='w-full | bg-white dark:bg-zinc-700 shadow-md rounded-xl | py-[16px]'>
-      <div className='overflow-auto'>
-        <FullCalendar
-          ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin]}
-          initialView='dayGridMonth'
-          aspectRatio={1.5}
-          customButtons={{
-            myToday: {
-              text: 'Today',
-              click: () => calendarRef.current?.getApi().today(),
-            },
-            myMonth: {
-              text: 'Month',
-              click: () => calendarRef.current?.getApi().changeView('dayGridMonth'),
-            },
-            myWeek: {
-              text: 'Week',
-              click: () => calendarRef.current?.getApi().changeView('timeGridWeek'),
-            },
-            myDay: {
-              text: 'Day',
-              click: () => calendarRef.current?.getApi().changeView('timeGridDay'),
-            },
-          }}
-          headerToolbar={{
-            left: 'prev,next myToday',
-            center: 'title',
-            right: 'myMonth,myWeek,myDay',
-          }}
-          dayMaxEvents={1}
-          events={events}
-          moreLinkClick={handleMoreLinkClick}
-          eventClick={handleEventClick}
-          datesSet={handleDatesSet}
-        />
-      </div>
+    <div className='hidden sm:block | flex-1 min-w-[500px] min-h-[420px] h-full | bg-white dark:bg-zinc-800 shadow-md rounded-xl | py-[16px]'>
+      <FullCalendar
+        ref={calendarRef}
+        plugins={[dayGridPlugin, timeGridPlugin]}
+        initialView='dayGridMonth'
+        height='100%'
+        customButtons={{
+          myToday: {
+            text: 'Today',
+            click: () => calendarRef.current?.getApi().today(),
+          },
+          myMonth: {
+            text: 'Month',
+            click: () => calendarRef.current?.getApi().changeView('dayGridMonth'),
+          },
+          myWeek: {
+            text: 'Week',
+            click: () => calendarRef.current?.getApi().changeView('timeGridWeek'),
+          },
+          myDay: {
+            text: 'Day',
+            click: () => calendarRef.current?.getApi().changeView('timeGridDay'),
+          },
+        }}
+        headerToolbar={{
+          left: 'prev,next myToday',
+          center: 'title',
+          right: 'myMonth,myWeek,myDay',
+        }}
+        dayMaxEvents={1}
+        events={events}
+        moreLinkClick={handleMoreLinkClick}
+        eventClick={handleEventClick}
+        datesSet={handleDatesSet}
+      />
     </div>
   )
 }

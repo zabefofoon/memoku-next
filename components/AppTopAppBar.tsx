@@ -31,8 +31,8 @@ export function AppTopAppBar(props: Props) {
   }
 
   return (
-    <header className='sticky top-0 lg:hidden'>
-      <div className='bg-gray-100 dark:bg-zinc-800 | border-b border-gray-200 dark:border-zinc-700 | h-[52px] | flex items-center | px-[12px]'>
+    <header className='sticky top-0 sm:hidden'>
+      <div className='bg-gray-100 dark:bg-zinc-900 | border-b border-gray-200 dark:border-zinc-700 | h-[52px] | flex items-center | px-[12px]'>
         <Link
           href='/'
           className='flex items-center gap-[6px]'>
@@ -56,7 +56,7 @@ export function AppTopAppBar(props: Props) {
             className={etcUtil.classNames([
               'rounded-full | p-[4px]',
               {
-                'bg-gray-200 dark:bg-zinc-700': pathname === '/notifications',
+                'bg-gray-200 dark:bg-zinc-800': pathname === '/notifications',
               },
             ])}>
             <Icon

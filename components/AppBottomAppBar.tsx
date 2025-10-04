@@ -17,8 +17,8 @@ export default function AppBottomAppBar() {
   const pathname = usePathname()
 
   return (
-    <div className='sticky bottom-0 left-0 | px-[8px] py-[12px] | lg:hidden'>
-      <nav className='flex items-center | bg-white dark:bg-zinc-700 | rounded-full shadow-lg overflow-hidden'>
+    <div className='sticky bottom-0 left-0 | px-[8px] py-[12px] mx-auto | sm:hidden | max-w-[360px]'>
+      <nav className='flex items-center | bg-white dark:bg-zinc-800 | rounded-full shadow-lg overflow-hidden'>
         {menus.map((menu) => (
           <Link
             href={menu.href}
@@ -28,7 +28,7 @@ export default function AppBottomAppBar() {
             <div
               className={etcUtil.classNames([
                 'relative | flex flex-col items-center justify-center rounded-full | p-[6px]',
-                { 'bg-slate-100 dark:bg-zinc-600': pathname === menu.href },
+                { 'bg-slate-100 dark:bg-zinc-700': pathname === menu.href },
               ])}>
               {menu.induce && (
                 <div className='absolute w-[4px] top-[4px] left-[16px] | aspect-square rounded-full | bg-red-500'></div>
