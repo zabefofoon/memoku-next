@@ -6,14 +6,13 @@ import { useTagsStore } from '@/stores/tags.store'
 import { useTodosStore } from '@/stores/todos.store'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { useCookies } from 'react-cookie'
+import TagBadge from './TagBadge'
 
 export default function HomeRecents() {
   const todoStore = useTodosStore()
   const tagsStore = useTagsStore()
 
   const dateUtil = useDateUtil()
-  const [cookies] = useCookies()
 
   const [recentTodos, setRecentTodos] = useState<Todo[]>([])
 
@@ -35,22 +34,7 @@ export default function HomeRecents() {
             key={todo.id}
             href={`/todos/${todo.id}`}
             className='flex items-center | border-t border-slate-100 dark:border-zinc-600 last:border-b | py-[4px] px-[8px]'>
-            <div className='dark:bg-zinc-700 | p-[4px] shadow-sm shadow-gray-400 dark:shadow-gray-800 rounded-full'>
-              <span
-                className='w-[32px] | flex items-center justify-center | rounded-full | text-[14px] font-[700] | aspect-square'
-                style={{
-                  background:
-                    cookies['x-theme'] === 'dark'
-                      ? `${tagsStore.getTagsById(todo.tagId)?.color ?? '#000000'}`
-                      : `${tagsStore.getTagsById(todo.tagId)?.color ?? '#000000'}24`,
-                  color:
-                    cookies['x-theme'] === 'dark'
-                      ? 'white'
-                      : (tagsStore.getTagsById(todo.tagId)?.color ?? '#000000'),
-                }}>
-                {tagsStore.getTagsById(todo.tagId)?.label?.slice(0, 1) ?? 'M'}
-              </span>
-            </div>
+            <TagBadge todo={todo} />
 
             <div className='w-full overflow-hidden | hover:bg-slate-50 dark:hover:bg-zinc-600 | rounded-full | px-[8px] py-[4px]'>
               <p className='truncate text-[14px] sm:text-[15px]'>

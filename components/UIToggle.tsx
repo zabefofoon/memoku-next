@@ -11,7 +11,7 @@ interface Props {
 
 export default function UIToggle(props: Props) {
   return (
-    <label className='flex cursor-pointer select-none items-center'>
+    <label className='flex select-none items-center'>
       <span className='sr-only'>{props.id}</span>
       <div className='relative'>
         <input

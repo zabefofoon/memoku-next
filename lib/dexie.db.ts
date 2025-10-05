@@ -13,7 +13,7 @@ export class MySubClassedDexie extends Dexie {
     super('SimpleTodo')
     // 스키마 정의
     this.version(2).stores({
-      todos: '++id, date, description, tagId, time, created, upto, done, modified', // images 필드 제거
+      todos: '++id, date, description, tagId, time, created, upto, done, modified, relatedId', // images 필드 제거
       setting: '++id, tags, forms',
       images: '++id, image, todoId', // 새로운 image 테이블 추가
       tags: 'id, color, label, excludeUpload',
@@ -47,6 +47,8 @@ export class MySubClassedDexie extends Dexie {
         }
         if (allTags.length > 0) await tx.table<Tag>('tags').bulkAdd(allTags)
       }
+
+      console.log('asdf;lkm')
     })
   }
 }

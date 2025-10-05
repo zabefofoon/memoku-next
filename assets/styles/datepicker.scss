@@ -33,7 +33,7 @@
   }
 }
 
-.calendar {
+.date-picker {
   .fc {
     padding: 0 16px;
 
@@ -59,6 +59,7 @@
     }
 
     .fc-daygrid-day-top {
+      justify-content: center;
       font-size: 12px;
     }
 
@@ -80,13 +81,29 @@
     .fc-button-group {
       gap: 4px;
     }
+  }
 
-    .fc-timegrid-axis-cushion {
-      font-size: 13px;
+  .fc-daygrid-body-natural {
+    .fc-daygrid-day-events {
+      display: none;
+    }
+  }
+
+  .fc-select-button {
+    padding: 0 4px !important;
+    font-size: 12px !important;
+    color: white;
+    background: var(--color-violet-500);
+    border-radius: 99px !important;
+
+    &:hover {
+      color: white;
+      background: var(--color-violet-500);
     }
 
-    .fc-timegrid-slot-label-cushion {
-      font-size: 13px;
+    &:active {
+      color: white !important;
+      background: var(--color-violet-500) !important;
     }
   }
 }

@@ -57,7 +57,7 @@ export function AppAside(props: Props) {
         isExpand ? 'w-[240px]' : 'w-[62px]',
       ])}>
       <button
-        className='cursor-pointer | absolute right-0 top-0 translate-x-full | bg-white dark:bg-zinc-800 rounded-r-full | py-[12px]'
+        className='absolute right-0 top-0 translate-x-full | bg-white dark:bg-zinc-800 rounded-r-full | py-[12px]'
         type='button'
         onClick={toggleExpandAside}>
         <Icon name='expand' />
@@ -86,7 +86,7 @@ export function AppAside(props: Props) {
               className={etcUtil.classNames([
                 'relative | flex items-center gap-[6px] | py-[12px] px-[16px] mx-[4px] | rounded-full hover:bg-slate-50 hover:dark:bg-zinc-700/50',
                 {
-                  'bg-slate-100 dark:bg-zinc-700 hover:bg-slate-100 hover:dark:bg-zinc-700':
+                  'text-white | bg-violet-500 dark:bg-violet-600 hover:bg-violet-500 hover:dark:bg-violet-600':
                     pathname === menu.href,
                 },
               ])}>

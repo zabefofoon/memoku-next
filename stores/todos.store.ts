@@ -9,15 +9,22 @@ export interface CreatedSeriesPoint {
 }
 
 interface TodosStore {
+  getTodo: (id: number) => Promise<Todo | undefined>
   getTodos: () => Promise<Todo[]>
   getTodayTodos: () => Promise<Todo[]>
   getRecentTodos: () => Promise<Todo[]>
   getTodosDateRange: (start: Date, end: Date) => Promise<Todo[]>
   getTagsCount: () => Promise<Record<string, number>[]>
   getCreatedSeries30d: (date?: Date) => Promise<CreatedSeriesPoint[]>
+  postDescription: (description: string) => Promise<number>
+  updateDescription: (id: number, description: string) => Promise<number>
 }
 
 export const useTodosStore = create<TodosStore>(() => {
+  const getTodo = async (id: number): Promise<Todo> => {
+    const [res] = await db.todos.where({ id }).toArray()
+    return res
+  }
   const getTodos = async (): Promise<Todo[]> => {
     return db.todos.toArray()
   }
@@ -79,12 +86,23 @@ export const useTodosStore = create<TodosStore>(() => {
     return days.map((d) => ({ day: d, created: map.get(d) || 0 }))
   }
 
+  const postDescription = (description: string): Promise<number> => {
+    return db.todos.add({ description, created: Date.now(), modified: Date.now() })
+  }
+
+  const updateDescription = (id: number, description: string): Promise<number> => {
+    return db.todos.update(id, { description, modified: Date.now() })
+  }
+
   return {
+    getTodo,
     getTodos,
     getTodayTodos,
     getRecentTodos,
     getTodosDateRange,
     getTagsCount,
     getCreatedSeries30d,
+    postDescription,
+    updateDescription,
   }
 })

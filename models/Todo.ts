@@ -11,6 +11,7 @@ export interface Todo {
   images?: (string | Blob)[]
   linked?: 'google'
   createdDate?: string
+  relatedId?: string
 }
 
 export interface Setting {

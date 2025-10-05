@@ -46,7 +46,7 @@ export default function HomeCalendar() {
   }
 
   return (
-    <div className='hidden sm:block | flex-1 min-w-[500px] min-h-[420px] h-full | bg-white dark:bg-zinc-800 shadow-md rounded-xl | py-[16px]'>
+    <div className='calendar | hidden sm:block | flex-1 min-w-[500px] min-h-[420px] h-full | bg-white dark:bg-zinc-800 shadow-md rounded-xl | py-[16px]'>
       <FullCalendar
         ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin]}

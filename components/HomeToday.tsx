@@ -31,7 +31,7 @@ export default function HomeTody() {
       key={todo.id}
       href={`/todos/${todo.id}`}
       className='flex items-center | border-t border-slate-100 dark:border-zinc-600 last:border-b | py-[4px] px-[8px]'>
-      <div className='dark:bg-zinc-700 | p-[4px] shadow-sm shadow-gray-400 dark:shadow-gray-800 rounded-full'>
+      <div className='p-[4px] dark:bg-zinc-700 shadow-sm shadow-gray-400 dark:shadow-gray-800 rounded-full'>
         <span
           className='w-[32px] | flex items-center justify-center | rounded-full | text-[14px] font-[700] | aspect-square'
           style={{
@@ -61,9 +61,7 @@ export default function HomeTody() {
 
   return (
     <div className='w-full | bg-white dark:bg-zinc-800 shadow-md rounded-xl | py-[16px]'>
-      <h3 className='cursor-pointer | rounded-full | font-[700] text-[16px] | px-[16px]'>
-        오늘 할 일
-      </h3>
+      <h3 className='rounded-full | font-[700] text-[16px] | px-[16px]'>오늘 할 일</h3>
       <div className='mt-[12px] | flex flex-col gap-[4px]'>
         {todos.length ? (
           todos

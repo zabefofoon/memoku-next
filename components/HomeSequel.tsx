@@ -27,7 +27,7 @@ export default function HomeSequel() {
   }
 
   const loadData = async (): Promise<void> => {
-    const base = await todosStore.getCreatedSeries30d(new Date('2024-12-01'))
+    const base = await todosStore.getCreatedSeries30d()
     const withMA = withMovingAverage(base, 7)
     setData(withMA)
   }
@@ -37,7 +37,7 @@ export default function HomeSequel() {
   }, [])
 
   return (
-    <div className='gap-[8px] flex flex-col | shadow-md rounded-xl bg-violet-500 | p-[16px]'>
+    <div className='gap-[8px] flex flex-col | shadow-md rounded-xl bg-violet-500 dark:bg-violet-600 | p-[16px]'>
       <h3 className='font-[700] text-[16px] | text-white'>주간 활동</h3>
       <ResponsiveContainer
         width='100%'

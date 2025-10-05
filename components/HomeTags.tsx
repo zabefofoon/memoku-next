@@ -5,7 +5,7 @@ import { useTagsStore } from '@/stores/tags.store'
 import { useTodosStore } from '@/stores/todos.store'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { useCookies } from 'react-cookie'
+import TagBadge from './TagBadge'
 
 interface Group {
   id: string
@@ -16,7 +16,6 @@ interface Group {
 export default function HomeTags() {
   const todoStore = useTodosStore()
   const tagsStore = useTagsStore()
-  const [cookies] = useCookies()
 
   const [todos, setTodos] = useState<Todo[]>()
 
@@ -53,23 +52,8 @@ export default function HomeTags() {
             key={item.id}
             href={`/todos/${item.id}`}
             className='flex items-center gap-[6px] | border-t border-slate-100 dark:border-zinc-600 last:border-b | py-[4px]'>
-            <div className='dark:bg-zinc-700 | p-[4px] shadow-sm shadow-gray-400 dark:shadow-gray-800 rounded-full'>
-              <span
-                key={item.id}
-                className='w-[32px] | flex items-center justify-center | rounded-full | text-[14px] font-[700] | aspect-square'
-                style={{
-                  background:
-                    cookies['x-theme'] === 'dark'
-                      ? `${tagsStore.getTagsById(item.id)?.color ?? '#000000'}`
-                      : `${tagsStore.getTagsById(item.id)?.color ?? '#000000'}24`,
-                  color:
-                    cookies['x-theme'] === 'dark'
-                      ? 'white'
-                      : (tagsStore.getTagsById(item.id)?.color ?? '#000000'),
-                }}>
-                {tagsStore.getTagsById(item.id)?.label?.slice(0, 1) ?? 'M'}
-              </span>
-            </div>
+            <TagBadge todo={{ tagId: item.id }} />
+
             <div className='w-full | flex items-center justify-between'>
               <p className='font-[700] text-[15px]'>
                 {tagsStore.getTagsById(item.id)?.label ?? 'Memo'}
