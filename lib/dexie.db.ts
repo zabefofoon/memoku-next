@@ -11,9 +11,10 @@ export class MySubClassedDexie extends Dexie {
 
   constructor() {
     super('SimpleTodo')
+
     // 스키마 정의
     this.version(2).stores({
-      todos: '++id, date, description, tagId, time, created, upto, done, modified, relatedId', // images 필드 제거
+      todos: '++id, date, description, tagId, time, created, upto, done, modified, parentId', // images 필드 제거
       setting: '++id, tags, forms',
       images: '++id, image, todoId', // 새로운 image 테이블 추가
       tags: 'id, color, label, excludeUpload',
@@ -32,6 +33,7 @@ export class MySubClassedDexie extends Dexie {
           }
         }
         delete todo.images // 기존 테이블에서 images 필드 제거
+        todo.parentId = -1
         await tx.table('todos').put(todo)
       }
 
@@ -47,8 +49,6 @@ export class MySubClassedDexie extends Dexie {
         }
         if (allTags.length > 0) await tx.table<Tag>('tags').bulkAdd(allTags)
       }
-
-      console.log('asdf;lkm')
     })
   }
 }

@@ -1,5 +1,5 @@
 export interface Todo {
-  id?: string
+  id?: number
   upto?: boolean
   date?: string
   description?: string
@@ -10,8 +10,7 @@ export interface Todo {
   modified?: number
   images?: (string | Blob)[]
   linked?: 'google'
-  createdDate?: string
-  relatedId?: string
+  parentId?: number
 }
 
 export interface Setting {

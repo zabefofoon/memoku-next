@@ -2,8 +2,8 @@ import { useDateUtil } from '@/hooks/useDateUtil'
 import { Todo } from '@/models/Todo'
 import { useTagsStore } from '@/stores/tags.store'
 import Link from 'next/link'
-import { Icon } from './Icon'
 import TagBadge from './TagBadge'
+import TodosDeleteButton from './TodosDeleteButton'
 import TodosStatus from './TodosStatus'
 
 export interface Props {
@@ -92,15 +92,7 @@ export default function TodosTable(props: Props) {
                 </Link>
               </td>
               <td className='py-[12px]'>
-                <Link
-                  href='#'
-                  className='w-fit | bg-red-100 dark:bg-transparent dark:border border-red-600 | mx-auto px-[8px] py-[4px] rounded-full | flex items-center justify-center | text-red-500 dark:text-red-600 | hover:underline'>
-                  <Icon
-                    name='delete'
-                    className='text-[20px]'
-                  />
-                  <span className='font-[700] text-[12px]'>DELETE</span>
-                </Link>
+                <TodosDeleteButton />
               </td>
             </tr>
           ))}

@@ -37,9 +37,7 @@ export default function HomeRecents() {
             <TagBadge todo={todo} />
 
             <div className='w-full overflow-hidden | hover:bg-slate-50 dark:hover:bg-zinc-600 | rounded-full | px-[8px] py-[4px]'>
-              <p className='truncate text-[14px] sm:text-[15px]'>
-                [{tagsStore.getTagsById(todo.tagId)?.label ?? 'Memo'}] {todo.description}
-              </p>
+              <p className='truncate text-[14px] sm:text-[15px]'>{todo.description}</p>
               <p className='text-[11px] opacity-70 whitespace-nowrap'>
                 {dateUtil.parseDate(todo.created)}
               </p>

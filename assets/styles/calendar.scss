@@ -90,3 +90,15 @@
     }
   }
 }
+
+.page {
+  .fc {
+    width: 100%;
+
+    .fc-daygrid-body-unbalanced {
+      .fc-daygrid-day-events {
+        min-height: 1em;
+      }
+    }
+  }
+}

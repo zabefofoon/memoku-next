@@ -16,8 +16,11 @@ interface TodosStore {
   getTodosDateRange: (start: Date, end: Date) => Promise<Todo[]>
   getTagsCount: () => Promise<Record<string, number>[]>
   getCreatedSeries30d: (date?: Date) => Promise<CreatedSeriesPoint[]>
-  postDescription: (description: string) => Promise<number>
+  postDescription: (description: string, parentId?: number) => Promise<number>
   updateDescription: (id: number, description: string) => Promise<number>
+  getDescendantsFlat: (rootId: number) => Promise<Todo[]>
+  getAncestorsFlat: (childId: number) => Promise<Todo[]>
+  addNewTodo: (todo: Todo) => Promise<number>
 }
 
 export const useTodosStore = create<TodosStore>(() => {
@@ -26,7 +29,7 @@ export const useTodosStore = create<TodosStore>(() => {
     return res
   }
   const getTodos = async (): Promise<Todo[]> => {
-    return db.todos.toArray()
+    return db.todos.where('parentId').equals(-1).toArray()
   }
 
   const getTodayTodos = async (): Promise<Todo[]> => {
@@ -86,12 +89,53 @@ export const useTodosStore = create<TodosStore>(() => {
     return days.map((d) => ({ day: d, created: map.get(d) || 0 }))
   }
 
-  const postDescription = (description: string): Promise<number> => {
-    return db.todos.add({ description, created: Date.now(), modified: Date.now() })
+  const postDescription = (description: string, parentId = -1): Promise<number> => {
+    return db.todos.add({ description, parentId, created: Date.now(), modified: Date.now() })
+  }
+
+  const addNewTodo = (todo: Todo): Promise<number> => {
+    return db.todos.add({ ...todo, created: Date.now(), modified: Date.now() })
   }
 
   const updateDescription = (id: number, description: string): Promise<number> => {
     return db.todos.update(id, { description, modified: Date.now() })
+  }
+
+  const getDescendantsFlat = async (rootId: number) => {
+    const result: Todo[] = []
+    const queue: number[] = [rootId]
+    const seen = new Set<number>([rootId]) // 사이클 방지
+
+    while (queue.length) {
+      const pid = queue.shift()!
+      const children = await db.todos.where('parentId').equals(pid).toArray()
+      for (const child of children) {
+        if (!child.id || seen.has(child.id)) continue
+        result.push(child)
+        seen.add(child.id)
+        queue.push(child.id)
+      }
+    }
+    return result
+  }
+
+  const getAncestorsFlat = async (childId: number): Promise<Todo[]> => {
+    const out: Todo[] = []
+    const seen = new Set<number>()
+
+    const cur = await db.todos.get(childId)
+    if (!cur) return out
+
+    let pid = cur.parentId ?? -1
+    while (typeof pid === 'number' && pid !== -1 && !seen.has(pid)) {
+      seen.add(pid)
+      const parent = await db.todos.get(pid)
+      if (!parent) break
+      out.push(parent)
+      pid = parent.parentId ?? -1
+    }
+
+    return out.reverse()
   }
 
   return {
@@ -104,5 +148,8 @@ export const useTodosStore = create<TodosStore>(() => {
     getCreatedSeries30d,
     postDescription,
     updateDescription,
+    getDescendantsFlat,
+    getAncestorsFlat,
+    addNewTodo,
   }
 })
