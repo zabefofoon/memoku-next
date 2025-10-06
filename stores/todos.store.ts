@@ -18,6 +18,7 @@ interface TodosStore {
   getCreatedSeries30d: (date?: Date) => Promise<CreatedSeriesPoint[]>
   postDescription: (description: string, parentId?: number) => Promise<number>
   updateDescription: (id: number, description: string) => Promise<number>
+  updateRange: (id: number, range: { start?: number; end?: number }) => Promise<number>
   getDescendantsFlat: (rootId: number) => Promise<Todo[]>
   getAncestorsFlat: (childId: number) => Promise<Todo[]>
   addNewTodo: (todo: Todo) => Promise<number>
@@ -101,6 +102,10 @@ export const useTodosStore = create<TodosStore>(() => {
     return db.todos.update(id, { description, modified: Date.now() })
   }
 
+  const updateRange = (id: number, range: { start?: number; end?: number }): Promise<number> => {
+    return db.todos.update(id, range)
+  }
+
   const getDescendantsFlat = async (rootId: number) => {
     const result: Todo[] = []
     const queue: number[] = [rootId]
@@ -148,6 +153,7 @@ export const useTodosStore = create<TodosStore>(() => {
     getCreatedSeries30d,
     postDescription,
     updateDescription,
+    updateRange,
     getDescendantsFlat,
     getAncestorsFlat,
     addNewTodo,

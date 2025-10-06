@@ -1,9 +1,9 @@
 import { useDateUtil } from '@/hooks/useDateUtil'
 import { Todo } from '@/models/Todo'
-import { useTagsStore } from '@/stores/tags.store'
 import Link from 'next/link'
 import TagBadge from './TagBadge'
 import TodosDeleteButton from './TodosDeleteButton'
+import TodosPeriodText from './TodosPeriodText'
 import TodosStatus from './TodosStatus'
 
 export interface Props {
@@ -12,7 +12,6 @@ export interface Props {
 
 export default function TodosTable(props: Props) {
   const dateUtil = useDateUtil()
-  const tagsStore = useTagsStore()
 
   return (
     <div className='w-full | bg-white dark:bg-zinc-800 shadow-md rounded-xl | overflow-hidden'>
@@ -21,12 +20,12 @@ export default function TodosTable(props: Props) {
           <tr>
             <th
               scope='col'
-              className='py-[12px] w-[128px]'>
+              className='py-[12px] w-[80px]'>
               태그
             </th>
             <th
               scope='col'
-              className='py-[12px] w-[128px]'>
+              className='py-[12px] w-[100px]'>
               진행상태
             </th>
             <th
@@ -36,8 +35,8 @@ export default function TodosTable(props: Props) {
             </th>
             <th
               scope='col'
-              className='py-[12px] w-[128px]'>
-              수정일
+              className='py-[12px] w-[200px]'>
+              기한
             </th>
             <th
               scope='col'
@@ -78,11 +77,14 @@ export default function TodosTable(props: Props) {
                 </Link>
               </th>
               <td className='opacity-70'>
-                <Link
-                  className='py-[12px] | block'
-                  href={`/todos/${todo.id}`}>
-                  {dateUtil.parseDate(todo.modified)}
-                </Link>
+                {(todo.start && todo.end && (
+                  <Link
+                    className='py-[12px] | block'
+                    href={`/todos/${todo.id}`}>
+                    <TodosPeriodText todo={todo} />
+                  </Link>
+                )) ||
+                  '--'}
               </td>
               <td className='opacity-70'>
                 <Link

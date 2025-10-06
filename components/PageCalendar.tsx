@@ -41,6 +41,8 @@ export default function PageCalendar() {
       title: todo.description?.slice(0, 20),
       date: dayjs(todo.created).format('YYYY-MM-DD'),
       backgroundColor: tagsStore.getTagsById(todo.tagId)?.color ?? '#000000',
+      start: todo.start ? dayjs(todo.start).format('YYYY-MM-DD') : undefined,
+      end: todo.end ? dayjs(todo.end).format('YYYY-MM-DD') : undefined,
     }))
     setEvents(mapped)
   }

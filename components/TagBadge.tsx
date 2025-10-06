@@ -14,6 +14,8 @@ export default function TagBadge(props: Props) {
 
   const tag = tagsStore.getTagsById(props.todo?.tagId)
 
+  if (props.todo == null) return null
+
   return (
     <div className='dark:bg-zinc-700 | p-[4px] shadow-sm shadow-gray-400 dark:shadow-gray-800 rounded-full'>
       <span

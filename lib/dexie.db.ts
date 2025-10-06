@@ -14,7 +14,7 @@ export class MySubClassedDexie extends Dexie {
 
     // 스키마 정의
     this.version(2).stores({
-      todos: '++id, date, description, tagId, time, created, upto, done, modified, parentId', // images 필드 제거
+      todos: '++id, description, tagId, created, done, modified, parentId, start, end',
       setting: '++id, tags, forms',
       images: '++id, image, todoId', // 새로운 image 테이블 추가
       tags: 'id, color, label, excludeUpload',

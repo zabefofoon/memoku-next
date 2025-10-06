@@ -93,6 +93,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
           />
           <p className='text-[20px] truncate'>{textValue.split(/\n/)[0] || '내용을 입력하세요.'}</p>
         </button>
+        <p className='text-[16px] opacity-50'>모든 글은 자동으로 저장 됩니다.</p>
       </div>
       <div className='flex flex-col'>
         {parents?.map((todo) => (

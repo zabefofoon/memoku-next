@@ -41,9 +41,13 @@ export default function HomeCalendar() {
       title: todo.description?.slice(0, 20),
       date: dayjs(todo.created).format('YYYY-MM-DD'),
       backgroundColor: tagsStore.getTagsById(todo.tagId)?.color ?? '#000000',
+      start: todo.start ? dayjs(todo.start).format('YYYY-MM-DD') : undefined,
+      end: todo.end ? dayjs(todo.end).format('YYYY-MM-DD') : undefined,
     }))
+
     setEvents(mapped)
   }
+  if (tagsStore.tags.length == 0) return ''
 
   return (
     <div className='calendar | hidden sm:block | flex-1 min-w-[500px] min-h-[420px] h-full | bg-white dark:bg-zinc-800 shadow-md rounded-xl | py-[16px]'>

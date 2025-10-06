@@ -1,16 +1,15 @@
 export interface Todo {
   id?: number
-  upto?: boolean
-  date?: string
   description?: string
   tagId?: string
-  time?: string
   created?: number
   done?: boolean
   modified?: number
+  parentId?: number
+  start?: number
+  end?: number
   images?: (string | Blob)[]
   linked?: 'google'
-  parentId?: number
 }
 
 export interface Setting {
