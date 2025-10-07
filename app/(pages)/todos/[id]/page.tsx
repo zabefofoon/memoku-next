@@ -1,13 +1,16 @@
 'use client'
 
 import { Icon } from '@/app/components/Icon'
+import { TodosDeleteModal } from '@/app/components/TodosDeleteModal'
 import TodosEditor from '@/app/components/TodosEditor'
 import { Todo } from '@/app/models/Todo'
 import { useTodosStore } from '@/app/stores/todos.store'
 import debounce from 'lodash.debounce'
+import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
+  const router = useRouter()
   const todosStore = useTodosStore()
 
   const [todo, setTodo] = useState<Todo>()
@@ -15,6 +18,8 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
 
   const [parents, setParents] = useState<Todo[]>()
   const [children, setChildren] = useState<Todo[]>()
+
+  const [isShowDeleteModal, setIsShowDeleteModal] = useState(false)
 
   const saveText = useMemo(
     () =>
@@ -74,14 +79,44 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
     setChildren(res)
   }
 
+  const deleteTodo = async (): Promise<void> => {
+    const searchParams = await props.searchParams
+    if (searchParams.deleteModal && !isNaN(+searchParams.deleteModal)) {
+      await todosStore.deleteTodo(+searchParams.deleteModal)
+
+      if (todo?.id === +searchParams.deleteModal) router.replace('/todos')
+      else {
+        loadTodo()
+        loadParent()
+        loadChildren()
+        router.back()
+      }
+    }
+  }
+
   useEffect(() => {
     loadTodo()
     loadParent()
     loadChildren()
   }, [])
 
+  const handleSearchParams = async (): Promise<void> => {
+    const searchParams = await props.searchParams
+    setIsShowDeleteModal(!!searchParams.deleteModal)
+  }
+
+  useEffect(() => {
+    handleSearchParams()
+  }, [props.searchParams])
+
   return (
     <div className='flex-1 | flex flex-col'>
+      <TodosDeleteModal
+        isShow={isShowDeleteModal}
+        close={router.back}
+        delete={deleteTodo}
+      />
+
       <div className='mb-[24px]'>
         <button
           type='button'

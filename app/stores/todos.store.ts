@@ -8,29 +8,13 @@ export interface CreatedSeriesPoint {
   created: number
 }
 
-interface TodosStore {
-  getTodo: (id: number) => Promise<Todo | undefined>
-  getTodos: () => Promise<Todo[]>
-  getTodayTodos: () => Promise<Todo[]>
-  getRecentTodos: () => Promise<Todo[]>
-  getTodosDateRange: (start: Date, end: Date) => Promise<Todo[]>
-  getTagsCount: () => Promise<Record<string, number>[]>
-  getCreatedSeries30d: (date?: Date) => Promise<CreatedSeriesPoint[]>
-  postDescription: (description: string, parentId?: number) => Promise<number>
-  updateDescription: (id: number, description: string) => Promise<number>
-  updateRange: (id: number, range: { start?: number; end?: number }) => Promise<number>
-  getDescendantsFlat: (rootId: number) => Promise<Todo[]>
-  getAncestorsFlat: (childId: number) => Promise<Todo[]>
-  addNewTodo: (todo: Todo) => Promise<number>
-}
-
-export const useTodosStore = create<TodosStore>(() => {
+export const useTodosStore = create(() => {
   const getTodo = async (id: number): Promise<Todo> => {
     const [res] = await db.todos.where({ id }).toArray()
     return res
   }
   const getTodos = async (): Promise<Todo[]> => {
-    return db.todos.where('parentId').equals(-1).toArray()
+    return db.todos.filter(({ parentId }) => !parentId || parentId === -1).toArray()
   }
 
   const getTodayTodos = async (): Promise<Todo[]> => {
@@ -143,6 +127,15 @@ export const useTodosStore = create<TodosStore>(() => {
     return out.reverse()
   }
 
+  const deleteTodo = async (id: number): Promise<number> => {
+    return db.transaction('rw', db.todos, async () => {
+      const target = await db.todos.get(id)
+      if (!target) return -1
+      db.todos.where('parentId').equals(id).modify({ parentId: target.parentId })
+      return db.todos.where({ id }).delete()
+    })
+  }
+
   return {
     getTodo,
     getTodos,
@@ -157,5 +150,6 @@ export const useTodosStore = create<TodosStore>(() => {
     getDescendantsFlat,
     getAncestorsFlat,
     addNewTodo,
+    deleteTodo,
   }
 })

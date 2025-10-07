@@ -60,3 +60,40 @@
 button {
   cursor: pointer;
 }
+
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 240ms ease;
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+
+/* 카드 슬라이드 업: 중첩 없이 자손 셀렉터로 */
+.fade-enter .modal-card {
+  transform: translateY(10px);
+}
+
+.fade-enter-active .modal-card {
+  transform: translateY(0);
+  transition: transform 240ms ease;
+}
+
+.fade-exit .modal-card {
+  transform: translateY(0);
+}
+
+.fade-exit-active .modal-card {
+  transform: translateY(10px);
+  transition: transform 240ms ease;
+}

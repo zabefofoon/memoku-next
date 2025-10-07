@@ -93,9 +93,7 @@ export default function TodosTable(props: Props) {
                   {dateUtil.parseDate(todo.created)}
                 </Link>
               </td>
-              <td className='py-[12px]'>
-                <TodosDeleteButton />
-              </td>
+              <td className='py-[12px]'>{todo.id && <TodosDeleteButton id={todo.id} />}</td>
             </tr>
           ))}
         </tbody>

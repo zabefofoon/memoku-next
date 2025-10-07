@@ -2,7 +2,7 @@ import { useDateUtil } from '@/app/hooks/useDateUtil'
 import { Todo } from '@/app/models/Todo'
 import { useTodosStore } from '@/app/stores/todos.store'
 import etcUtil from '@/app/utils/etc.util'
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useEffect, useRef, useState } from 'react'
 import { Icon } from './Icon'
 import TagBadge from './TagBadge'
 import TodosDatePicker from './TodosDatePicker'
@@ -18,6 +18,9 @@ interface Props {
 
 export default function TodosEditor(props: Props) {
   const todosStore = useTodosStore()
+
+  const textareaEl = useRef<HTMLTextAreaElement>(null)
+
   const [open, setOpen] = useState(false)
 
   const dateUtil = useDateUtil()
@@ -25,12 +28,14 @@ export default function TodosEditor(props: Props) {
   const [textValue, setTextValue] = useState<string>('')
 
   const handleTextareaInput = (event: FormEvent<HTMLTextAreaElement>): void => {
-    setTextareaAutoHeight(event)
+    setTextareaAutoHeight()
     props.updateText?.(event.currentTarget.value, props.todo?.id)
   }
-  const setTextareaAutoHeight = (event: FormEvent<HTMLTextAreaElement>): void => {
-    event.currentTarget.style.height = '0'
-    event.currentTarget.style.height = `${event.currentTarget.scrollHeight}px`
+  const setTextareaAutoHeight = (): void => {
+    if (textareaEl.current == null) return
+
+    textareaEl.current.style.height = '0'
+    textareaEl.current.style.height = `${textareaEl.current.scrollHeight}px`
   }
 
   const setTodoRange = (range?: { start?: number; end?: number }): void => {
@@ -45,14 +50,16 @@ export default function TodosEditor(props: Props) {
 
   useEffect(() => {
     setTextValue(props.todo?.description ?? '')
+    setTimeout(() => setTextareaAutoHeight())
   }, [props.todo?.description])
 
   return (
     <div className='relative | bg-white dark:bg-zinc-800 shadow-md rounded-xl | p-[8px]'>
       <div className='absolute top-[16px] right-[16px]'>
-        <TodosDeleteButton />
+        {props.todo?.id && <TodosDeleteButton id={props.todo.id} />}
       </div>
       <textarea
+        ref={textareaEl}
         name='postContent'
         className='w-full min-h-[100px] resize-none | rounded-xl p-[8px] | text-[15px]'
         value={textValue}
