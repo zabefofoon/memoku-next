@@ -2,6 +2,7 @@ import { useDateUtil } from '@/app/hooks/useDateUtil'
 import { Todo } from '@/app/models/Todo'
 import { useTodosStore } from '@/app/stores/todos.store'
 import etcUtil from '@/app/utils/etc.util'
+import { useRouter } from 'next/navigation'
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import { Icon } from './Icon'
 import TagBadge from './TagBadge'
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export default function TodosEditor(props: Props) {
+  const router = useRouter()
   const todosStore = useTodosStore()
 
   const textareaEl = useRef<HTMLTextAreaElement>(null)
@@ -66,7 +68,10 @@ export default function TodosEditor(props: Props) {
         onChange={(e) => setTextValue(e.currentTarget.value)}
         onInput={handleTextareaInput}></textarea>
       <div className='flex items-center gap-[6px] px-[8px]'>
-        <TagBadge id={props.todo?.tagId} />
+        <TagBadge
+          id={props.todo?.tagId}
+          click={() => router.push(`?todoTag=${props.todo?.id}`)}
+        />
         <TodosStatus />
         <UIDropdown
           isOpen={open}

@@ -3,7 +3,8 @@
 import { Icon } from '@/app/components/Icon'
 import { TodosDeleteModal } from '@/app/components/TodosDeleteModal'
 import TodosEditor from '@/app/components/TodosEditor'
-import { Todo } from '@/app/models/Todo'
+import { TodosTagModal } from '@/app/components/TodosTagModal'
+import { Tag, Todo } from '@/app/models/Todo'
 import { useTodosStore } from '@/app/stores/todos.store'
 import debounce from 'lodash.debounce'
 import { useRouter } from 'next/navigation'
@@ -20,6 +21,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
   const [children, setChildren] = useState<Todo[]>()
 
   const [isShowDeleteModal, setIsShowDeleteModal] = useState(false)
+  const [isShowTagModal, setIsShowTagModal] = useState(false)
 
   const saveText = useMemo(
     () =>
@@ -94,6 +96,18 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
     }
   }
 
+  const changeTag = async (tag: Tag): Promise<void> => {
+    const searchParams = await props.searchParams
+    if (searchParams.todoTag && !isNaN(+searchParams.todoTag)) {
+      await todosStore.updateTag(+searchParams.todoTag, tag.id)
+
+      loadTodo()
+      loadParent()
+      loadChildren()
+      router.back()
+    }
+  }
+
   useEffect(() => {
     loadTodo()
     loadParent()
@@ -103,6 +117,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
   const handleSearchParams = async (): Promise<void> => {
     const searchParams = await props.searchParams
     setIsShowDeleteModal(!!searchParams.deleteModal)
+    setIsShowTagModal(!!searchParams.todoTag)
   }
 
   useEffect(() => {
@@ -115,6 +130,11 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
         isShow={isShowDeleteModal}
         close={router.back}
         delete={deleteTodo}
+      />
+      <TodosTagModal
+        isShow={isShowTagModal}
+        close={router.back}
+        select={changeTag}
       />
 
       <div className='mb-[24px]'>

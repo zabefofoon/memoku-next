@@ -90,6 +90,10 @@ export const useTodosStore = create(() => {
     return db.todos.update(id, range)
   }
 
+  const updateTag = (id: number, tagId: string): Promise<number> => {
+    return db.todos.update(id, { tagId })
+  }
+
   const getDescendantsFlat = async (rootId: number) => {
     const result: Todo[] = []
     const queue: number[] = [rootId]
@@ -151,5 +155,6 @@ export const useTodosStore = create(() => {
     getAncestorsFlat,
     addNewTodo,
     deleteTodo,
+    updateTag,
   }
 })

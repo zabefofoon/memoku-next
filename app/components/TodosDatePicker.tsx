@@ -123,9 +123,9 @@ export default function TodosDatePicker(props: Props) {
             })}
           </div>
           <div className='time | overflow-y-scroll | max-h-[230px] | flex flex-col gap-[4px] | border-r border-gray-100 dark:border-zinc-600'>
-            {Array.from({ length: 60 }, (_, index) => {
+            {Array.from({ length: 12 }, (_, index) => {
               const cur = rangeDate[step]
-              const selected = cur && dayjs(cur).minute() === index
+              const selected = cur && dayjs(cur).minute() === index * 5
               return (
                 <button
                   key={index}
@@ -135,8 +135,8 @@ export default function TodosDatePicker(props: Props) {
                       'bg-violet-500 text-white': selected,
                     },
                   ])}
-                  onClick={() => setMinute(index)}>
-                  {`${index}`.padStart(2, '0')}
+                  onClick={() => setMinute(index * 5)}>
+                  {`${index * 5}`.padStart(2, '0')}
                 </button>
               )
             })}

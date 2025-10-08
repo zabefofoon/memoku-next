@@ -2,6 +2,7 @@
 
 import { useTagsStore } from '@/app/stores/tags.store'
 import { useTodosStore } from '@/app/stores/todos.store'
+import { TAG_COLORS } from '@/const'
 import {
   DatesSetArg,
   EventClickArg,
@@ -14,8 +15,13 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
+import { useCookies } from 'react-cookie'
+import { useThemeStore } from '../stores/theme.store'
 
 export default function HomeCalendar() {
+  const [cookies] = useCookies()
+
+  const themeStore = useThemeStore()
   const todoStore = useTodosStore()
   const tagsStore = useTagsStore()
   const router = useRouter()
@@ -36,14 +42,24 @@ export default function HomeCalendar() {
 
   const handleDatesSet = async (arg: DatesSetArg) => {
     const res = await todoStore.getTodosDateRange(arg.start, arg.end)
-    const mapped = res.map((todo) => ({
-      id: todo.id,
-      title: todo.description?.slice(0, 20),
-      date: dayjs(todo.created).format('YYYY-MM-DD'),
-      backgroundColor: tagsStore.getTagsById(todo.tagId)?.color ?? '#000000',
-      start: todo.start ? dayjs(todo.start).toDate() : undefined,
-      end: todo.end ? dayjs(todo.end).toDate() : undefined,
-    })) as EventSourceInput
+    const mapped = res.map((todo) => {
+      const tagColor = tagsStore.getTagsById(todo.tagId)?.color
+      return {
+        id: todo.id,
+        title: todo.description?.slice(0, 20),
+        date: dayjs(todo.created).format('YYYY-MM-DD'),
+        backgroundColor:
+          cookies['x-theme'] === 'dark'
+            ? tagColor
+              ? (TAG_COLORS[tagColor]?.dark ?? '#000000')
+              : '#000000'
+            : tagColor
+              ? (TAG_COLORS[tagColor]?.white ?? '#000000')
+              : '#000000',
+        start: todo.start ? dayjs(todo.start).toDate() : undefined,
+        end: todo.end ? dayjs(todo.end).toDate() : undefined,
+      }
+    }) as EventSourceInput
 
     setEvents(mapped)
   }
@@ -51,6 +67,7 @@ export default function HomeCalendar() {
   return (
     <div className='calendar | hidden sm:block | flex-1 min-w-[500px] min-h-[420px] h-full | bg-white dark:bg-zinc-800 shadow-md rounded-xl | py-[16px]'>
       <FullCalendar
+        key={`${themeStore.isDarkMode}`}
         ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin]}
         initialView='dayGridMonth'
