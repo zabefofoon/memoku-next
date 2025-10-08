@@ -56,6 +56,9 @@ dependencies:
   recharts:
     specifier: ^3.2.1
     version: 3.2.1(@types/react@19.1.13)(react-dom@19.1.0)(react-is@16.13.1)(react@19.1.0)(redux@5.0.1)
+  short-unique-id:
+    specifier: ^5.3.2
+    version: 5.3.2
   tailwind-merge:
     specifier: ^3.3.1
     version: 3.3.1
@@ -4144,6 +4147,11 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
     dev: true
+
+  /short-unique-id@5.3.2:
+    resolution: {integrity: sha512-KRT/hufMSxXKEDSQujfVE0Faa/kZ51ihUcZQAcmP04t00DvPj7Ox5anHke1sJYUtzSuiT/Y5uyzg/W7bBEGhCg==}
+    hasBin: true
+    dev: false
 
   /side-channel-list@1.0.0:
     resolution: {integrity: sha512-FCLHtRD/gnpCiCHEiJLOwdmFP+wzCmDEkc9y7NsYxeF4u7Btsn1ZuwgwJGxImImHicJArLP4R0yX4c2KCrMrTA==}

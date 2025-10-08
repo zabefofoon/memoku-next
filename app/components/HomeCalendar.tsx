@@ -47,7 +47,6 @@ export default function HomeCalendar() {
 
     setEvents(mapped)
   }
-  if (tagsStore.tags.length == 0) return ''
 
   return (
     <div className='calendar | hidden sm:block | flex-1 min-w-[500px] min-h-[420px] h-full | bg-white dark:bg-zinc-800 shadow-md rounded-xl | py-[16px]'>

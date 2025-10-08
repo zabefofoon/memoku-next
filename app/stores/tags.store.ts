@@ -1,12 +1,20 @@
 import { db } from '@/app/lib/dexie.db'
 import { Tag } from '@/app/models/Todo'
+import { TAG_COLORS } from '@/const'
 import { create } from 'zustand'
+import etcUtil from '../utils/etc.util'
 
 interface TagsStore {
   tags: Tag[]
   tagsMap: Record<string, Tag>
   initTags: () => void
   getTagsById: (id?: string) => Tag | undefined
+  deleteTag: (id: string) => Promise<void>
+  addTag: (tagInfo: { label: string; color: keyof typeof TAG_COLORS }) => Promise<string>
+  updateTag: (
+    id: string,
+    tagInfo: { label: string; color: keyof typeof TAG_COLORS }
+  ) => Promise<number>
 }
 
 export const useTagsStore = create<TagsStore>((set, get) => {
@@ -26,10 +34,32 @@ export const useTagsStore = create<TagsStore>((set, get) => {
 
   const getTagsById = (id?: string): Tag | undefined => (id ? get().tagsMap[id] : undefined)
 
+  const addTag = async (tagInfo: {
+    label: string
+    color: keyof typeof TAG_COLORS
+  }): Promise<string> => {
+    return db.tags.add({ ...tagInfo, id: etcUtil.generateUniqueId(), excludeUpload: false })
+  }
+
+  const updateTag = async (
+    id: string,
+    tagInfo: { label: string; color: keyof typeof TAG_COLORS }
+  ): Promise<number> => {
+    return db.tags.update(id, tagInfo)
+  }
+
+  const deleteTag = async (id: string): Promise<void> => {
+    await db.tags.where({ id }).delete()
+    initTags()
+  }
+
   return {
     tags,
     tagsMap,
     initTags,
     getTagsById,
+    deleteTag,
+    addTag,
+    updateTag,
   }
 })

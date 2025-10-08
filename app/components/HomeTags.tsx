@@ -22,7 +22,8 @@ export default function HomeTags() {
   const data: Group[] = useMemo(() => {
     const map =
       todos?.reduce<Record<string, Group>>((acc, current) => {
-        const id = current.tagId ?? 'undefined' // 태그 없으면 그룹핑용 기본값
+        const currentTagId = current.tagId ?? 'undefined'
+        const id = tagsStore.tagsMap[currentTagId] ? currentTagId : 'undefined' // 태그 없으면 그룹핑용 기본값
         if (!acc[id]) acc[id] = { id, totalCount: 0, undoneCount: 0 }
         acc[id].totalCount += 1
 
@@ -31,7 +32,6 @@ export default function HomeTags() {
 
         return acc
       }, {}) ?? []
-
     return Object.values(map)
   }, [todos])
 

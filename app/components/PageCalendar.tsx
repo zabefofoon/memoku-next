@@ -47,8 +47,6 @@ export default function PageCalendar() {
     setEvents(mapped)
   }
 
-  if (tagsStore.tags.length == 0) return ''
-
   return (
     <div className='page calendar | flex-1 h-full flex | bg-white dark:bg-zinc-800 shadow-md rounded-xl | py-[16px]'>
       <FullCalendar

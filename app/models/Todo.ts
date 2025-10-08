@@ -1,3 +1,5 @@
+import { TAG_COLORS } from '@/const'
+
 export interface Todo {
   id?: number
   description?: string
@@ -19,7 +21,7 @@ export interface Setting {
 
 export interface Tag {
   id: string
-  color: string
+  color: keyof typeof TAG_COLORS
   label: string
   excludeUpload: boolean
 }
