@@ -8,11 +8,11 @@ import packageJson from '../../package.json'
 
 import { AGE_1_YEAR, COOKIE_EXPAND, COOKIE_THEME } from '@/const'
 import { useState } from 'react'
+import { useThemeStore } from '../stores/theme.store'
 import { Icon } from './Icon'
 import UIToggle from './UIToggle'
 
 interface Props {
-  isDarkMode: boolean
   isExpand: boolean
 }
 
@@ -27,14 +27,14 @@ const menus = [
 ]
 
 export function AppAside(props: Props) {
+  const themeStore = useThemeStore()
   const pathname = usePathname()
   const [_, setCookie, removeCookie] = useCookies([COOKIE_THEME, COOKIE_EXPAND])
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(props.isDarkMode)
 
   const [isExpand, setIsExpand] = useState<boolean>(props.isExpand)
 
   const toggleDarkMode = (value: boolean): void => {
-    setIsDarkMode(value)
+    themeStore.setIsDarkMode(value)
     if (value) {
       document.documentElement.classList.add('dark')
       setCookie(COOKIE_THEME, 'dark', { maxAge: AGE_1_YEAR, path: '/', sameSite: 'lax' })
@@ -113,7 +113,7 @@ export function AppAside(props: Props) {
           id='다크모드'
           onIcon='moon'
           offIcon='sun'
-          checked={isDarkMode}
+          checked={themeStore.isDarkMode}
           toggle={toggleDarkMode}
         />
         <span className='text-[13px]'>v{packageJson.version}</span>

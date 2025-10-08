@@ -31,13 +31,10 @@ export default async function RootLayout(props: LayoutProps<'/'>) {
       className={etcUtil.classNames(['h-full', { dark: isDarkMode }])}>
       <body
         className={`${notoSansKr.className} antialiased | h-full | text-slate-800 dark:text-white/95 | bg-gray-100 dark:bg-zinc-900`}>
-        <EnsureProviders>
+        <EnsureProviders isDarkMode={isDarkMode}>
           <div className='relative | h-full | flex flex-col sm:flex-row sm:gap-[36px] sm:p-[24px] sm:pr-[0]'>
-            <AppTopAppBar isDarkMode={isDarkMode} />
-            <AppAside
-              isDarkMode={isDarkMode}
-              isExpand={isExpandAside}
-            />
+            <AppTopAppBar />
+            <AppAside isExpand={isExpandAside} />
             <main className='relative z-[1] | w-full h-full overflow-auto flex-1 sm:pr-[24px] pb-[4px]'>
               <div className='flex flex-col flex-1 min-h-full | p-[16px] sm:p-[0px]'>
                 {props.children}

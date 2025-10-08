@@ -66,7 +66,7 @@ export default function TodosEditor(props: Props) {
         onChange={(e) => setTextValue(e.currentTarget.value)}
         onInput={handleTextareaInput}></textarea>
       <div className='flex items-center gap-[6px] px-[8px]'>
-        <TagBadge todo={props.todo} />
+        <TagBadge id={props.todo?.tagId} />
         <TodosStatus />
         <UIDropdown
           isOpen={open}

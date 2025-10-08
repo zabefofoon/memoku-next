@@ -59,7 +59,7 @@ export default function TodosTable(props: Props) {
                 <Link
                   className='py-[12px] flex justify-center'
                   href={`/todos/${todo.id}`}>
-                  <TagBadge todo={todo} />
+                  <TagBadge id={todo.tagId} />
                 </Link>
               </td>
               <td>

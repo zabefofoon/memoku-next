@@ -4,23 +4,19 @@ import etcUtil from '@/app/utils/etc.util'
 import { AGE_1_YEAR, COOKIE_THEME } from '@/const'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
 import { useCookies } from 'react-cookie'
+import { useThemeStore } from '../stores/theme.store'
 import { Icon } from './Icon'
 import UIToggle from './UIToggle'
 
-interface Props {
-  isDarkMode: boolean
-}
-
-export function AppTopAppBar(props: Props) {
+export function AppTopAppBar() {
   const [_, setCookie, removeCookie] = useCookies([COOKIE_THEME])
   const pathname = usePathname()
 
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(props.isDarkMode)
+  const themeStore = useThemeStore()
 
   const toggleDarkMode = (value: boolean): void => {
-    setIsDarkMode(value)
+    themeStore.setIsDarkMode(value)
     if (value) {
       document.documentElement.classList.add('dark')
       setCookie(COOKIE_THEME, 'dark', { maxAge: AGE_1_YEAR, path: '/', sameSite: 'lax' })
@@ -47,7 +43,7 @@ export function AppTopAppBar(props: Props) {
             id='다크모드'
             onIcon='moon'
             offIcon='sun'
-            checked={isDarkMode}
+            checked={themeStore.isDarkMode}
             toggle={toggleDarkMode}
           />
           <Link

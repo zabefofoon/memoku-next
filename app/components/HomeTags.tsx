@@ -52,7 +52,7 @@ export default function HomeTags() {
             key={item.id}
             href={`/todos/${item.id}`}
             className='flex items-center gap-[6px] | border-t border-slate-100 dark:border-zinc-600 last:border-b | py-[4px]'>
-            <TagBadge todo={{ tagId: item.id }} />
+            <TagBadge id={item.id} />
 
             <div className='w-full | flex items-center justify-between'>
               <p className='font-[700] text-[15px]'>

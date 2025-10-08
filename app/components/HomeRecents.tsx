@@ -34,7 +34,7 @@ export default function HomeRecents() {
             key={todo.id}
             href={`/todos/${todo.id}`}
             className='flex items-center | border-t border-slate-100 dark:border-zinc-600 last:border-b | py-[4px] px-[8px]'>
-            <TagBadge todo={todo} />
+            <TagBadge id={todo.tagId} />
 
             <div className='w-full overflow-hidden | hover:bg-slate-50 dark:hover:bg-zinc-600 | rounded-full | px-[8px] py-[4px]'>
               <p className='truncate text-[14px] sm:text-[15px]'>

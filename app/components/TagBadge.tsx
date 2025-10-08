@@ -1,20 +1,17 @@
 'use client'
 
-import { Todo } from '@/app/models/Todo'
 import { useTagsStore } from '@/app/stores/tags.store'
 import { useCookies } from 'react-cookie'
 
 interface Props {
-  todo?: Todo
+  id?: string
 }
 
 export default function TagBadge(props: Props) {
   const [cookies] = useCookies()
   const tagsStore = useTagsStore()
 
-  const tag = tagsStore.getTagsById(props.todo?.tagId)
-
-  if (props.todo == null) return null
+  const tag = tagsStore.getTagsById(props.id)
 
   return (
     <div className='dark:bg-zinc-700 | p-[4px] shadow-sm shadow-gray-400 dark:shadow-gray-800 rounded-full'>
