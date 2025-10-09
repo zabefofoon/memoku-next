@@ -1,6 +1,7 @@
 import { db } from '@/app/lib/dexie.db'
-import { Todo } from '@/app/models/Todo'
+import { GetTodosParams, Todo } from '@/app/models/Todo'
 import dayjs from 'dayjs'
+import { Collection } from 'dexie'
 import { create } from 'zustand'
 
 export interface CreatedSeriesPoint {
@@ -13,8 +14,23 @@ export const useTodosStore = create(() => {
     const [res] = await db.todos.where({ id }).toArray()
     return res
   }
-  const getTodos = async (): Promise<Todo[]> => {
-    return db.todos.filter(({ parentId }) => !parentId || parentId === -1).toArray()
+  const getTodos = async (params?: GetTodosParams): Promise<Todo[]> => {
+    const isRoot = (t: Todo) => t.parentId == null || t.parentId === -1
+
+    const tags = params?.tags?.filter(Boolean)
+    const status = params?.status?.trim()
+    const q = params?.searchText?.trim().toLowerCase()
+
+    let coll: Collection<Todo, number>
+    if (tags && tags.length > 0) coll = db.todos.where('tagId').anyOf(Array.from(new Set(tags)))
+    else if (status) coll = db.todos.where('status').equals(status)
+    else coll = db.todos.toCollection()
+
+    coll = coll.and(isRoot)
+    if (status) coll = coll.and((t) => t.status === status)
+    if (q?.length) coll = coll.and((t) => (t.description ?? '').toLowerCase().includes(q))
+
+    return coll.toArray()
   }
 
   const getTodayTodos = async (): Promise<Todo[]> => {

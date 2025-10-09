@@ -10,9 +10,10 @@ interface Props {
   select?: (status: Todo['status']) => void
 }
 
+const status: Todo['status'][] = ['created', 'inprogress', 'done']
+
 export default function TodosStatus(props: Props): ReactElement {
   const [open, setOpen] = useState(false)
-  const status: Todo['status'][] = ['created', 'inprogress', 'done']
 
   return (
     <UIDropdown

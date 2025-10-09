@@ -25,3 +25,9 @@ export interface Tag {
   label: string
   excludeUpload: boolean
 }
+
+export interface GetTodosParams {
+  tags?: string[]
+  status?: string
+  searchText?: string
+}

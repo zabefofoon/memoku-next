@@ -65,7 +65,7 @@ export default function TodosEditor(props: Props) {
       <textarea
         ref={textareaEl}
         name='postContent'
-        className='w-full min-h-[100px] resize-none | rounded-xl p-[8px] | text-[15px]'
+        className='w-full min-h-[80px] resize-none | rounded-xl p-[8px] | text-[15px]'
         value={textValue}
         onChange={(e) => setTextValue(e.currentTarget.value)}
         onInput={handleTextareaInput}></textarea>

@@ -2,9 +2,10 @@
 
 import { Icon } from '@/app/components/Icon'
 import { TodosDeleteModal } from '@/app/components/TodosDeleteModal'
+import TodosSearch from '@/app/components/TodosSearch'
 import TodosStatusDropdown from '@/app/components/TodosStatusDropdown'
 import TodosTable from '@/app/components/TodosTable'
-import TodosTagsDropdown from '@/app/components/TodosTagsDropdown'
+import TodosTagsFilter from '@/app/components/TodosTagsFilter'
 import { Todo } from '@/app/models/Todo'
 import { useTodosStore } from '@/app/stores/todos.store'
 import Link from 'next/link'
@@ -20,7 +21,11 @@ export default function Todos(props: PageProps<'/todos'>) {
   const [isShowDeleteModal, setIsShowDeleteModal] = useState(false)
 
   const loadTodos = async () => {
-    const res = await todosStore.getTodos()
+    const searchParams = await props.searchParams
+    const tags = (searchParams.tags as string)?.split(',')
+    const status = searchParams.status as string
+    const searchText = searchParams.searchText as string
+    const res = await todosStore.getTodos({ tags, status, searchText })
     setTodos(res)
   }
 
@@ -55,6 +60,7 @@ export default function Todos(props: PageProps<'/todos'>) {
 
   useEffect(() => {
     handleSearchParams()
+    loadTodos()
   }, [props.searchParams])
 
   return (
@@ -69,33 +75,8 @@ export default function Todos(props: PageProps<'/todos'>) {
         <p className='text-[16px] opacity-50'>할 일을 정리해보세요.</p>
       </div>
       <div className='flex items-center gap-[12px] | mb-[20px]'>
-        <label className='search | w-fit flex items-center | border border-gray-300 dark:border-zinc-600 rounded-lg has-focus:border-violet-500 | pr-[8px]'>
-          <span className='sr-only'>검색</span>
-          <button
-            type='button'
-            className='pl-[8px]'>
-            <Icon
-              name='search'
-              className='text-[20px]'
-            />
-          </button>
-          <input
-            type='text'
-            placeholder='검색'
-            className='w-[200px] py-[4px] pl-[4px] outline-0'
-            required
-          />
-          <button
-            type='button'
-            className='close'>
-            <Icon
-              name='close'
-              className='text-[20px]'
-            />
-          </button>
-        </label>
+        <TodosSearch />
         <div className='flex items-center gap-[12px]'>
-          <TodosTagsDropdown />
           <TodosStatusDropdown />
         </div>
         <Link
@@ -108,6 +89,7 @@ export default function Todos(props: PageProps<'/todos'>) {
           <p className='text-[14px]'>추가하기</p>
         </Link>
       </div>
+      <TodosTagsFilter />
       <TodosTable
         todos={todos}
         updateStatus={updateStatus}
