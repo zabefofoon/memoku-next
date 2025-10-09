@@ -29,11 +29,13 @@ export function TodosTagModal(props: Props) {
       content={() => (
         <div className='flex gap-[6px] flex-wrap | max-w-[320px]'>
           {tagsStore.tags.map((tag) => (
-            <button
+            <div
               key={tag.id}
-              className='relative | rounded-full'
-              onClick={() => setSelectedTag(tag)}>
-              <TagBadge id={tag.id} />
+              className='relative | rounded-full'>
+              <TagBadge
+                id={tag.id}
+                click={() => setSelectedTag(tag)}
+              />
               {selectedTag?.color === tag.color && (
                 <div className='flex items-center justify-center  | absolute top-0 left-0 | w-full h-full rounded-full | bg-black/50'>
                   <Icon
@@ -42,7 +44,7 @@ export function TodosTagModal(props: Props) {
                   />
                 </div>
               )}
-            </button>
+            </div>
           ))}
         </div>
       )}

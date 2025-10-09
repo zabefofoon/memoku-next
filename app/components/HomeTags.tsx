@@ -27,8 +27,7 @@ export default function HomeTags() {
         if (!acc[id]) acc[id] = { id, totalCount: 0, undoneCount: 0 }
         acc[id].totalCount += 1
 
-        const isDone = current.done
-        if (!isDone) acc[id].undoneCount += 1
+        if (current.status !== 'done') acc[id].undoneCount += 1
 
         return acc
       }, {}) ?? []

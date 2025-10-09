@@ -8,6 +8,7 @@ import TodosStatus from './TodosStatus'
 
 export interface Props {
   todos?: Todo[]
+  updateStatus?: (status: Todo['status'], todoId?: number) => void
 }
 
 export default function TodosTable(props: Props) {
@@ -63,11 +64,12 @@ export default function TodosTable(props: Props) {
                 </Link>
               </td>
               <td>
-                <Link
-                  className='py-[12px] | flex justify-center'
-                  href={`/todos/${todo.id}`}>
-                  <TodosStatus />
-                </Link>
+                <div className='py-[12px] | flex justify-center'>
+                  <TodosStatus
+                    status={todo.status}
+                    select={(status) => props.updateStatus?.(status, todo.id)}
+                  />
+                </div>
               </td>
               <th scope='row'>
                 <Link
@@ -77,7 +79,7 @@ export default function TodosTable(props: Props) {
                 </Link>
               </th>
               <td className='opacity-70'>
-                {(todo.start && todo.end && (
+                {(todo.status !== 'done' && todo.start && todo.end && (
                   <Link
                     className='py-[12px] | block'
                     href={`/todos/${todo.id}`}>

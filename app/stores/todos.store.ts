@@ -75,7 +75,13 @@ export const useTodosStore = create(() => {
   }
 
   const postDescription = (description: string, parentId = -1): Promise<number> => {
-    return db.todos.add({ description, parentId, created: Date.now(), modified: Date.now() })
+    return db.todos.add({
+      description,
+      parentId,
+      status: 'created',
+      created: Date.now(),
+      modified: Date.now(),
+    })
   }
 
   const addNewTodo = (todo: Todo): Promise<number> => {
@@ -92,6 +98,10 @@ export const useTodosStore = create(() => {
 
   const updateTag = (id: number, tagId: string): Promise<number> => {
     return db.todos.update(id, { tagId })
+  }
+
+  const updateStatus = (id: number, status: Todo['status']): Promise<number> => {
+    return db.todos.update(id, { status })
   }
 
   const getDescendantsFlat = async (rootId: number) => {
@@ -151,6 +161,7 @@ export const useTodosStore = create(() => {
     postDescription,
     updateDescription,
     updateRange,
+    updateStatus,
     getDescendantsFlat,
     getAncestorsFlat,
     addNewTodo,

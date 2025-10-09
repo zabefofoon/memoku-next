@@ -5,13 +5,13 @@ export interface Todo {
   description?: string
   tagId?: string
   created?: number
-  done?: boolean
   modified?: number
   parentId?: number
   start?: number
   end?: number
   images?: (string | Blob)[]
   linked?: 'google'
+  status: 'created' | 'inprogress' | 'done'
 }
 
 export interface Setting {

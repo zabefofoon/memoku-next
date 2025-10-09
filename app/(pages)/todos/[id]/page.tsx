@@ -43,6 +43,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
       description: '',
       parentId: children?.at(-1)?.id || todo?.id,
       tagId: todo?.tagId,
+      status: 'created',
     }
     const res = await todosStore.addNewTodo(newChild)
     newChild.id = res
@@ -108,17 +109,28 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
     }
   }
 
-  useEffect(() => {
-    loadTodo()
-    loadParent()
-    loadChildren()
-  }, [])
-
   const handleSearchParams = async (): Promise<void> => {
     const searchParams = await props.searchParams
     setIsShowDeleteModal(!!searchParams.deleteModal)
     setIsShowTagModal(!!searchParams.todoTag)
   }
+
+  const updateStatus = async (status: Todo['status'], todoId?: number): Promise<void> => {
+    if (todoId == null) return
+
+    await todosStore.updateStatus(todoId, status)
+    if (todoId === todo?.id) setTodo((prev) => ({ ...prev, status }))
+    else if (children?.find((child) => child.id === todoId))
+      setChildren((prev) => prev?.map((todo) => (todo.id === todoId ? { ...todo, status } : todo)))
+    else if (parents?.find((parent) => parent.id === todoId))
+      setParents((prev) => prev?.map((todo) => (todo.id === todoId ? { ...todo, status } : todo)))
+  }
+
+  useEffect(() => {
+    loadTodo()
+    loadParent()
+    loadChildren()
+  }, [])
 
   useEffect(() => {
     handleSearchParams()
@@ -156,6 +168,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
             <TodosEditor
               todo={todo}
               updateText={saveChildrenText}
+              updateStatus={updateStatus}
             />
             <div className='h-[28px] | border-x-[3px] border-dotted border-gray-300 dark:border-zinc-600 | mx-[20px]'></div>
           </div>
@@ -163,6 +176,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
         <TodosEditor
           todo={todo}
           updateText={saveText}
+          updateStatus={updateStatus}
         />
         {children?.map((todo) => (
           <div key={todo.id}>
@@ -170,6 +184,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
             <TodosEditor
               todo={todo}
               updateText={saveChildrenText}
+              updateStatus={updateStatus}
             />
           </div>
         ))}

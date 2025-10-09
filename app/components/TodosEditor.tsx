@@ -15,6 +15,7 @@ import UIDropdown from './UIDropdown'
 interface Props {
   todo?: Todo
   updateText?: (text: string, todoId?: number) => void
+  updateStatus?: (status: Todo['status'], todoId?: number) => void
 }
 
 export default function TodosEditor(props: Props) {
@@ -33,6 +34,7 @@ export default function TodosEditor(props: Props) {
     setTextareaAutoHeight()
     props.updateText?.(event.currentTarget.value, props.todo?.id)
   }
+
   const setTextareaAutoHeight = (): void => {
     if (textareaEl.current == null) return
 
@@ -68,11 +70,16 @@ export default function TodosEditor(props: Props) {
         onChange={(e) => setTextValue(e.currentTarget.value)}
         onInput={handleTextareaInput}></textarea>
       <div className='flex items-center gap-[6px] px-[8px]'>
-        <TagBadge
-          id={props.todo?.tagId}
-          click={() => router.push(`?todoTag=${props.todo?.id}`)}
+        {props.todo && (
+          <TagBadge
+            id={props.todo?.tagId}
+            click={() => router.push(`?todoTag=${props.todo?.id}`)}
+          />
+        )}
+        <TodosStatus
+          status={props.todo?.status ?? 'created'}
+          select={(status) => props.updateStatus?.(status, props.todo?.id)}
         />
-        <TodosStatus />
         <UIDropdown
           isOpen={open}
           onOpenChange={setOpen}
@@ -91,7 +98,7 @@ export default function TodosEditor(props: Props) {
                     : 'opacity-70 | bg-slate-100 text-slate-600'
                 )}
               />
-              {props.todo && props.todo.start && props.todo.end && (
+              {props.todo && props.todo.status !== 'done' && props.todo.start && props.todo.end && (
                 <span className='text-[12px] font-[700]'>
                   <TodosPeriodText todo={props.todo} />
                 </span>

@@ -39,6 +39,16 @@ export default function Todos(props: PageProps<'/todos'>) {
     router.back()
   }
 
+  const updateStatus = async (status: Todo['status'], todoId?: number): Promise<void> => {
+    if (todoId == null) return
+    if (todos == null) return
+
+    await todosStore.updateStatus(todoId, status)
+    setTodos(
+      (prev) => prev?.map((todo) => (todo.id === todoId ? { ...todo, status } : todo)) ?? prev
+    )
+  }
+
   useEffect(() => {
     loadTodos()
   }, [])
@@ -98,7 +108,10 @@ export default function Todos(props: PageProps<'/todos'>) {
           <p className='text-[14px]'>추가하기</p>
         </Link>
       </div>
-      <TodosTable todos={todos} />
+      <TodosTable
+        todos={todos}
+        updateStatus={updateStatus}
+      />
     </div>
   )
 }

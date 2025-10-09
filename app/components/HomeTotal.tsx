@@ -19,7 +19,7 @@ export default function HomeTotal() {
     const res = await todoStore.getTodos()
     setTotal(res.length)
 
-    const dones = res.filter((todo) => todo.done)
+    const dones = res.filter((todo) => todo.status === 'done')
     setdone(dones.length)
 
     setData([

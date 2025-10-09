@@ -1,16 +1,44 @@
-export default function TodosStatus() {
-  return (
-    <p className='opacity-70 | bg-slate-100 rounded-full | w-fit h-[32px] | px-[12px] | flex items-center'>
-      <span className='font-[700] text-slate-600 text-[12px] leading-[130%]'>생성됨</span>
-    </p>
-  )
+'use client'
+
+import { ReactElement, useState } from 'react'
+import { Todo } from '../models/Todo'
+import TodosStatusChip from './TodosStatusChip'
+import UIDropdown from './UIDropdown'
+
+interface Props {
+  status?: Todo['status']
+  select?: (status: Todo['status']) => void
 }
 
-{
-  /* <p className='opacity-70 | bg-yellow-100  rounded-full | h-[32px] | px-[12px] | flex items-center'>
-            <span className='text-yellow-600 text-[12px] leading-[130%]'>진행중</span>
-          </p>
-          <p className='opacity-70 | bg-green-100  rounded-full | h-[32px] | px-[12px] | flex items-center'>
-            <span className='text-green-500 text-[12px] leading-[130%]'>완료</span>
-          </p> */
+export default function TodosStatus(props: Props): ReactElement {
+  const [open, setOpen] = useState(false)
+  const status: Todo['status'][] = ['created', 'inprogress', 'done']
+
+  return (
+    <UIDropdown
+      isOpen={open}
+      fitOptionsParent={false}
+      onOpenChange={setOpen}
+      renderButton={({ toggle }) => (
+        <TodosStatusChip
+          status={props.status ?? 'created'}
+          click={() => toggle()}
+        />
+      )}
+      renderOptions={({ toggle }) => (
+        <div className='py-[3px] | flex flex-col'>
+          {status.map((value) => (
+            <div
+              key={value}
+              className='px-[6px] py-[3px] | flex justify-center hover:bg-slate-50 hover:dark:bg-zinc-600'>
+              <TodosStatusChip
+                status={value}
+                click={() => toggle(false, () => props.select?.(value))}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+    />
+  )
 }
