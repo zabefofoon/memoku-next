@@ -30,7 +30,7 @@ export default function TodosTagsFilter() {
   }
 
   return (
-    <div className='px-[2px] | flex flex-wrap gap-[6px] | mb-[24px]'>
+    <div className='px-[2px] | flex flex-wrap gap-[4px] sm:gap-[6px] | mb-[16px] sm:mb-[24px]'>
       {tagsStore.tags.map((tag) => (
         <div
           key={tag.id}
@@ -39,7 +39,7 @@ export default function TodosTagsFilter() {
             className='bg-white dark:bg-zinc-700 | p-[4px] shadow-sm shadow-gray-400 dark:shadow-gray-800 rounded-full'
             onClick={() => moveTo(tag.id)}>
             <span
-              className='px-[8px] | flex items-center justify-center | rounded-full | text-[13px] font-[700]'
+              className='py-[4px] px-[8px] | flex items-center justify-center | rounded-full | text-[13px] font-[700]'
               style={{
                 background:
                   cookies['x-theme'] === 'dark'

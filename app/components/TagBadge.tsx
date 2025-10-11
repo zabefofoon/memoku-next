@@ -18,10 +18,10 @@ export default function TagBadge(props: Props) {
 
   return (
     <button
-      className='dark:bg-zinc-700 | p-[4px] shadow-sm shadow-gray-400 dark:shadow-gray-800 rounded-full'
+      className='relative z-1 | bg-white dark:bg-zinc-700 | p-[4px] shadow-sm shadow-gray-400 dark:shadow-gray-800 rounded-full'
       onClick={() => props.click?.(tag)}>
       <span
-        className='w-[32px] | flex items-center justify-center | rounded-full | text-[14px] font-[700] | aspect-square'
+        className='w-[24px] sm:w-[32px] | flex items-center justify-center | rounded-full | text-[12px] sm:text-[14px] font-[700] | aspect-square'
         style={{
           background:
             cookies['x-theme'] === 'dark'

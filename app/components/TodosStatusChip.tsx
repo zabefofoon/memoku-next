@@ -27,14 +27,18 @@ export default function TodosStatusChip(props: Props) {
   return (
     <button
       className={etcUtil.classNames([
-        'rounded-full | w-fit h-[32px] | px-[12px] | flex items-center justify-center',
+        'rounded-full | shrink-0 h-[24px] sm:h-[32px] w-fit | px-[6px] sm:px-[12px] sm:py-0 | flex items-center justify-center',
         bgColor,
       ])}
       onClick={(event) => {
         event.stopPropagation()
         props.click?.()
       }}>
-      <span className={etcUtil.classNames(['font-[700] text-[12px] leading-[130%]', textColor])}>
+      <span
+        className={etcUtil.classNames([
+          'whitespace-nowrap font-[700] text-[11px] sm:text-[12px] leading-[130%]',
+          textColor,
+        ])}>
         {text}
       </span>
     </button>

@@ -41,7 +41,7 @@ export default function TodosStatusDropdown() {
           type='button'
           className='flex items-center'
           onClick={() => toggle()}>
-          <span className='text-[14px]'>{selectedItem?.name ?? '전체'}</span>
+          <span className='text-[13px] sm:text-[14px]'>{selectedItem?.name ?? '전체'}</span>
           <Icon
             name='chevron-down'
             className='text-[24px]'
@@ -49,7 +49,7 @@ export default function TodosStatusDropdown() {
         </button>
       )}
       renderOptions={({ toggle }) => (
-        <div className='flex flex-col | text-[15px]'>
+        <div className='flex flex-col | text-[13px] sm:text-[15px]'>
           {items.map((item) => (
             <button
               key={item.name}

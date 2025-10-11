@@ -46,13 +46,21 @@ export default function TodosPeriodText(props: Props) {
     typeof props.todo.end === 'number' ? props.todo.end : new Date(props.todo.end).getTime()
 
   if (now < start)
-    return <span className='font-[700]'>{formatDuration(start - now, 'until')} 후 시작</span>
+    return (
+      <span className='text-[11px] sm:text-[14px] font-[700]'>
+        {formatDuration(start - now, 'until')} 후 시작
+      </span>
+    )
   else if (now >= start && now < end)
     return (
-      <span className='font-[700] text-violet-500'>{formatDuration(end - now, 'left')} 남음</span>
+      <span className='text-[11px] sm:text-[14px] font-[700] text-violet-500'>
+        {formatDuration(end - now, 'left')} 남음
+      </span>
     )
   else
     return (
-      <span className='font-[700] text-red-500'>{formatDuration(now - end, 'passed')} 초과</span>
+      <span className='text-[11px] sm:text-[14px] font-[700] text-red-500'>
+        {formatDuration(now - end, 'passed')} 초과
+      </span>
     )
 }

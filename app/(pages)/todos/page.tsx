@@ -1,6 +1,7 @@
 'use client'
 
 import { Icon } from '@/app/components/Icon'
+import TodosCards from '@/app/components/TodosCards'
 import { TodosDeleteModal } from '@/app/components/TodosDeleteModal'
 import TodosSearch from '@/app/components/TodosSearch'
 import TodosStatusDropdown from '@/app/components/TodosStatusDropdown'
@@ -18,7 +19,8 @@ export default function Todos(props: PageProps<'/todos'>) {
   const router = useRouter()
   const [todos, setTodos] = useState<Todo[]>()
 
-  const [isShowDeleteModal, setIsShowDeleteModal] = useState(false)
+  const [isShowDeleteModal, setIsShowDeleteModal] = useState<boolean>(false)
+  const [loadKey, setLoadKey] = useState<number>(0)
 
   const loadTodos = async () => {
     const searchParams = await props.searchParams
@@ -39,6 +41,7 @@ export default function Todos(props: PageProps<'/todos'>) {
     if (searchParams.deleteModal && !isNaN(+searchParams.deleteModal)) {
       await todosStore.deleteTodo(+searchParams.deleteModal)
       loadTodos()
+      setLoadKey((prev) => ++prev)
     }
 
     router.back()
@@ -64,7 +67,7 @@ export default function Todos(props: PageProps<'/todos'>) {
   }, [props.searchParams])
 
   return (
-    <div>
+    <div className='flex flex-col | max-h-full'>
       <TodosDeleteModal
         isShow={isShowDeleteModal}
         close={() => router.back()}
@@ -74,14 +77,14 @@ export default function Todos(props: PageProps<'/todos'>) {
         <h1 className='text-[20px] opacity-80'>Todos</h1>
         <p className='text-[16px] opacity-50'>할 일을 정리해보세요.</p>
       </div>
-      <div className='flex items-center gap-[12px] | mb-[20px]'>
+      <div className='flex items-center gap-[12px] | mb-[16px] sm:mb-[20px]'>
         <TodosSearch />
-        <div className='flex items-center gap-[12px]'>
+        <div className='shrink-0 flex items-center gap-[12px]'>
           <TodosStatusDropdown />
         </div>
         <Link
           href='/todos/new'
-          className='ml-auto | flex items-center | bg-violet-500 rounded-lg | px-[8px] py-[6px] | text-white'>
+          className='ml-auto | hidden sm:flex items-center | bg-violet-500 rounded-lg | px-[8px] py-[6px] | text-white'>
           <Icon
             name='plus'
             className='text-[20px]'
@@ -91,6 +94,12 @@ export default function Todos(props: PageProps<'/todos'>) {
       </div>
       <TodosTagsFilter />
       <TodosTable
+        key={`table_${loadKey}`}
+        todos={todos}
+        updateStatus={updateStatus}
+      />
+      <TodosCards
+        key={`cards${loadKey}`}
         todos={todos}
         updateStatus={updateStatus}
       />
