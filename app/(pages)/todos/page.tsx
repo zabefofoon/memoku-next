@@ -55,6 +55,7 @@ export default function Todos(props: PageProps<'/todos'>) {
     setTodos(
       (prev) => prev?.map((todo) => (todo.id === todoId ? { ...todo, status } : todo)) ?? prev
     )
+    setLoadKey((prev) => ++prev)
   }
 
   useEffect(() => {

@@ -158,10 +158,13 @@ export const useTodosStore = create(() => {
   }
 
   const deleteTodo = async (id: number): Promise<number> => {
+    await db.images.where('todoId').equals(id).delete()
+
     return db.transaction('rw', db.todos, async () => {
       const target = await db.todos.get(id)
       if (!target) return -1
       db.todos.where('parentId').equals(id).modify({ parentId: target.parentId })
+
       return db.todos.where({ id }).delete()
     })
   }

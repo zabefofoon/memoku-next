@@ -78,6 +78,7 @@ export default function TodosTable(props: Props) {
                 todo={todo}
                 getDescendantsFlat={getDescendantsFlat}
                 idExpanded={!!(todo.id && isExpandMap[todo.id])}
+                updateStatus={props.updateStatus}
               />
               {todo.id &&
                 isExpandMap[todo.id] &&
@@ -85,6 +86,7 @@ export default function TodosTable(props: Props) {
                   <TodosTableRow
                     key={child.id}
                     todo={child}
+                    updateStatus={props.updateStatus}
                   />
                 ))}
             </Fragment>
