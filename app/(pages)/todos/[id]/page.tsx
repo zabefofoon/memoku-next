@@ -3,6 +3,7 @@
 import { Icon } from '@/app/components/Icon'
 import { TodosDeleteModal } from '@/app/components/TodosDeleteModal'
 import TodosEditor from '@/app/components/TodosEditor'
+import TodosImagesModal from '@/app/components/TodosImagesModal'
 import { TodosTagModal } from '@/app/components/TodosTagModal'
 import { Tag, Todo } from '@/app/models/Todo'
 import { useTodosStore } from '@/app/stores/todos.store'
@@ -22,6 +23,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
 
   const [isShowDeleteModal, setIsShowDeleteModal] = useState(false)
   const [isShowTagModal, setIsShowTagModal] = useState(false)
+  const [isShowImageModal, setIsShowImageModal] = useState(false)
 
   const saveText = useMemo(
     () =>
@@ -113,6 +115,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
     const searchParams = await props.searchParams
     setIsShowDeleteModal(!!searchParams.deleteModal)
     setIsShowTagModal(!!searchParams.todoTag)
+    setIsShowImageModal(!!searchParams.images)
   }
 
   const updateStatus = async (status: Todo['status'], todoId?: number): Promise<void> => {
@@ -147,6 +150,10 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
         isShow={isShowTagModal}
         close={router.back}
         select={changeTag}
+      />
+      <TodosImagesModal
+        isShow={isShowImageModal}
+        close={router.back}
       />
 
       <div className='mb-[24px]'>

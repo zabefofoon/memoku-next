@@ -227,11 +227,13 @@ export default function TodosEditor(props: Props) {
               <div
                 key={index}
                 className='relative'>
-                <img
-                  className='w-[160px] max-w-[160px] aspect-square object-contain | shadow-md rounded-lg bg-black'
-                  src={image.image}
-                  alt=''
-                />
+                <Link href={`?images=${props.todo?.id}`}>
+                  <img
+                    className='w-[160px] max-w-[160px] aspect-square object-contain | shadow-md rounded-lg bg-black'
+                    src={image.image}
+                    alt=''
+                  />
+                </Link>
 
                 <Link
                   href={`?image=${image.id}`}

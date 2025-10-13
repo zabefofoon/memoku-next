@@ -8,10 +8,10 @@ import { Icon } from './Icon'
 interface Props {
   open: boolean
   close?: () => void
-  header: () => ReactElement
+  header?: () => ReactElement
   content: () => ReactElement
-  cancel: () => ReactElement
-  ok: () => ReactElement
+  cancel?: () => ReactElement
+  ok?: () => ReactElement
 }
 
 export default function UIModal(props: Props) {
@@ -45,11 +45,12 @@ export default function UIModal(props: Props) {
           onClick={props.close}
           className='absolute inset-0 bg-black/50'
         />
-        <div className='modal-card | flex flex-col gap-[12px] | relative z-10 | min-w-[320px] | p-[16px] | rounded-xl bg-white dark:bg-zinc-800 shadow-xl'>
+        <div className='modal-card | flex flex-col gap-[12px] | relative z-10 | min-w-[320px] max-w-[calc(100%-32px)] | p-[16px] | rounded-xl bg-white dark:bg-zinc-800 shadow-xl'>
           <div className='flex justify-between'>
-            <p className='text-[20px] font-[700]'>{props.header?.() || '제목'}</p>
+            {props.header && <p className='text-[20px] font-[700]'>{props.header()}</p>}
             <button
               type='button'
+              className='ml-auto'
               onClick={props.close}>
               <Icon name='close' />
             </button>
