@@ -7,22 +7,20 @@ interface Props {
 }
 
 export default function TodosStatusChip(props: Props) {
-  const bgColor =
-    props.status === 'created'
-      ? 'bg-slate-200'
-      : props.status === 'inprogress'
-        ? 'bg-violet-100'
-        : 'bg-green-100'
+  let bgColor = 'bg-slate-200'
+  if (props.status === 'done') bgColor = 'bg-green-200'
+  if (props.status === 'inprogress') bgColor = 'bg-violet-200'
+  if (props.status === 'hold') bgColor = 'bg-orange-200'
 
-  const textColor =
-    props.status === 'created'
-      ? 'text-slate-500'
-      : props.status === 'inprogress'
-        ? 'text-violet-500'
-        : 'text-green-500'
+  let textColor = 'text-slate-500'
+  if (props.status === 'done') textColor = 'text-green-500'
+  if (props.status === 'inprogress') textColor = 'text-violet-500'
+  if (props.status === 'hold') textColor = 'text-orange-600'
 
-  const text =
-    props.status === 'created' ? '생성됨' : props.status === 'inprogress' ? '진행중' : '완료'
+  let text = '생성됨'
+  if (props.status === 'done') text = '완료됨'
+  if (props.status === 'inprogress') text = '진행중'
+  if (props.status === 'hold') text = '중지됨'
 
   return (
     <button

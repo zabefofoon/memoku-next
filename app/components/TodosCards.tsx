@@ -3,10 +3,11 @@ import { Fragment, useState } from 'react'
 import { useDateUtil } from '../hooks/useDateUtil'
 import { Todo } from '../models/Todo'
 import { useTodosStore } from '../stores/todos.store'
+import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
 import TagBadge from './TagBadge'
 import TodosDeleteButton from './TodosDeleteButton'
-import TodosPeriodText from './TodosPeriodText'
+import TodosPeriodText, { BottomTexts } from './TodosPeriodText'
 import TodosStatus from './TodosStatus'
 
 export interface Props {
@@ -74,7 +75,40 @@ function TodoCard(props: {
           status={props.todo.status}
           select={(status) => props.updateStatus?.(status, props.todo.id)}
         />
-        <TodosPeriodText todo={props.todo} />
+        <div className='relative'>
+          {
+            <Link
+              href={`?time=${props.todo?.id}`}
+              className={etcUtil.classNames(
+                'relative | w-[24px] aspect-square | rounded-full | flex items-center justify-center',
+                props.todo && props.todo.start && props.todo.end
+                  ? 'bg-violet-500 '
+                  : 'opacity-70 | bg-slate-100 text-slate-600'
+              )}>
+              <Icon
+                name='alarm'
+                className={etcUtil.classNames([
+                  'text-[16px]',
+                  props.todo && props.todo.start && props.todo.end ? 'text-white' : '',
+                ])}
+              />
+            </Link>
+          }
+          {props.todo?.start && (
+            <Link
+              href={`?deleteTime=${props.todo?.id}`}
+              onClick={(event) => event.stopPropagation()}>
+              <Icon
+                name='close'
+                className='p-[2px] | rounded-full absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 | bg-slate-100 dark:bg-zinc-600 | text-[12px]'
+              />
+            </Link>
+          )}
+        </div>
+        <TodosPeriodText
+          todo={props.todo}
+          hideBottomText
+        />
         <div className='ml-auto'>{props.todo.id && <TodosDeleteButton id={props.todo.id} />}</div>
       </div>
       <Link
@@ -84,7 +118,13 @@ function TodoCard(props: {
       </Link>
       <div className='flex items-center | pt-[8px] | border-t border-gray-100 dark:border-zinc-600'>
         <div className='w-full | flex items-center gap-[4px]'>
-          <p className='text-[11px] opacity-70'>{dateUtil.parseDate(props.todo.created)}</p>
+          {!props.todo.start ? (
+            <p className='text-[11px] opacity-70'>
+              {dateUtil.parseDate(props.todo.created)} 생성됨
+            </p>
+          ) : (
+            <BottomTexts todo={props.todo} />
+          )}
           {(props.todo.parentId == null || props.todo.parentId === -1) && (
             <button
               type='button'

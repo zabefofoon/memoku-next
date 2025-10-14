@@ -1,6 +1,5 @@
 import { useDateUtil } from '@/app/hooks/useDateUtil'
 import { Todo } from '@/app/models/Todo'
-import { useTodosStore } from '@/app/stores/todos.store'
 import etcUtil from '@/app/utils/etc.util'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -8,15 +7,14 @@ import { ChangeEvent, ClipboardEvent, FormEvent, useEffect, useRef, useState } f
 import { useImagesStore } from '../stores/images.store'
 import { Icon } from './Icon'
 import TagBadge from './TagBadge'
-import TodosDatePicker from './TodosDatePicker'
 import TodosDeleteButton from './TodosDeleteButton'
 import { TodosDeleteModal } from './TodosDeleteModal'
-import TodosPeriodText from './TodosPeriodText'
+import TodosPeriodText, { BottomTexts } from './TodosPeriodText'
 import TodosStatus from './TodosStatus'
-import UIDropdown from './UIDropdown'
 
 interface Props {
   todo?: Todo
+  deleteTime?: (todoId?: number) => void
   updateText?: (text: string, todoId?: number) => void
   updateStatus?: (status: Todo['status'], todoId?: number) => void
 }
@@ -26,14 +24,13 @@ export default function TodosEditor(props: Props) {
   const searchParams = useSearchParams()
   const pathname = usePathname()
 
-  const todosStore = useTodosStore()
   const imagesStore = useImagesStore()
 
   const fileInputEl = useRef<HTMLInputElement>(null)
   const textareaEl = useRef<HTMLTextAreaElement>(null)
 
-  const [open, setOpen] = useState(false)
   const [isShowDeleteModal, setIsShowDeleteModal] = useState<boolean>(false)
+  const [isShowDeleteTimeModal, setIsShowDeleteTimeModal] = useState<boolean>(false)
 
   const dateUtil = useDateUtil()
 
@@ -59,16 +56,6 @@ export default function TodosEditor(props: Props) {
 
     textareaEl.current.style.height = '0'
     textareaEl.current.style.height = `${textareaEl.current.scrollHeight}px`
-  }
-
-  const setTodoRange = (range?: { start?: number; end?: number }): void => {
-    if (range == null) return
-    if (props.todo == null) return
-
-    props.todo.start = range.start
-    props.todo.end = range.end
-
-    if (props.todo.id != null) todosStore.updateRange(props.todo.id, range)
   }
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
@@ -133,15 +120,25 @@ export default function TodosEditor(props: Props) {
   }, [props.todo?.description])
 
   useEffect(() => {
-    if (pathname.endsWith(`${props.todo?.id}`)) setIsShowDeleteModal(!!searchParams.get('image'))
+    if (pathname.endsWith(`${props.todo?.id}`)) {
+      setIsShowDeleteModal(!!searchParams.get('image'))
+      setIsShowDeleteTimeModal(!!searchParams.get('deleteTime'))
+    }
   }, [searchParams])
 
   return (
-    <div className='flex flex-col gap-[12px] | w-full | relative | bg-white dark:bg-zinc-800 shadow-md rounded-xl | p-[8px]'>
+    <div
+      id={`todo-${props.todo?.id}`}
+      className='flex flex-col gap-[12px] | w-full | relative | bg-white dark:bg-zinc-800 shadow-md rounded-xl | p-[8px]'>
       <TodosDeleteModal
         isShow={isShowDeleteModal}
         close={() => router.back()}
         delete={deleteImage}
+      />
+      <TodosDeleteModal
+        isShow={isShowDeleteTimeModal}
+        close={() => router.back()}
+        delete={() => props.deleteTime?.(props.todo?.id)}
       />
       <input
         accept='image/*'
@@ -176,41 +173,41 @@ export default function TodosEditor(props: Props) {
           status={props.todo?.status ?? 'created'}
           select={(status) => props.updateStatus?.(status, props.todo?.id)}
         />
-        <UIDropdown
-          isOpen={open}
-          onOpenChange={setOpen}
-          fitOptionsParent={false}
-          renderButton={({ toggle }) => (
-            <button
-              type='button'
-              className='flex items-center gap-[4px]'
-              onClick={() => toggle()}>
-              <Icon
-                name='alarm'
+        {props.todo?.status !== 'done' && (
+          <>
+            <div className='relative'>
+              <Link
+                href={`?time=${props.todo?.id}`}
                 className={etcUtil.classNames(
-                  'w-[32px] aspect-square rounded-full | flex items-center justify-center | text-[20px]',
+                  'relative | w-[24px] sm:w-[32px] aspect-square | rounded-full | flex items-center justify-center',
                   props.todo && props.todo.start && props.todo.end
-                    ? 'bg-violet-500 text-white'
+                    ? 'bg-violet-500 '
                     : 'opacity-70 | bg-slate-100 text-slate-600'
-                )}
-              />
-              {props.todo && props.todo.status !== 'done' && props.todo.start && props.todo.end && (
-                <span className='text-[12px] font-[700]'>
-                  <TodosPeriodText todo={props.todo} />
-                </span>
+                )}>
+                <Icon
+                  name='alarm'
+                  className={etcUtil.classNames([
+                    'text-[16px] sm:text-[20px]',
+                    props.todo && props.todo.start && props.todo.end ? 'text-white' : '',
+                  ])}
+                />
+              </Link>
+              {props.todo?.start && (
+                <Link
+                  href={`?deleteTime=${props.todo?.id}`}
+                  onClick={(event) => event.stopPropagation()}>
+                  <Icon
+                    name='close'
+                    className='p-[2px] | rounded-full absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 | bg-slate-100 dark:bg-zinc-600 | text-[12px] sm:text-[14px]'
+                  />
+                </Link>
               )}
-            </button>
-          )}
-          renderOptions={({ toggle }) => (
-            <div className='w-full max-w-[328px] py-[12px]'>
-              <TodosDatePicker
-                value={{ start: props.todo?.start, end: props.todo?.end }}
-                onChange={(range) => toggle(false, () => setTodoRange(range))}
-                onCancel={() => toggle(false)}
-              />
             </div>
-          )}
-        />
+            {props.todo && props.todo.start && props.todo.end && (
+              <TodosPeriodText todo={props.todo} />
+            )}
+          </>
+        )}
       </div>
       <textarea
         ref={textareaEl}
@@ -245,10 +242,14 @@ export default function TodosEditor(props: Props) {
           </div>
         )}
       </div>
-      <p className='flex gap-[8px] | opacity-70 | text-[12px] leading-[130%]'>
-        <span>최근 수정일</span>
-        <span>{dateUtil.parseDate(props.todo?.modified)}</span>
-      </p>
+      {!props.todo?.start ? (
+        <p className='flex gap-[8px] | opacity-70 | text-[12px] leading-[130%]'>
+          <span>최근 수정일</span>
+          <span>{dateUtil.parseDate(props.todo?.modified)}</span>
+        </p>
+      ) : (
+        <BottomTexts todo={props.todo} />
+      )}
     </div>
   )
 }

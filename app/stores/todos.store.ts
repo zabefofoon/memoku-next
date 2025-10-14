@@ -1,5 +1,5 @@
 import { db } from '@/app/lib/dexie.db'
-import { GetTodosParams, Todo } from '@/app/models/Todo'
+import { GetTodosParams, Todo, WeekDay } from '@/app/models/Todo'
 import dayjs from 'dayjs'
 import { Collection } from 'dexie'
 import { create } from 'zustand'
@@ -108,8 +108,11 @@ export const useTodosStore = create(() => {
     return db.todos.update(id, { description, modified: Date.now() })
   }
 
-  const updateRange = (id: number, range: { start?: number; end?: number }): Promise<number> => {
-    return db.todos.update(id, range)
+  const updateTimes = (
+    id: number,
+    range: { start?: number; end?: number; days?: WeekDay[] }
+  ): Promise<number> => {
+    return db.todos.update(id, { ...range, modified: Date.now() })
   }
 
   const updateTag = (id: number, tagId: string): Promise<number> => {
@@ -117,7 +120,7 @@ export const useTodosStore = create(() => {
   }
 
   const updateStatus = (id: number, status: Todo['status']): Promise<number> => {
-    return db.todos.update(id, { status })
+    return db.todos.update(id, { status, modified: Date.now() })
   }
 
   const getDescendantsFlat = async (rootId: number) => {
@@ -179,7 +182,7 @@ export const useTodosStore = create(() => {
     getCreatedSeries30d,
     postDescription,
     updateDescription,
-    updateRange,
+    updateTimes,
     updateStatus,
     getDescendantsFlat,
     getAncestorsFlat,

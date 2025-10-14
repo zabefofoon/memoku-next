@@ -17,7 +17,7 @@ export default function AppBottomAppBar() {
   const pathname = usePathname()
 
   return (
-    <div className='sticky bottom-0 left-0 | px-[8px] py-[12px] mx-auto | sm:hidden | max-w-[360px]'>
+    <div className='sticky bottom-0 left-0 z-[50] | px-[8px] py-[12px] mx-auto | sm:hidden | max-w-[360px]'>
       <nav className='flex items-center | bg-white dark:bg-zinc-800 | rounded-full shadow-lg overflow-hidden'>
         {menus.map((menu) => (
           <Link

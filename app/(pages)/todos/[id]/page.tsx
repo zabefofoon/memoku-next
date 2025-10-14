@@ -5,6 +5,7 @@ import { TodosDeleteModal } from '@/app/components/TodosDeleteModal'
 import TodosEditor from '@/app/components/TodosEditor'
 import TodosImagesModal from '@/app/components/TodosImagesModal'
 import { TodosTagModal } from '@/app/components/TodosTagModal'
+import TodosTimeModal from '@/app/components/TodosTimeModal'
 import { Tag, Todo } from '@/app/models/Todo'
 import { useTodosStore } from '@/app/stores/todos.store'
 import debounce from 'lodash.debounce'
@@ -24,6 +25,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
   const [isShowDeleteModal, setIsShowDeleteModal] = useState(false)
   const [isShowTagModal, setIsShowTagModal] = useState(false)
   const [isShowImageModal, setIsShowImageModal] = useState(false)
+  const [isShowTimeModal, setIsShowTimeModal] = useState(false)
 
   const saveText = useMemo(
     () =>
@@ -116,6 +118,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
     setIsShowDeleteModal(!!searchParams.deleteModal)
     setIsShowTagModal(!!searchParams.todoTag)
     setIsShowImageModal(!!searchParams.images)
+    setIsShowTimeModal(!!searchParams.time)
   }
 
   const updateStatus = async (status: Todo['status'], todoId?: number): Promise<void> => {
@@ -129,6 +132,33 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
       setParents((prev) => prev?.map((todo) => (todo.id === todoId ? { ...todo, status } : todo)))
   }
 
+  const updateTime = async (
+    id: number,
+    values: { start: Todo['start']; end: Todo['end']; days?: Todo['days'] }
+  ): Promise<void> => {
+    await todosStore.updateTimes(id, values)
+
+    if (id === todo?.id) setTodo((prev) => prev && { ...prev, ...values })
+    else if (children?.find((child) => child.id === id))
+      setChildren((prev) => prev?.map((todo) => (todo.id === id ? { ...todo, ...values } : todo)))
+    else if (parents?.find((parent) => parent.id === id))
+      setParents((prev) => prev?.map((todo) => (todo.id === id ? { ...todo, ...values } : todo)))
+  }
+
+  const deleteTime = async (id?: number): Promise<void> => {
+    if (id == null) return
+    const values = { start: undefined, end: undefined, days: undefined }
+    await todosStore.updateTimes(id, values)
+
+    if (id === todo?.id) setTodo((prev) => prev && { ...prev, ...values })
+    else if (children?.find((child) => child.id === id))
+      setChildren((prev) => prev?.map((todo) => (todo.id === id ? { ...todo, ...values } : todo)))
+    else if (parents?.find((parent) => parent.id === id))
+      setParents((prev) => prev?.map((todo) => (todo.id === id ? { ...todo, ...values } : todo)))
+
+    router.back()
+  }
+
   useEffect(() => {
     loadTodo()
     loadParent()
@@ -139,8 +169,25 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
     handleSearchParams()
   }, [props.searchParams])
 
+  useEffect(() => {
+    props.params.then((params) => {
+      setTimeout(() => {
+        const target = document.getElementById(`todo-${params.id}`)
+        document
+          .getElementById('scroll-el')
+          ?.scrollTo({ top: target?.offsetTop, behavior: 'smooth' })
+      }, 250)
+    })
+  }, [todo, parents, children])
+
   return (
     <div className='flex-1 | flex flex-col'>
+      <TodosTimeModal
+        isShow={isShowTimeModal}
+        todos={[todo, ...(parents ?? []), ...(children ?? [])].filter((todo) => !!todo)}
+        updateTime={updateTime}
+        close={router.back}
+      />
       <TodosDeleteModal
         isShow={isShowDeleteModal}
         close={router.back}
@@ -176,6 +223,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
               todo={todo}
               updateText={saveChildrenText}
               updateStatus={updateStatus}
+              deleteTime={deleteTime}
             />
             <div className='h-[28px] | border-x-[3px] border-dotted border-gray-300 dark:border-zinc-600 | mx-[20px]'></div>
           </div>
@@ -184,6 +232,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
           todo={todo}
           updateText={saveText}
           updateStatus={updateStatus}
+          deleteTime={deleteTime}
         />
         {children?.map((todo) => (
           <div key={todo.id}>
@@ -192,6 +241,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
               todo={todo}
               updateText={saveChildrenText}
               updateStatus={updateStatus}
+              deleteTime={deleteTime}
             />
           </div>
         ))}

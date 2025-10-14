@@ -11,7 +11,8 @@ export interface Todo {
   end?: number
   images?: (string | Blob)[]
   linked?: 'google'
-  status: 'created' | 'inprogress' | 'done'
+  status: 'created' | 'inprogress' | 'done' | 'hold'
+  days?: WeekDay[]
 }
 
 export interface Setting {
@@ -31,3 +32,5 @@ export interface GetTodosParams {
   status?: string
   searchText?: string
 }
+
+export type WeekDay = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'

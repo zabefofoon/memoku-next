@@ -1,7 +1,11 @@
 import { Todo } from '@/app/models/Todo'
+import { WEEK_DAYS_NAME } from '@/const'
+import dayjs from 'dayjs'
+import { useDateUtil } from '../hooks/useDateUtil'
 
 interface Props {
   todo?: Todo
+  hideBottomText?: boolean
 }
 
 const MS = {
@@ -47,20 +51,72 @@ export default function TodosPeriodText(props: Props) {
 
   if (now < start)
     return (
-      <span className='text-[11px] sm:text-[14px] font-[700]'>
-        {formatDuration(start - now, 'until')} 후 시작
-      </span>
+      <p className='flex flex-col justify-start | text-left leading-[110%]'>
+        <span className='text-[11px] sm:text-[13px] font-[700]'>
+          {formatDuration(start - now, 'until')} 후 시작
+        </span>
+        {!props.hideBottomText && (
+          <span className='hidden sm:inline'>
+            <BottomTexts todo={props.todo} />
+          </span>
+        )}
+      </p>
     )
   else if (now >= start && now < end)
     return (
-      <span className='text-[11px] sm:text-[14px] font-[700] text-violet-500'>
-        {formatDuration(end - now, 'left')} 남음
-      </span>
+      <p className='flex flex-col justify-start | text-left leading-[110%]'>
+        <span className='text-[11px] sm:text-[13px] font-[700] text-violet-500'>
+          {formatDuration(end - now, 'left')} 남음
+        </span>
+        {!props.hideBottomText && (
+          <span className='hidden sm:inline'>
+            <BottomTexts todo={props.todo} />
+          </span>
+        )}
+      </p>
     )
   else
     return (
-      <span className='text-[11px] sm:text-[14px] font-[700] text-red-500'>
-        {formatDuration(now - end, 'passed')} 초과
-      </span>
+      <p className='flex flex-col justify-start | text-left leading-[110%]'>
+        <span className='text-[11px] sm:text-[13px] font-[700] text-red-500'>
+          {formatDuration(now - end, 'passed')} 초과
+        </span>
+        {!props.hideBottomText && (
+          <span className='hidden sm:inline'>
+            <BottomTexts todo={props.todo} />
+          </span>
+        )}
+      </p>
     )
+}
+
+export function BottomTexts(props: { todo: Todo }) {
+  const dateUtil = useDateUtil()
+
+  const days =
+    props.todo.days && props.todo.days.length === 7
+      ? '매일'
+      : props.todo.days?.map((day) => WEEK_DAYS_NAME[day]).join(',')
+
+  const start =
+    typeof props.todo.start === 'number'
+      ? props.todo.start
+      : new Date(props.todo.start ?? '').getTime()
+  const end =
+    typeof props.todo.end === 'number' ? props.todo.end : new Date(props.todo.end ?? '').getTime()
+
+  const startHour = `${dayjs(start).hour()}`.padStart(2, '0')
+  const startMinute = `${dayjs(start).minute()}`.padStart(2, '0')
+  const endHour = `${dayjs(end).hour()}`.padStart(2, '0')
+  const endMinute = `${dayjs(end).minute()}`.padStart(2, '0')
+
+  return props.todo?.days ? (
+    <span className='text-[11px] opacity-70 tracking-tight'>
+      {days} / {startHour}:{startMinute} ~ {endHour}:{endMinute}
+    </span>
+  ) : (
+    <span className='text-[11px] opacity-70 tracking-tight'>
+      {dateUtil.parseDate(start)} ~ {dateUtil.parseDate(end)}
+    </span>
+  )
 }

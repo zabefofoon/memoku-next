@@ -1,7 +1,16 @@
 'use client'
 
 import useEmblaCarousel from 'embla-carousel-react'
-import { createContext, PropsWithChildren, useContext, useEffect, useRef } from 'react'
+import {
+  createContext,
+  forwardRef,
+  PropsWithChildren,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from 'react'
+import etcUtil from '../utils/etc.util'
 
 interface Props {
   gap?: string
@@ -11,7 +20,14 @@ interface Props {
   startIndex?: number
   autoplay?: boolean
   hideDots?: boolean
-  active?: boolean
+  vertical?: boolean
+  scrollSnap?: boolean
+  className?: string
+  change?: (index: number) => void
+}
+
+export type UICarouselHandle = {
+  scrollTo: (index: number) => void
 }
 
 const CarouselContext = createContext<{
@@ -22,12 +38,24 @@ const CarouselContext = createContext<{
   gap: '0px',
 })
 
-export default function UICarousel(props: PropsWithChildren<Props>) {
+export default forwardRef<UICarouselHandle, PropsWithChildren<Props>>(function UICarouselImpl(
+  props: PropsWithChildren<Props>,
+  ref: React.Ref<UICarouselHandle>
+) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: props.loop ?? false,
     dragFree: props.dragFree ?? false,
     startIndex: props.startIndex ?? 0,
+    axis: props.vertical ? 'y' : 'x',
   })
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      scrollTo: (index: number) => emblaApi?.scrollTo(index),
+    }),
+    [emblaApi]
+  )
 
   const dotsNode = useRef<HTMLDivElement>(null)
 
@@ -76,24 +104,49 @@ export default function UICarousel(props: PropsWithChildren<Props>) {
     }
   }, [emblaApi, dotsNode.current])
 
+  useEffect(() => {
+    if (!props.scrollSnap) return
+
+    emblaApi?.on('select', (event) => {
+      const index = event.selectedScrollSnap() || 0
+      props.change?.(index)
+    })
+
+    emblaApi?.on('pointerUp', (api) => {
+      const snaps: number[] = api.scrollSnapList()
+      const progress: number = api.scrollProgress()
+      let nearest = 0,
+        best = Infinity
+      snaps.forEach((p, i) => {
+        const d = Math.abs(p - progress)
+        if (d < best) {
+          best = d
+          nearest = i
+        }
+      })
+      api.scrollTo(nearest)
+    })
+  }, [emblaApi, props.scrollSnap, props.change])
+
   return (
     <CarouselContext.Provider
       value={{
         gap: props.gap ?? '0px',
         perview: props.perview ?? 1,
       }}>
-      <div className='embla'>
+      <div className={etcUtil.classNames(['embla', props.className])}>
         <div
           ref={emblaRef}
           className='embla-viewport'
           role='presentation'
+          style={{ height: props.vertical ? '100%' : 'auto' }}
           onMouseDown={(event) => event.stopPropagation()}
           onTouchStart={(event) => event.stopPropagation()}>
           <div
             className='embla-container'
             style={{
-              flexDirection: 'row',
-              height: 'auto',
+              flexDirection: props.vertical ? 'column' : 'row',
+              height: props.vertical ? `100%` : 'auto',
               marginLeft: `-${props.gap ?? '0px'}`,
             }}>
             {props.children}
@@ -109,16 +162,16 @@ export default function UICarousel(props: PropsWithChildren<Props>) {
       </div>
     </CarouselContext.Provider>
   )
-}
+})
 
-export function UICarouselSlide(props: PropsWithChildren) {
+export function UICarouselSlide(props: PropsWithChildren<{ className?: string }>) {
   const context = useContext(CarouselContext)
 
   const flex = context.perview === 'auto' ? '0 0 auto' : `0 0 ${100 / context.perview}%`
 
   return (
     <div
-      className='embla-slide'
+      className={etcUtil.classNames(['embla-slide', props.className])}
       style={{ flex, paddingLeft: context.gap }}
       {...props}>
       {props.children}

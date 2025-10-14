@@ -3,6 +3,10 @@ import ShortUniqueId from 'short-unique-id'
 import { twMerge } from 'tailwind-merge'
 
 const etcUtil = {
+  sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(() => resolve(), ms))
+  },
+
   classNames(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
   },

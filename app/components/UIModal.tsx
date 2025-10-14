@@ -39,26 +39,30 @@ export default function UIModal(props: Props) {
         ref={nodeRef}
         role='dialog'
         aria-modal='true'
-        className='fixed left-0 top-0 z-50 w-full h-full flex items-center justify-center'>
+        className='fixed left-0 top-0 z-50 | w-full h-full | flex items-center justify-center'>
         <button
           aria-label='닫기'
           onClick={props.close}
-          className='absolute inset-0 bg-black/50'
+          className='fixed inset-0 bg-black/50 | w-full h-full'
         />
-        <div className='modal-card | flex flex-col gap-[12px] | relative z-10 | min-w-[320px] max-w-[calc(100%-32px)] | p-[16px] | rounded-xl bg-white dark:bg-zinc-800 shadow-xl'>
-          <div className='flex justify-between'>
-            {props.header && <p className='text-[20px] font-[700]'>{props.header()}</p>}
-            <button
-              type='button'
-              className='ml-auto'
-              onClick={props.close}>
-              <Icon name='close' />
-            </button>
-          </div>
-          <div className='mb-[12px]'>{props.content?.()}</div>
-          <div className='flex flex-col gap-[4px]'>
-            {props.ok?.()}
-            {props.cancel?.()}
+        <div className='flex justify-center | max-h-full py-[32px] overflow-auto | scroll-hidden'>
+          <div className='modal-card | flex flex-col gap-[12px] | relative z-10 | min-w-[320px] max-w-[calc(100%-32px)] max-h-[calc(100dvh-64px)] | p-[16px] | rounded-xl bg-white dark:bg-zinc-800 shadow-xl'>
+            <div className='flex justify-between'>
+              {props.header && <p className='text-[20px] font-[700]'>{props.header()}</p>}
+              <button
+                type='button'
+                className='ml-auto'
+                onClick={props.close}>
+                <Icon name='close' />
+              </button>
+            </div>
+            <div className='mb-[12px] | flex-1 h-full overflow-auto | scroll-hidden'>
+              {props.content?.()}
+            </div>
+            <div className='flex flex-col gap-[4px]'>
+              {props.ok?.()}
+              {props.cancel?.()}
+            </div>
           </div>
         </div>
       </div>

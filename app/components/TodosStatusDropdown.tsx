@@ -18,7 +18,8 @@ export default function TodosStatusDropdown() {
     { name: '전체', value: undefined },
     { name: '생성됨', value: 'created' },
     { name: '진행중', value: 'inprogress' },
-    { name: '완료', value: 'done' },
+    { name: '완료됨', value: 'done' },
+    { name: '중지됨', value: 'hold' },
   ]
 
   const selectedItem = items.find((item) => item.value === urlParams.get('status'))

@@ -35,7 +35,7 @@ export function SettingsTagModal(props: Props) {
       open={props.isShow ?? false}
       close={() => props.close()}
       content={() => (
-        <div className='flex flex-col | gap-[12px]'>
+        <div className='flex flex-col | gap-[12px] | pb-[2px]'>
           <label className='flex items-center'>
             <span className='w-[100px] | text-[15px]'>이름</span>
             <input

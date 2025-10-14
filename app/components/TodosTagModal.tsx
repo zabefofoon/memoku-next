@@ -27,7 +27,7 @@ export function TodosTagModal(props: Props) {
       open={props.isShow ?? false}
       close={() => props.close()}
       content={() => (
-        <div className='flex gap-[6px] flex-wrap | max-w-[320px]'>
+        <div className='flex gap-[6px] flex-wrap | max-w-[320px] | pb-[2px]'>
           {tagsStore.tags.map((tag) => (
             <div
               key={tag.id}

@@ -35,7 +35,9 @@ export default async function RootLayout(props: LayoutProps<'/'>) {
           <div className='relative | h-full | flex flex-col sm:flex-row sm:gap-[36px] sm:p-[24px] sm:pr-[0]'>
             <AppTopAppBar />
             <AppAside isExpand={isExpandAside} />
-            <main className='relative z-[1] | w-full h-full overflow-auto flex-1 sm:pr-[24px] pb-[4px]'>
+            <main
+              id='scroll-el'
+              className='relative z-[1] | w-full h-full overflow-auto flex-1 sm:pr-[24px] pb-[4px]'>
               <div className='flex flex-col flex-1 min-h-full sm:h-full | p-[16px] sm:p-[0px]'>
                 {props.children}
               </div>

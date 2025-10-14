@@ -53,7 +53,7 @@ export default function TodosSearch() {
       <input
         type='text'
         placeholder='검색'
-        className='w-[200px] py-[4px] pl-[4px] outline-0'
+        className='min-w-[120px] w-full max-w-[200px] py-[4px] pl-[4px] outline-0'
         value={value}
         onChange={(event) => {
           setValue(event.target.value)

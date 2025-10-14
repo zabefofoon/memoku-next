@@ -56,8 +56,8 @@ export default function TodosTable(props: Props) {
             </th>
             <th
               scope='col'
-              className='py-[12px] w-[200px]'>
-              기한
+              className='py-[12px] w-[260px]'>
+              일정
             </th>
             <th
               scope='col'
@@ -161,15 +161,50 @@ function TodosTableRow(props: {
           {props.todo.description?.split(/\n/)[0]}
         </Link>
       </th>
-      <td className='opacity-70'>
-        {(props.todo.status !== 'done' && props.todo.start && props.todo.end && (
-          <Link
-            className='py-[12px] | block'
-            href={`/todos/${props.todo.id}`}>
-            <TodosPeriodText todo={props.todo} />
-          </Link>
-        )) ||
-          '--'}
+      <td>
+        {props.todo.status !== 'done' ? (
+          <div className='flex items-center justify-center gap-[8px]'>
+            <div className='relative'>
+              {
+                <Link
+                  href={`?time=${props.todo?.id}`}
+                  className={etcUtil.classNames(
+                    'relative | w-[32px] aspect-square | rounded-full | flex items-center justify-center',
+                    props.todo && props.todo.start && props.todo.end
+                      ? 'bg-violet-500 '
+                      : 'opacity-70 | bg-slate-100 text-slate-600'
+                  )}>
+                  <Icon
+                    name='alarm'
+                    className={etcUtil.classNames([
+                      'text-[20px]',
+                      props.todo && props.todo.start && props.todo.end ? 'text-white' : '',
+                    ])}
+                  />
+                </Link>
+              }
+              {props.todo?.start && (
+                <Link
+                  href={`?deleteTime=${props.todo?.id}`}
+                  onClick={(event) => event.stopPropagation()}>
+                  <Icon
+                    name='close'
+                    className='p-[2px] | rounded-full absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 | bg-slate-100 dark:bg-zinc-600 | text-[14px]'
+                  />
+                </Link>
+              )}
+            </div>
+            {props.todo.start && props.todo.end && (
+              <Link
+                className='w-full | py-[12px] | block'
+                href={`/todos/${props.todo.id}`}>
+                <TodosPeriodText todo={props.todo} />
+              </Link>
+            )}
+          </div>
+        ) : (
+          <span>-</span>
+        )}
       </td>
       <td className='opacity-70'>
         <Link
