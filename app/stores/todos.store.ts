@@ -22,7 +22,7 @@ export const useTodosStore = create(() => {
     const q = params?.searchText?.trim().toLowerCase()
 
     let coll: Collection<Todo, number>
-    if (tags && tags.length > 0) coll = db.todos.where('tagId').anyOf(Array.from(new Set(tags)))
+    if (tags && tags.length > 0) coll = db.todos.where('tagId').anyOf(tags)
     else if (status) coll = db.todos.where('status').equals(status)
     else coll = db.todos.toCollection()
 
@@ -30,7 +30,7 @@ export const useTodosStore = create(() => {
     if (status) coll = coll.and((t) => t.status === status)
     if (q?.length) coll = coll.and((t) => (t.description ?? '').toLowerCase().includes(q))
 
-    return coll.toArray()
+    return (await coll.sortBy('created')).reverse()
   }
 
   const getTodayTodos = async (): Promise<Todo[]> => {

@@ -9,6 +9,7 @@ import { AppAside } from '../components/AppAside'
 import AppBottomAppBar from '../components/AppBottomAppBar'
 import { AppTopAppBar } from '../components/AppTopAppBar'
 import { EnsureProviders } from '../components/EnsureProviders'
+import FloatingButtons from '../components/FloatingButtons'
 
 const notoSansKr = Noto_Sans_KR({
   weight: ['400', '700', '900'],
@@ -41,6 +42,7 @@ export default async function RootLayout(props: LayoutProps<'/'>) {
               <div className='flex flex-col flex-1 min-h-full sm:h-full | p-[16px] sm:p-[0px]'>
                 {props.children}
               </div>
+              <FloatingButtons />
               <AppBottomAppBar />
             </main>
           </div>

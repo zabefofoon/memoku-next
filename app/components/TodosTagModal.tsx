@@ -50,14 +50,14 @@ export function TodosTagModal(props: Props) {
       )}
       ok={() => (
         <button
-          className='rounded-md bg-violet-500 py-[6px]'
+          className='rounded-md bg-violet-500 py-[12px]'
           onClick={() => selectedTag && props.select(selectedTag)}>
           <p className='text-white text-[15px] font-[700]'>선택하기</p>
         </button>
       )}
       cancel={() => (
         <button
-          className='rounded-md bg-gray-200 dark:bg-zinc-700 text-[15px] py-[6px]'
+          className='rounded-md bg-gray-200 dark:bg-zinc-700 text-[15px] py-[12px]'
           onClick={() => props.close()}>
           <p className='text-[15px]'>취소하기</p>
         </button>

@@ -74,26 +74,28 @@ export default function Todos(props: PageProps<'/todos'>) {
         close={() => router.back()}
         delete={deleteTodo}
       />
-      <div className='mb-[24px]'>
+      <div className='mb-[24px] | hidden sm:block'>
         <h1 className='text-[20px] opacity-80'>Todos</h1>
         <p className='text-[16px] opacity-50'>할 일을 정리해보세요.</p>
       </div>
-      <div className='flex items-center gap-[12px] | mb-[16px] sm:mb-[20px]'>
-        <TodosSearch />
-        <div className='shrink-0 flex items-center gap-[12px]'>
-          <TodosStatusDropdown />
+      <div className='sticky top-0 left-0 z-[50] bg-gray-100 dark:bg-zinc-900'>
+        <div className='flex items-center gap-[12px] | mb-[8px] sm:mb-[20px]'>
+          <TodosSearch />
+          <div className='shrink-0 flex items-center gap-[12px]'>
+            <TodosStatusDropdown />
+          </div>
+          <Link
+            href='/todos/new'
+            className='ml-auto | hidden sm:flex items-center | bg-violet-500 rounded-lg | px-[8px] py-[6px] | text-white'>
+            <Icon
+              name='plus'
+              className='text-[20px]'
+            />
+            <p className='text-[14px]'>추가하기</p>
+          </Link>
         </div>
-        <Link
-          href='/todos/new'
-          className='ml-auto | hidden sm:flex items-center | bg-violet-500 rounded-lg | px-[8px] py-[6px] | text-white'>
-          <Icon
-            name='plus'
-            className='text-[20px]'
-          />
-          <p className='text-[14px]'>추가하기</p>
-        </Link>
+        <TodosTagsFilter />
       </div>
-      <TodosTagsFilter />
       <TodosTable
         key={`table_${loadKey}`}
         todos={todos}

@@ -203,14 +203,14 @@ export default function TodosTimeModal(props: Props): ReactNode {
         )}
         ok={() => (
           <button
-            className='rounded-md bg-violet-500 py-[6px]'
+            className='rounded-md bg-violet-500 py-[12px]'
             onClick={handleSelect}>
             <p className='text-white text-[15px] font-[700]'>선택하기</p>
           </button>
         )}
         cancel={() => (
           <button
-            className='rounded-md bg-gray-200 dark:bg-zinc-700 text-[15px] py-[6px]'
+            className='rounded-md bg-gray-200 dark:bg-zinc-700 text-[15px] py-[12px]'
             onClick={() => {
               if (step === 'select') props.close()
               else setStep('select')

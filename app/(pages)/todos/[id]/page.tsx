@@ -52,6 +52,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
     const res = await todosStore.addNewTodo(newChild)
     newChild.id = res
     setChildren((prev) => [...(prev ?? []), newChild])
+    router.replace(`/todos/${res}`)
   }
 
   const saveChildrenText = useMemo(
@@ -181,7 +182,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
   }, [todo, parents, children])
 
   return (
-    <div className='flex-1 | flex flex-col'>
+    <div className='flex-1 h-full | flex flex-col'>
       <TodosTimeModal
         isShow={isShowTimeModal}
         todos={[todo, ...(parents ?? []), ...(children ?? [])].filter((todo) => !!todo)}
@@ -203,7 +204,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
         close={router.back}
       />
 
-      <div className='mb-[24px]'>
+      <div className='mb-[24px] hidden sm:block'>
         <button
           type='button'
           className='opacity-80 | flex items-center | max-w-[300px]'
@@ -216,7 +217,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
         </button>
         <p className='text-[16px] opacity-50'>모든 글은 자동으로 저장 됩니다.</p>
       </div>
-      <div className='flex flex-col'>
+      <div className='h-full flex-1 | flex flex-col | sm:overflow-auto'>
         {parents?.map((todo) => (
           <div key={todo.id}>
             <TodosEditor
@@ -245,13 +246,14 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
             />
           </div>
         ))}
+
+        <button
+          className='shadow-lg bg-violet-500 | mt-[24px] px-[20px] py-[12px] mx-auto | w-fit | rounded-2xl'
+          type='button'
+          onClick={addChildren}>
+          <p className='text-white text-[15px]'>연관 일 추가하기</p>
+        </button>
       </div>
-      <button
-        className='shadow-lg bg-violet-500 | mt-[24px] px-[20px] py-[6px] mx-auto | w-fit | rounded-2xl'
-        type='button'
-        onClick={addChildren}>
-        <p className='text-white text-[15px]'>연관 일 추가하기</p>
-      </button>
     </div>
   )
 }

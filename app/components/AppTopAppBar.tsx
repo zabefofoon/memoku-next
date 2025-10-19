@@ -3,9 +3,12 @@
 import etcUtil from '@/app/utils/etc.util'
 import { AGE_1_YEAR, COOKIE_THEME } from '@/const'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
+import { Todo } from '../models/Todo'
 import { useThemeStore } from '../stores/theme.store'
+import { useTodosStore } from '../stores/todos.store'
 import { Icon } from './Icon'
 import UIToggle from './UIToggle'
 
@@ -26,6 +29,7 @@ export function AppTopAppBar() {
     }
   }
 
+  if (pathname.match(/\/todos\//gi)) return <TodosDetailHeader />
   return (
     <header className='sticky top-0 sm:hidden'>
       <div className='bg-gray-100 dark:bg-zinc-900 | border-b border-gray-200 dark:border-zinc-700 | h-[52px] | flex items-center | px-[12px]'>
@@ -61,6 +65,44 @@ export function AppTopAppBar() {
             />
           </Link>
         </div>
+      </div>
+    </header>
+  )
+}
+
+export function TodosDetailHeader() {
+  const todosStore = useTodosStore()
+  const params = useParams()
+
+  const [todo, setTodo] = useState<Todo>()
+
+  const loadTodo = async (): Promise<void> => {
+    const id = params.id ? +params.id : undefined
+    if (!id || isNaN(id)) return
+
+    const currentTodo = await todosStore.getTodo(id)
+    if (currentTodo != null) setTodo(currentTodo)
+  }
+
+  useEffect(() => {
+    loadTodo()
+  }, [])
+
+  return (
+    <header className='sticky top-0 sm:hidden'>
+      <div className='bg-gray-100 dark:bg-zinc-900 | border-b border-gray-200 dark:border-zinc-700 | h-[52px] | flex items-center | px-[12px]'>
+        <button
+          type='button'
+          className='opacity-80 | flex items-center | max-w-[300px]'
+          onClick={() => history.back()}>
+          <Icon
+            name='chevron-left'
+            className='text-[24px]'
+          />
+          <p className='text-[16px] truncate'>
+            {todo?.description?.slice(0, 50) || '내용을 입력하세요.'}
+          </p>
+        </button>
       </div>
     </header>
   )

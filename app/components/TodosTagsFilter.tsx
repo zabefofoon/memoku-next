@@ -30,7 +30,7 @@ export default function TodosTagsFilter() {
   }
 
   return (
-    <div className='px-[2px] | flex flex-wrap gap-[4px] sm:gap-[6px] | mb-[16px] sm:mb-[24px]'>
+    <div className='px-[2px] | flex flex-wrap gap-[4px] sm:gap-[6px] | mb-[8px] sm:mb-[24px]'>
       {tagsStore.tags.map((tag) => (
         <div
           key={tag.id}
