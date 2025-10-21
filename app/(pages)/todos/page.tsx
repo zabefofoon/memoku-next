@@ -9,7 +9,6 @@ import TodosTable from '@/app/components/TodosTable'
 import TodosTagsFilter from '@/app/components/TodosTagsFilter'
 import { Todo } from '@/app/models/Todo'
 import { useTodosStore } from '@/app/stores/todos.store'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -22,13 +21,18 @@ export default function Todos(props: PageProps<'/todos'>) {
   const [isShowDeleteModal, setIsShowDeleteModal] = useState<boolean>(false)
   const [loadKey, setLoadKey] = useState<number>(0)
 
-  const loadTodos = async () => {
+  const loadTodos = async (): Promise<void> => {
     const searchParams = await props.searchParams
     const tags = (searchParams.tags as string)?.split(',')
     const status = searchParams.status as string
     const searchText = searchParams.searchText as string
     const res = await todosStore.getTodos({ tags, status, searchText })
     setTodos(res)
+  }
+
+  const createTodo = async (): Promise<void> => {
+    const res = await todosStore.postDescription('')
+    router.push(`/todos/${res}`)
   }
 
   const handleSearchParams = async (): Promise<void> => {
@@ -84,15 +88,16 @@ export default function Todos(props: PageProps<'/todos'>) {
           <div className='shrink-0 flex items-center gap-[12px]'>
             <TodosStatusDropdown />
           </div>
-          <Link
-            href='/todos/new'
-            className='ml-auto | hidden sm:flex items-center | bg-violet-500 rounded-lg | px-[8px] py-[6px] | text-white'>
+          <button
+            type='button'
+            className='ml-auto | hidden sm:flex items-center | bg-violet-500 rounded-lg | px-[8px] py-[6px] | text-white'
+            onClick={createTodo}>
             <Icon
               name='plus'
               className='text-[20px]'
             />
             <p className='text-[14px]'>추가하기</p>
-          </Link>
+          </button>
         </div>
         <TodosTagsFilter />
       </div>

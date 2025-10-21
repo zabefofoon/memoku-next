@@ -33,6 +33,16 @@ export const useTodosStore = create(() => {
     return (await coll.sortBy('created')).reverse()
   }
 
+  const getParentTodo = async (parentId: number): Promise<Todo> => {
+    const [res] = await db.todos.where({ parentId }).toArray()
+    return res
+  }
+
+  const getChildTodo = async (id: number): Promise<Todo> => {
+    const [res] = await db.todos.where({ parentId: id }).toArray()
+    return res
+  }
+
   const getTodayTodos = async (): Promise<Todo[]> => {
     const start = dayjs().startOf('day').valueOf()
     const end = dayjs().endOf('day').valueOf()
@@ -174,6 +184,8 @@ export const useTodosStore = create(() => {
 
   return {
     getTodo,
+    getParentTodo,
+    getChildTodo,
     getTodos,
     getTodayTodos,
     getRecentTodos,

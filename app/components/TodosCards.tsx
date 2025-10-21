@@ -48,7 +48,7 @@ export default function TodosCards(props: Props) {
                 className='flex items-center gap-[4px]'>
                 <Icon
                   name='reply'
-                  className='text-[20px]'
+                  className='text-[16px]'
                 />
                 <TodoCard todo={child} />
               </div>
@@ -113,7 +113,7 @@ function TodoCard(props: {
       </div>
       <Link
         href={`/todos/${props.todo.id}`}
-        className='block min-h-[40px] | text-[14px] truncate | w-full | px-[6px]'>
+        className='block | text-[14px] truncate | w-full | px-[6px]'>
         {props.todo.description}
       </Link>
       <div className='flex items-center | pt-[8px] | border-t border-gray-100 dark:border-zinc-600'>

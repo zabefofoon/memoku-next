@@ -1,24 +1,31 @@
 'use client'
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useTodosStore } from '../stores/todos.store'
 import { Icon } from './Icon'
 
 export default function FloatingButtons() {
   const pathname = usePathname()
+  const router = useRouter()
+  const todosStore = useTodosStore()
 
   if (pathname.match(/\/todos\//gi)) return null
 
+  const createTodo = async (): Promise<void> => {
+    const res = await todosStore.postDescription('')
+    router.push(`/todos/${res}`)
+  }
+
   return (
     <div className='sm:hidden | fixed right-[16px] bottom-[92px] z-[50]'>
-      <Link
+      <button
         className='w-[48px] aspect-square | flex items-center justify-center | bg-violet-500 rounded-full | text-white'
-        href='/todos/new'>
+        onClick={createTodo}>
         <Icon
           name='plus'
           className='text-[24px]'
         />
-      </Link>
+      </button>
     </div>
   )
 }

@@ -40,7 +40,7 @@ export default function TodosImagesModal(props: Props) {
             {images?.map((image, index) => (
               <UICarouselSlide key={index}>
                 <img
-                  className='w-full h-[80dvh] sm:h-[50dvh] aspect-square object-contain'
+                  className='w-full sm:max-w-[992px] h-[80dvh] sm:h-[50dvh] aspect-square object-contain'
                   src={image}
                   alt=''
                 />

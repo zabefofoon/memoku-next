@@ -23,6 +23,7 @@ export default function TodosEditor(props: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const pathname = usePathname()
+  const dateUtil = useDateUtil()
 
   const imagesStore = useImagesStore()
 
@@ -32,14 +33,11 @@ export default function TodosEditor(props: Props) {
   const [isShowDeleteModal, setIsShowDeleteModal] = useState<boolean>(false)
   const [isShowDeleteTimeModal, setIsShowDeleteTimeModal] = useState<boolean>(false)
 
-  const dateUtil = useDateUtil()
-
   const [textValue, setTextValue] = useState<string>('')
 
   const [images, setImages] = useState<{ id?: number; image: string; todoId: number }[]>()
 
   const handleTextareaInput = (event: FormEvent<HTMLTextAreaElement>): void => {
-    setTextareaAutoHeight()
     props.updateText?.(event.currentTarget.value, props.todo?.id)
   }
 
@@ -49,13 +47,6 @@ export default function TodosEditor(props: Props) {
       event.preventDefault()
       for (const index in files) await addImage(files[index])
     }
-  }
-
-  const setTextareaAutoHeight = (): void => {
-    if (textareaEl.current == null) return
-
-    textareaEl.current.style.height = '0'
-    textareaEl.current.style.height = `${textareaEl.current.scrollHeight}px`
   }
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
@@ -116,7 +107,6 @@ export default function TodosEditor(props: Props) {
   useEffect(() => {
     loadImages()
     setTextValue(props.todo?.description ?? '')
-    setTimeout(() => setTextareaAutoHeight())
   }, [props.todo?.description])
 
   useEffect(() => {
@@ -129,7 +119,7 @@ export default function TodosEditor(props: Props) {
   return (
     <div
       id={`todo-${props.todo?.id}`}
-      className='flex flex-col gap-[12px] | w-full | relative | bg-white dark:bg-zinc-800 shadow-md rounded-xl | p-[8px]'>
+      className='flex flex-col gap-[12px] | flex-1 w-full overflow-auto | relative | p-[8px]'>
       <TodosDeleteModal
         isShow={isShowDeleteModal}
         close={() => router.back()}
@@ -212,13 +202,13 @@ export default function TodosEditor(props: Props) {
       <textarea
         ref={textareaEl}
         name='postContent'
-        className='w-full min-h-[80px] resize-none | rounded-xl p-[8px] | text-[15px]'
+        className='w-full flex-1 | resize-none | rounded-xl p-[8px] | text-[15px]'
         value={textValue}
         onChange={(e) => setTextValue(e.currentTarget.value)}
         onInput={handleTextareaInput}
         onPaste={handlePaste}></textarea>
-      <div className='w-full overflow-auto'>
-        {images && (
+      {images && images.length > 0 && (
+        <div className='w-full overflow-auto'>
           <div className='flex gap-[12px] | px-[4px] py-[6px]'>
             {images.map((image, index) => (
               <div
@@ -240,8 +230,8 @@ export default function TodosEditor(props: Props) {
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
       {!props.todo?.start ? (
         <p className='flex gap-[8px] | opacity-70 | text-[12px] leading-[130%]'>
           <span>최근 수정일</span>
