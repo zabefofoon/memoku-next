@@ -34,7 +34,7 @@ export const useTodosStore = create(() => {
   }
 
   const getParentTodo = async (parentId: number): Promise<Todo> => {
-    const [res] = await db.todos.where({ parentId }).toArray()
+    const [res] = await db.todos.where({ id: parentId }).toArray()
     return res
   }
 
