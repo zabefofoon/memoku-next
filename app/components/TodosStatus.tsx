@@ -13,7 +13,7 @@ interface Props {
 const status: Todo['status'][] = ['created', 'hold', 'inprogress', 'done']
 
 export default function TodosStatus(props: Props): ReactElement {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState<boolean>(false)
 
   return (
     <UIDropdown

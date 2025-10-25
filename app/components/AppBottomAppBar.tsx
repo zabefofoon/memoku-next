@@ -30,7 +30,7 @@ export default function AppBottomAppBar() {
             <div
               className={etcUtil.classNames([
                 'relative | flex flex-col items-center justify-center rounded-full | p-[6px]',
-                { 'bg-violet-500 text-white': pathname === menu.href },
+                { 'bg-indigo-500 text-white': pathname === menu.href },
               ])}>
               {menu.induce && (
                 <div className='absolute w-[4px] top-[4px] left-[16px] | aspect-square rounded-full | bg-red-500'></div>

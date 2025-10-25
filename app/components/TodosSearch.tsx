@@ -38,7 +38,7 @@ export default function TodosSearch() {
   }, [searchParams])
 
   return (
-    <label className='search | w-full sm:w-fit flex items-center | border border-gray-300 dark:border-zinc-600 rounded-lg has-focus:border-violet-500 | pr-[8px]'>
+    <label className='search | w-full sm:w-fit flex items-center | border border-gray-300 dark:border-zinc-600 rounded-lg has-focus:border-indigo-500 | pr-[8px]'>
       <span className='sr-only'>검색</span>
       <button
         type='button'

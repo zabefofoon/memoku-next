@@ -41,7 +41,7 @@ export default function TodosDatePicker(props: Props) {
           }}
           dayCellClassNames={(arg) => {
             const day = dayjs(arg.date).startOf('day')
-            return day.isSame(selectedDate) ? '!bg-violet-500 text-white' : ''
+            return day.isSame(selectedDate) ? '!bg-indigo-500 text-white' : ''
           }}
         />
       </div>

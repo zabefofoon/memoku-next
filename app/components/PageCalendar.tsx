@@ -2,7 +2,7 @@
 
 import { useTagsStore } from '@/app/stores/tags.store'
 import { useTodosStore } from '@/app/stores/todos.store'
-import { TAG_COLORS } from '@/const'
+import { CALENDAR_REPEAT, TAG_COLORS } from '@/const'
 import {
   DatesSetArg,
   EventClickArg,
@@ -59,6 +59,7 @@ export default function PageCalendar() {
               : '#000000',
         start: todo.start ? dayjs(todo.start).toDate() : undefined,
         end: todo.end ? dayjs(todo.end).toDate() : undefined,
+        daysOfWeek: todo.days?.map((day) => CALENDAR_REPEAT[day]),
       }
     }) as EventSourceInput
     setEvents(mapped)

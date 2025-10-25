@@ -36,3 +36,19 @@ export const WEEK_DAYS_NAME = {
   fri: '금',
   sat: '토',
 }
+
+export const MS = {
+  minute: 60 * 1000,
+  hour: 60 * 60 * 1000,
+  day: 24 * 60 * 60 * 1000,
+} as const
+
+export const CALENDAR_REPEAT = {
+  sun: 0,
+  mon: 1,
+  tue: 2,
+  wed: 3,
+  thu: 4,
+  fri: 5,
+  sat: 6,
+}

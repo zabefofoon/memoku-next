@@ -86,7 +86,7 @@ export function AppAside(props: Props) {
               className={etcUtil.classNames([
                 'relative | flex items-center gap-[6px] | py-[12px] px-[16px] mx-[4px] | rounded-full hover:bg-slate-50 hover:dark:bg-zinc-700/50',
                 {
-                  'text-white | bg-violet-500 dark:bg-violet-600 hover:bg-violet-500 hover:dark:bg-violet-600':
+                  'text-white | bg-indigo-500 dark:bg-indigo-600 hover:bg-indigo-500 hover:dark:bg-indigo-600':
                     pathname === menu.href,
                 },
               ])}>

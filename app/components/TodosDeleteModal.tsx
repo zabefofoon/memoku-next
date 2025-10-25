@@ -21,7 +21,7 @@ export function TodosDeleteModal(props: Props) {
       )}
       ok={() => (
         <button
-          className='rounded-md bg-violet-500 py-[12px]'
+          className='rounded-md bg-indigo-500 py-[12px]'
           onClick={() => props.delete()}>
           <p className='text-white text-[15px] font-[700]'>삭제하기</p>
         </button>

@@ -37,7 +37,7 @@ export default function HomeSequel() {
   }, [])
 
   return (
-    <div className='gap-[8px] flex flex-col | shadow-md rounded-xl bg-violet-500 dark:bg-violet-600 | p-[16px]'>
+    <div className='gap-[8px] flex flex-col | shadow-md rounded-xl bg-indigo-500 dark:bg-indigo-600 | p-[16px]'>
       <h3 className='font-[700] text-[16px] | text-white'>주간 활동</h3>
       <ResponsiveContainer
         width='100%'

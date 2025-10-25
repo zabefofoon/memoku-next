@@ -69,7 +69,7 @@ export default function HomeTotal() {
                 key={entry.name + index}
                 fill={
                   entry.name === 'done'
-                    ? 'var(--color-violet-500)'
+                    ? 'var(--color-indigo-500)'
                     : cookies['x-theme'] === 'dark'
                       ? 'var(--color-zinc-700)'
                       : 'var(--color-gray-200)'

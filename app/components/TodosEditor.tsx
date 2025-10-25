@@ -1,14 +1,10 @@
-import { useDateUtil } from '@/app/hooks/useDateUtil'
 import { Todo } from '@/app/models/Todo'
-import etcUtil from '@/app/utils/etc.util'
-import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ClipboardEvent, useEffect, useRef, useState } from 'react'
-import { Icon } from './Icon'
 import TagBadge from './TagBadge'
-import TodosDeleteButton from './TodosDeleteButton'
 import { TodosDeleteModal } from './TodosDeleteModal'
-import TodosPeriodText, { BottomTexts } from './TodosPeriodText'
+import { TodosDropdown } from './TodosDropdown'
+import TodosPeriodText from './TodosPeriodText'
 import TodosStatus from './TodosStatus'
 
 interface Props {
@@ -23,7 +19,6 @@ export default function TodosEditor(props: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const pathname = usePathname()
-  const dateUtil = useDateUtil()
 
   const textareaEl = useRef<HTMLTextAreaElement>(null)
 
@@ -57,7 +52,13 @@ export default function TodosEditor(props: Props) {
         delete={() => props.deleteTime?.(props.todo?.id)}
       />
       <div className='absolute top-[16px] right-[16px] | flex gap-[4px] sm:gap-[8px]'>
-        {props.todo?.id && <TodosDeleteButton id={props.todo.id} />}
+        {props.todo?.id && (
+          <TodosDropdown
+            todo={props.todo}
+            hideEdit
+            position={{ x: 'RIGHT' }}
+          />
+        )}
       </div>
       <div className='flex items-center gap-[6px] px-[8px]'>
         {props.todo && (
@@ -70,41 +71,6 @@ export default function TodosEditor(props: Props) {
           status={props.todo?.status ?? 'created'}
           select={(status) => props.updateStatus?.(status, props.todo?.id)}
         />
-        {props.todo?.status !== 'done' && (
-          <>
-            <div className='relative'>
-              <Link
-                href={`?time=${props.todo?.id}`}
-                className={etcUtil.classNames(
-                  'relative | w-[24px] sm:w-[32px] aspect-square | rounded-full | flex items-center justify-center',
-                  props.todo && props.todo.start && props.todo.end
-                    ? 'bg-violet-500 '
-                    : 'opacity-70 | bg-slate-100 text-slate-600'
-                )}>
-                <Icon
-                  name='alarm'
-                  className={etcUtil.classNames([
-                    'text-[16px] sm:text-[20px]',
-                    props.todo && props.todo.start && props.todo.end ? 'text-white' : '',
-                  ])}
-                />
-              </Link>
-              {props.todo?.start && (
-                <Link
-                  href={`?deleteTime=${props.todo?.id}`}
-                  onClick={(event) => event.stopPropagation()}>
-                  <Icon
-                    name='close'
-                    className='p-[2px] | rounded-full absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 | bg-slate-100 dark:bg-zinc-600 | text-[12px] sm:text-[14px]'
-                  />
-                </Link>
-              )}
-            </div>
-            {props.todo && props.todo.start && props.todo.end && (
-              <TodosPeriodText todo={props.todo} />
-            )}
-          </>
-        )}
       </div>
       <textarea
         ref={textareaEl}
@@ -114,14 +80,7 @@ export default function TodosEditor(props: Props) {
         onChange={(e) => setTextValue(e.currentTarget.value)}
         onInput={(event) => props.updateText?.(event.currentTarget.value, props.todo?.id)}
         onPaste={handlePaste}></textarea>
-      {!props.todo?.start ? (
-        <p className='flex gap-[8px] | opacity-70 | text-[12px] leading-[130%]'>
-          <span>최근 수정일</span>
-          <span>{dateUtil.parseDate(props.todo?.modified)}</span>
-        </p>
-      ) : (
-        <BottomTexts todo={props.todo} />
-      )}
+      <TodosPeriodText todo={props.todo} />
     </div>
   )
 }

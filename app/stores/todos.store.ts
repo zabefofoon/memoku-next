@@ -55,7 +55,28 @@ export const useTodosStore = create(() => {
   }
 
   const getTodosDateRange = (start: Date, end: Date): Promise<Todo[]> => {
-    return db.todos.where('created').between(start.getTime(), end.getTime(), true, true).toArray()
+    const startTs = start.getTime()
+    const endTs = end.getTime()
+
+    return db.transaction('r', db.todos, async () => {
+      const [byCreated, byOverlap, byDays] = await Promise.all([
+        db.todos.where('created').between(startTs, endTs, true, true).toArray(),
+
+        db.todos
+          .where('start')
+          .belowOrEqual(endTs)
+          .and((t) => typeof t.end === 'number' && t.end >= startTs)
+          .toArray(),
+
+        db.todos.filter((t) => Array.isArray(t.days) && t.days.length > 0).toArray(),
+      ])
+
+      const map = new Map<number, Todo>()
+      for (const arr of [byCreated, byOverlap, byDays]) {
+        for (const t of arr) if (typeof t.id === 'number') map.set(t.id, t)
+      }
+      return [...map.values()]
+    })
   }
 
   const getTagsCount = async (): Promise<Record<string, number>[]> => {
@@ -111,7 +132,12 @@ export const useTodosStore = create(() => {
   }
 
   const addNewTodo = (todo: Todo): Promise<number> => {
-    return db.todos.add({ ...todo, created: Date.now(), modified: Date.now() })
+    return db.transaction('rw', db.todos, async () => {
+      const id = await db.todos.add({ ...todo, created: Date.now(), modified: Date.now() })
+      if (todo.parentId) await db.todos.update(todo.parentId, { childId: id })
+
+      return id
+    })
   }
 
   const updateDescription = (id: number, description: string): Promise<number> => {
@@ -177,6 +203,7 @@ export const useTodosStore = create(() => {
       const target = await db.todos.get(id)
       if (!target) return -1
       db.todos.where('parentId').equals(id).modify({ parentId: target.parentId })
+      db.todos.where('childId').equals(id).modify({ childId: target.childId })
 
       return db.todos.where({ id }).delete()
     })

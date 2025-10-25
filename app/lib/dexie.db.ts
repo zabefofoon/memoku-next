@@ -14,13 +14,13 @@ export class MySubClassedDexie extends Dexie {
 
     // 스키마 정의
     this.version(2).stores({
-      todos: '++id, description, tagId, created, modified, parentId, start, end, status, days',
+      todos:
+        '++id, description, tagId, created, modified, parentId, childId, start, end, status, days',
       setting: '++id, tags, forms',
       images: '++id, image, todoId', // 새로운 image 테이블 추가
       tags: 'id, color, label',
     })
 
-    // 데이터 마이그레이션
     this.version(2).upgrade(async (tx) => {
       const todos = await tx.table('todos').toArray()
       const imageTable = tx.table('images')
@@ -50,6 +50,27 @@ export class MySubClassedDexie extends Dexie {
         }
         if (allTags.length > 0) await tx.table<Tag>('tags').bulkAdd(allTags)
       }
+    })
+
+    this.version(3).upgrade(async (tx) => {
+      const table = tx.table<Todo>('todos')
+      const seen = new Set<number>()
+
+      await table
+        .where('parentId')
+        .aboveOrEqual(0)
+        .each(async (child) => {
+          const pid = child.parentId
+          if (typeof pid !== 'number') return
+          if (seen.has(pid)) return
+
+          const parent = await table.get(pid)
+          if (!parent) return
+          if (parent.id === child.id) return
+
+          await table.update(pid, { childId: child.id })
+          seen.add(pid)
+        })
     })
   }
 }

@@ -1,12 +1,11 @@
 import { Todo } from '@/app/models/Todo'
 import Link from 'next/link'
 import { Fragment, useState } from 'react'
-import { useDateUtil } from '../hooks/useDateUtil'
 import { useTodosStore } from '../stores/todos.store'
 import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
 import TagBadge from './TagBadge'
-import TodosDeleteButton from './TodosDeleteButton'
+import { TodosDropdown } from './TodosDropdown'
 import TodosPeriodText from './TodosPeriodText'
 import TodosStatus from './TodosStatus'
 
@@ -62,11 +61,6 @@ export default function TodosTable(props: Props) {
             <th
               scope='col'
               className='py-[12px] w-[128px]'>
-              생성일
-            </th>
-            <th
-              scope='col'
-              className='py-[12px] w-[128px]'>
               <span className='sr-only'>Edit</span>
             </th>
           </tr>
@@ -103,7 +97,6 @@ function TodosTableRow(props: {
   updateStatus?: Props['updateStatus']
   getDescendantsFlat?: (todoId?: number) => Promise<void>
 }) {
-  const dateUtil = useDateUtil()
   return (
     <tr
       className={etcUtil.classNames([
@@ -113,7 +106,7 @@ function TodosTableRow(props: {
         },
       ])}>
       <td>
-        {(props.todo.parentId == null || props.todo.parentId === -1) && (
+        {(props.todo.parentId == null || props.todo.parentId === -1) && props.todo.childId && (
           <button
             type='button'
             className='w-full flex justify-center'
@@ -162,58 +155,20 @@ function TodosTableRow(props: {
         </Link>
       </th>
       <td>
-        {props.todo.status !== 'done' ? (
-          <div className='flex items-center justify-center gap-[8px]'>
-            <div className='relative'>
-              {
-                <Link
-                  href={`?time=${props.todo?.id}`}
-                  className={etcUtil.classNames(
-                    'relative | w-[32px] aspect-square | rounded-full | flex items-center justify-center',
-                    props.todo && props.todo.start && props.todo.end
-                      ? 'bg-violet-500 '
-                      : 'opacity-70 | bg-slate-100 text-slate-600'
-                  )}>
-                  <Icon
-                    name='alarm'
-                    className={etcUtil.classNames([
-                      'text-[20px]',
-                      props.todo && props.todo.start && props.todo.end ? 'text-white' : '',
-                    ])}
-                  />
-                </Link>
-              }
-              {props.todo?.start && (
-                <Link
-                  href={`?deleteTime=${props.todo?.id}`}
-                  onClick={(event) => event.stopPropagation()}>
-                  <Icon
-                    name='close'
-                    className='p-[2px] | rounded-full absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 | bg-slate-100 dark:bg-zinc-600 | text-[14px]'
-                  />
-                </Link>
-              )}
-            </div>
-            {props.todo.start && props.todo.end && (
-              <Link
-                className='w-full | py-[12px] | block'
-                href={`/todos/${props.todo.id}`}>
-                <TodosPeriodText todo={props.todo} />
-              </Link>
-            )}
-          </div>
-        ) : (
-          <span>-</span>
-        )}
+        <div className='flex items-center justify-center gap-[8px]'>
+          <Link
+            className='w-full | py-[12px] | block'
+            href={`/todos/${props.todo.id}`}>
+            <TodosPeriodText todo={props.todo} />
+          </Link>
+        </div>
       </td>
-      <td className='opacity-70'>
-        <Link
-          className='py-[12px] | block'
-          href={`/todos/${props.todo.id}`}>
-          {dateUtil.parseDate(props.todo.created)}
-        </Link>
+
+      <td className='py-[12px]'>
+        <div className='w-[20px] mx-auto'>
+          {props.todo.id && <TodosDropdown todo={props.todo} />}
+        </div>
       </td>
-      <td className='py-[12px]'>{props.todo.id && <TodosDeleteButton id={props.todo.id} />}</td>
     </tr>
   )
 }

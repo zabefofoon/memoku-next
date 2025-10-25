@@ -79,7 +79,7 @@ export function SettingsTagModal(props: Props) {
       )}
       ok={() => (
         <button
-          className='rounded-md bg-violet-500 py-[12px]'
+          className='rounded-md bg-indigo-500 py-[12px]'
           onClick={() =>
             tagName && selectedColor && props.done({ label: tagName, color: selectedColor })
           }>

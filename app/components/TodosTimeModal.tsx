@@ -29,18 +29,33 @@ interface TimeState {
   minute?: number
 }
 
+interface StepCard {
+  title: string
+  desc: string
+  caption: string
+  value: 'plan' | 'iterate' | 'reset'
+}
+
 export default function TodosTimeModal(props: Props): ReactNode {
   const searchParams = useSearchParams()
 
   const [isShowDateModal, setIsShowDateModal] = useState<boolean>(false)
 
   const [step, setStep] = useState<'select' | 'plan' | 'iterate'>('select')
-  const [selectedMode, setSelectedMode] = useState<'plan' | 'iterate'>('plan')
+  const [selectedMode, setSelectedMode] = useState<'plan' | 'iterate' | 'reset'>('plan')
 
   const [mode, setMode] = useState<'start' | 'end'>('start')
 
-  const [start, setStart] = useState<TimeState>({ date: new Date(), hour: 0, minute: 0 })
-  const [end, setEnd] = useState<TimeState>({ date: new Date(), hour: 23, minute: 55 })
+  const [start, setStart] = useState<TimeState>({
+    date: dayjs().set('hour', 0).set('minute', 0).toDate(),
+    hour: 0,
+    minute: 0,
+  })
+  const [end, setEnd] = useState<TimeState>({
+    date: dayjs().set('hour', 23).set('minute', 55).toDate(),
+    hour: 23,
+    minute: 55,
+  })
   const [days, setDays] = useState<WeekDay[]>([])
 
   const initStates = (): void => {
@@ -52,12 +67,12 @@ export default function TodosTimeModal(props: Props): ReactNode {
     else if (todo.start) step = 'plan'
 
     const startDate = dayjs(todo.start).toDate()
-    const startHour = dayjs(todo.start).get('hour').valueOf()
-    const startMinute = dayjs(todo.start).get('minute').valueOf()
+    const startHour = todo.start ? dayjs(todo.start).get('hour').valueOf() : 0
+    const startMinute = todo.start ? dayjs(todo.start).get('minute').valueOf() : 0
 
     const endtDate = dayjs(todo.end).toDate()
-    const endtHour = dayjs(todo.end).get('hour').valueOf()
-    const endinute = dayjs(todo.end).get('minute').valueOf()
+    const endtHour = todo.end ? dayjs(todo.end).get('hour').valueOf() : 23
+    const endinute = todo.end ? dayjs(todo.end).get('minute').valueOf() : 55
 
     setStep(step)
     setMode('start')
@@ -96,7 +111,15 @@ export default function TodosTimeModal(props: Props): ReactNode {
   }
 
   const handleSelect = (): void => {
-    if (step === 'select') setStep(selectedMode)
+    if (selectedMode === 'reset') {
+      const timeQuery = searchParams.get('time')
+      const todoId = timeQuery ? +timeQuery : undefined
+
+      if (!todoId || isNaN(todoId)) return
+
+      props.updateTime(todoId, { start: undefined, end: undefined, days: undefined })
+      props.close()
+    } else if (step === 'select') setStep(selectedMode)
     else {
       const startValue = dayjs(start.date)
         .hour(start.hour ?? 0)
@@ -191,19 +214,21 @@ export default function TodosTimeModal(props: Props): ReactNode {
                     />
                   )}
                 </div>
-                <ResultTexts
-                  selectedMode={selectedMode}
-                  start={start}
-                  end={end}
-                  days={days}
-                />
+                {selectedMode !== 'reset' && (
+                  <ResultTexts
+                    selectedMode={selectedMode}
+                    start={start}
+                    end={end}
+                    days={days}
+                  />
+                )}
               </>
             )}
           </div>
         )}
         ok={() => (
           <button
-            className='rounded-md bg-violet-500 py-[12px]'
+            className='rounded-md bg-indigo-500 py-[12px]'
             onClick={handleSelect}>
             <p className='text-white text-[15px] font-[700]'>선택하기</p>
           </button>
@@ -247,7 +272,7 @@ function Tabs(props: {
           key={item.value}
           type='button'
           className={etcUtil.classNames('font-[700] | py-[3px] px-[12px] | rounded-lg', {
-            'bg-violet-500 shadow-lg | text-white': props.mode === item.value,
+            'bg-indigo-500 shadow-lg | text-white': props.mode === item.value,
           })}
           onClick={() => props.setMode(item.value)}>
           {item.name}
@@ -258,16 +283,9 @@ function Tabs(props: {
 }
 
 function SelectContent(props: {
-  selectedMode: 'plan' | 'iterate'
-  setSelectedMode: (value: 'plan' | 'iterate') => void
+  selectedMode: 'plan' | 'iterate' | 'reset'
+  setSelectedMode: (value: 'plan' | 'iterate' | 'reset') => void
 }): ReactNode {
-  interface StepCard {
-    title: string
-    desc: string
-    caption: string
-    value: 'plan' | 'iterate'
-  }
-
   const stepCards: StepCard[] = [
     {
       title: '기간 설정',
@@ -280,6 +298,12 @@ function SelectContent(props: {
       desc: '매 주 선택한 요일의 시간을 정합니다.',
       caption: '매주 N요일, N요일 N시 N분 ~ N시 N분',
       value: 'iterate',
+    },
+    {
+      title: '초기화',
+      desc: '설정을 초기화 합니다.',
+      caption: '주의! 초기화된 설정은 복구할 수 없습니다.',
+      value: 'reset',
     },
   ]
 
@@ -343,7 +367,7 @@ function IterateContent(props: {
             className={etcUtil.classNames([
               'w-[30px] aspect-square | mx-auto | rounded-full | flex items-center justify-center',
               {
-                'bg-violet-500 text-white':
+                'bg-indigo-500 text-white':
                   props.mode === 'start'
                     ? props.days?.includes(item.value)
                     : props.days?.includes(item.value),

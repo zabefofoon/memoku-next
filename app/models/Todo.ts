@@ -7,6 +7,7 @@ export interface Todo {
   created?: number
   modified?: number
   parentId?: number
+  childId?: number
   start?: number
   end?: number
   images?: (string | Blob)[]

@@ -19,7 +19,7 @@ export default function FloatingButtons() {
   return (
     <div className='sm:hidden | fixed right-[16px] bottom-[92px] z-[50]'>
       <button
-        className='w-[48px] aspect-square | flex items-center justify-center | bg-violet-500 rounded-full | text-white'
+        className='w-[48px] aspect-square | flex items-center justify-center | bg-indigo-500 rounded-full | text-white'
         onClick={createTodo}>
         <Icon
           name='plus'

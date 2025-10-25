@@ -82,17 +82,17 @@
     padding: 0 4px !important;
     font-size: 12px !important;
     color: white;
-    background: var(--color-violet-500);
+    background: var(--color-indigo-500);
     border-radius: 99px !important;
 
     &:hover {
       color: white;
-      background: var(--color-violet-500);
+      background: var(--color-indigo-500);
     }
 
     &:active {
       color: white !important;
-      background: var(--color-violet-500) !important;
+      background: var(--color-indigo-500) !important;
     }
   }
 }

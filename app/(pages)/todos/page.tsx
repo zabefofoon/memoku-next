@@ -7,19 +7,28 @@ import TodosSearch from '@/app/components/TodosSearch'
 import TodosStatusDropdown from '@/app/components/TodosStatusDropdown'
 import TodosTable from '@/app/components/TodosTable'
 import TodosTagsFilter from '@/app/components/TodosTagsFilter'
+import TodosTimeModal from '@/app/components/TodosTimeModal'
 import { Todo } from '@/app/models/Todo'
 import { useTodosStore } from '@/app/stores/todos.store'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 export default function Todos(props: PageProps<'/todos'>) {
   const todosStore = useTodosStore()
-
+  const searchParams = useSearchParams()
   const router = useRouter()
   const [todos, setTodos] = useState<Todo[]>()
 
   const [isShowDeleteModal, setIsShowDeleteModal] = useState<boolean>(false)
+  const [isShowTimeModal, setIsShowTimeModal] = useState<boolean>(false)
   const [loadKey, setLoadKey] = useState<number>(0)
+
+  const timeTargetTodo = todos?.find((todo) => {
+    const timeQuery = searchParams.get('time')
+    const todoId = timeQuery ? +timeQuery : undefined
+
+    return todo.id === todoId
+  })
 
   const loadTodos = async (): Promise<void> => {
     const searchParams = await props.searchParams
@@ -38,6 +47,7 @@ export default function Todos(props: PageProps<'/todos'>) {
   const handleSearchParams = async (): Promise<void> => {
     const searchParams = await props.searchParams
     setIsShowDeleteModal(!!searchParams.deleteModal)
+    setIsShowTimeModal(!!searchParams.time)
   }
 
   const deleteTodo = async (): Promise<void> => {
@@ -62,6 +72,21 @@ export default function Todos(props: PageProps<'/todos'>) {
     setLoadKey((prev) => ++prev)
   }
 
+  const updateTime = async (
+    id: number,
+    values: { start: Todo['start']; end: Todo['end']; days?: Todo['days'] }
+  ): Promise<void> => {
+    const timeQuery = searchParams.get('time')
+    const todoId = timeQuery ? +timeQuery : undefined
+
+    await todosStore.updateTimes(id, values)
+
+    if (id === timeTargetTodo?.id)
+      setTodos(
+        (prev) => prev?.map((todo) => (todo.id === todoId ? { ...todo, ...values } : todo)) ?? prev
+      )
+  }
+
   useEffect(() => {
     loadTodos()
   }, [])
@@ -78,6 +103,12 @@ export default function Todos(props: PageProps<'/todos'>) {
         close={() => router.back()}
         delete={deleteTodo}
       />
+      <TodosTimeModal
+        isShow={isShowTimeModal}
+        todos={[timeTargetTodo].filter((todo) => !!todo)}
+        updateTime={updateTime}
+        close={router.back}
+      />
       <div className='mb-[24px] | hidden sm:block'>
         <h1 className='text-[20px] opacity-80'>Todos</h1>
         <p className='text-[16px] opacity-50'>할 일을 정리해보세요.</p>
@@ -90,7 +121,7 @@ export default function Todos(props: PageProps<'/todos'>) {
           </div>
           <button
             type='button'
-            className='ml-auto | hidden sm:flex items-center | bg-violet-500 rounded-lg | px-[8px] py-[6px] | text-white'
+            className='ml-auto | hidden sm:flex items-center | bg-indigo-500 dark:bg-indigo-600 rounded-lg | px-[8px] py-[6px] | text-white'
             onClick={createTodo}>
             <Icon
               name='plus'

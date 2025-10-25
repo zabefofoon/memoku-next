@@ -9,12 +9,12 @@ interface Props {
 export default function TodosStatusChip(props: Props) {
   let bgColor = 'bg-slate-200'
   if (props.status === 'done') bgColor = 'bg-green-200'
-  if (props.status === 'inprogress') bgColor = 'bg-violet-200'
+  if (props.status === 'inprogress') bgColor = 'bg-indigo-200'
   if (props.status === 'hold') bgColor = 'bg-orange-200'
 
   let textColor = 'text-slate-500'
   if (props.status === 'done') textColor = 'text-green-500'
-  if (props.status === 'inprogress') textColor = 'text-violet-500'
+  if (props.status === 'inprogress') textColor = 'text-indigo-500'
   if (props.status === 'hold') textColor = 'text-orange-600'
 
   let text = '생성됨'
