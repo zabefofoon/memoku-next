@@ -42,7 +42,7 @@ export function TodosImages(props: Props) {
   }, [searchParams])
 
   return (
-    <div className='h-full overflow-y-hidden sm:overflow-y-auto sm:overflow-x-hidden | flex sm:flex-col gap-[12px]'>
+    <div className='sm:h-full overflow-y-hidden sm:overflow-y-auto sm:overflow-x-hidden | flex sm:flex-col gap-[12px]'>
       <TodosDeleteModal
         isShow={isShowDeleteModal}
         close={() => router.back()}

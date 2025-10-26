@@ -7,6 +7,7 @@ import { TodosImages } from '@/app/components/TodosImages'
 import TodosImagesModal from '@/app/components/TodosImagesModal'
 import { TodosTagModal } from '@/app/components/TodosTagModal'
 import TodosTimeModal from '@/app/components/TodosTimeModal'
+import UISpinner from '@/app/components/UISpinner'
 import { Tag, Todo } from '@/app/models/Todo'
 import { useImagesStore } from '@/app/stores/images.store'
 import { useTodosStore } from '@/app/stores/todos.store'
@@ -25,6 +26,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
   const [parentTodo, setParentTodo] = useState<Todo>()
   const [childTodo, setChildTodo] = useState<Todo>()
   const [textValue, setTextValue] = useState<string>('')
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const [isShowDeleteModal, setIsShowDeleteModal] = useState(false)
   const [isShowTagModal, setIsShowTagModal] = useState(false)
@@ -59,12 +61,17 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
     const params = await props.params
     if (isNaN(+params.id)) return
 
+    setIsLoading(true)
     const res = await todosStore.getTodo(+params.id)
+
     setTodo(res)
     setTextValue(res?.description ?? '')
     loadImages(res.id)
+
     if (res.parentId) todosStore.getParentTodo(res.parentId).then(setParentTodo)
     if (res.id) todosStore.getChildTodo(res.id).then(setChildTodo)
+
+    setIsLoading(false)
   }
 
   const deleteTodo = async (): Promise<void> => {
@@ -174,8 +181,15 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
     handleSearchParams()
   }, [props.searchParams])
 
+  if (isLoading)
+    return (
+      <div className='flex-1 | flex items-center justify-center'>
+        <UISpinner />
+      </div>
+    )
+
   return (
-    <div className='flex-1 max-h-full | flex flex-col'>
+    <div className='flex-1 | flex flex-col'>
       <TodosTimeModal
         isShow={isShowTimeModal}
         todos={[todo].filter((todo) => !!todo)}
@@ -197,19 +211,23 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
         close={router.back}
       />
 
-      <div className='mb-[24px] hidden sm:block'>
-        <button
-          type='button'
-          className='opacity-80 | flex items-center | max-w-[300px]'
-          onClick={() => history.back()}>
-          <Icon
-            name='chevron-left'
-            className='text-[24px]'
-          />
-          <p className='text-[20px] truncate'>{textValue.split(/\n/)[0] || '내용을 입력하세요.'}</p>
-        </button>
-        <p className='text-[16px] opacity-50'>모든 글은 자동으로 저장 됩니다.</p>
-      </div>
+      {
+        <div className='mb-[24px] hidden sm:block'>
+          <button
+            type='button'
+            className='opacity-80 | flex items-center | max-w-[300px]'
+            onClick={() => history.back()}>
+            <Icon
+              name='chevron-left'
+              className='text-[24px]'
+            />
+            <p className='text-[20px] truncate'>
+              {textValue.split(/\n/)[0] || '내용을 입력하세요.'}
+            </p>
+          </button>
+          <p className='text-[16px] opacity-50'>모든 글은 자동으로 저장 됩니다.</p>
+        </div>
+      }
       {todo?.parentId && todo.parentId !== -1 && (
         <Link
           href={`/todos/${todo?.parentId}`}
@@ -225,23 +243,25 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
           <p className='truncate'>{parentTodo?.description?.split(/\n/)[0]}</p>
         </Link>
       )}
-      <div className='h-full flex-1 overflow-hidden | flex gap-[16px] flex-col sm:flex-row'>
-        <div className='flex-1 w-full h-full | flex flex-col | sm:overflow-auto | bg-white dark:bg-zinc-800 shadow-md rounded-xl'>
-          <TodosEditor
+      {
+        <div className='flex-1 overflow-hidden | flex gap-[16px] flex-col sm:flex-row'>
+          <div className='flex-1 w-full h-full | flex flex-col | sm:overflow-auto | bg-white dark:bg-zinc-800 shadow-md rounded-xl'>
+            <TodosEditor
+              todo={todo}
+              updateText={saveText}
+              updateStatus={updateStatus}
+              deleteTime={deleteTime}
+              addImage={addImage}
+            />
+          </div>
+          <TodosImages
             todo={todo}
-            updateText={saveText}
-            updateStatus={updateStatus}
-            deleteTime={deleteTime}
+            images={images}
             addImage={addImage}
+            deleteImage={deleteImage}
           />
         </div>
-        <TodosImages
-          todo={todo}
-          images={images}
-          addImage={addImage}
-          deleteImage={deleteImage}
-        />
-      </div>
+      }
 
       {childTodo ? (
         <Link

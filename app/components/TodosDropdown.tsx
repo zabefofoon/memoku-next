@@ -58,7 +58,7 @@ export function TodosDropdown(props: Props) {
           {!props.hideDelete && (
             <Link
               href={`?deleteModal=${props.todo.id}`}
-              className='px-[6px] py-[4px] | flex items-center justify-start gap-[6px] | hover:bg-slate-50 hover:dark:bg-zinc-600'
+              className='px-[6px] py-[4px] | flex items-center justify-start gap-[6px] | hover:bg-slate-100 hover:dark:bg-red-600'
               onClick={() => toggle(false)}>
               <Icon
                 name='delete'

@@ -7,9 +7,11 @@ import TagBadge from './TagBadge'
 import { TodosDropdown } from './TodosDropdown'
 import TodosPeriodText from './TodosPeriodText'
 import TodosStatus from './TodosStatus'
+import UISpinner from './UISpinner'
 
 export interface Props {
   todos?: Todo[]
+  isLoading?: boolean
   updateStatus?: (status: Todo['status'], todoId?: number) => void
 }
 
@@ -30,30 +32,42 @@ export default function TodosCards(props: Props) {
   }
 
   return (
-    <div className='flex flex-col gap-[8px] sm:hidden'>
-      {props.todos?.map((todo) => (
-        <Fragment key={todo.id}>
-          <TodoCard
-            todo={todo}
-            getDescendantsFlat={getDescendantsFlat}
-            idExpanded={!!(todo.id && isExpandMap[todo.id])}
-          />
-          {todo.id &&
-            isExpandMap[todo.id] &&
-            childrenMap[todo.id]?.map((child) => (
-              <div
-                key={child.id}
-                className='flex items-center gap-[4px]'>
-                <Icon
-                  name='reply'
-                  className='text-[16px]'
-                />
-                <TodoCard todo={child} />
-              </div>
-            ))}
-        </Fragment>
-      ))}
-    </div>
+    <>
+      {(props.isLoading || !props.todos?.length) && (
+        <div className='flex-1 h-full | py-[80px] | text-center'>
+          {props.isLoading && <UISpinner />}
+          {!props.isLoading && !props.todos?.length && (
+            <p className='text-[13px] opacity-70'>데이터가 없습니다.</p>
+          )}
+        </div>
+      )}
+      {!props.isLoading && !!props.todos?.length && (
+        <div className='flex flex-col gap-[8px] sm:hidden'>
+          {props.todos?.map((todo) => (
+            <Fragment key={todo.id}>
+              <TodoCard
+                todo={todo}
+                getDescendantsFlat={getDescendantsFlat}
+                idExpanded={!!(todo.id && isExpandMap[todo.id])}
+              />
+              {todo.id &&
+                isExpandMap[todo.id] &&
+                childrenMap[todo.id]?.map((child) => (
+                  <div
+                    key={child.id}
+                    className='flex items-center gap-[4px]'>
+                    <Icon
+                      name='reply'
+                      className='text-[16px]'
+                    />
+                    <TodoCard todo={child} />
+                  </div>
+                ))}
+            </Fragment>
+          ))}
+        </div>
+      )}
+    </>
   )
 }
 

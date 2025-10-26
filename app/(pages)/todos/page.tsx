@@ -6,9 +6,10 @@ import { TodosDeleteModal } from '@/app/components/TodosDeleteModal'
 import TodosSearch from '@/app/components/TodosSearch'
 import TodosStatusDropdown from '@/app/components/TodosStatusDropdown'
 import TodosTable from '@/app/components/TodosTable'
+import { TodosTagModal } from '@/app/components/TodosTagModal'
 import TodosTagsFilter from '@/app/components/TodosTagsFilter'
 import TodosTimeModal from '@/app/components/TodosTimeModal'
-import { Todo } from '@/app/models/Todo'
+import { Tag, Todo } from '@/app/models/Todo'
 import { useTodosStore } from '@/app/stores/todos.store'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -18,10 +19,12 @@ export default function Todos(props: PageProps<'/todos'>) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [todos, setTodos] = useState<Todo[]>()
+  const [isTodosLoading, setIsTodosLoading] = useState<boolean>(true)
 
   const [isShowDeleteModal, setIsShowDeleteModal] = useState<boolean>(false)
   const [isShowTimeModal, setIsShowTimeModal] = useState<boolean>(false)
   const [loadKey, setLoadKey] = useState<number>(0)
+  const [isShowTagModal, setIsShowTagModal] = useState(false)
 
   const timeTargetTodo = todos?.find((todo) => {
     const timeQuery = searchParams.get('time')
@@ -31,12 +34,14 @@ export default function Todos(props: PageProps<'/todos'>) {
   })
 
   const loadTodos = async (): Promise<void> => {
+    setIsTodosLoading(true)
     const searchParams = await props.searchParams
     const tags = (searchParams.tags as string)?.split(',')
     const status = searchParams.status as string
     const searchText = searchParams.searchText as string
     const res = await todosStore.getTodos({ tags, status, searchText })
     setTodos(res)
+    setIsTodosLoading(false)
   }
 
   const createTodo = async (): Promise<void> => {
@@ -48,6 +53,7 @@ export default function Todos(props: PageProps<'/todos'>) {
     const searchParams = await props.searchParams
     setIsShowDeleteModal(!!searchParams.deleteModal)
     setIsShowTimeModal(!!searchParams.time)
+    setIsShowTagModal(!!searchParams.todoTag)
   }
 
   const deleteTodo = async (): Promise<void> => {
@@ -87,6 +93,25 @@ export default function Todos(props: PageProps<'/todos'>) {
       )
   }
 
+  const changeTag = async (tag: Tag): Promise<void> => {
+    const tagTargetTodo = todos?.find((todo) => {
+      const timeQuery = searchParams.get('todoTag')
+      const todoId = timeQuery ? +timeQuery : undefined
+
+      return todo.id === todoId
+    })
+
+    if (tagTargetTodo?.id) {
+      await todosStore.updateTag(tagTargetTodo.id, tag.id)
+      setTodos(
+        (prev) =>
+          prev?.map((todo) => (todo.id === tagTargetTodo.id ? { ...todo, tagId: tag.id } : todo)) ??
+          prev
+      )
+      router.back()
+    }
+  }
+
   useEffect(() => {
     loadTodos()
   }, [])
@@ -97,7 +122,7 @@ export default function Todos(props: PageProps<'/todos'>) {
   }, [props.searchParams])
 
   return (
-    <div className='flex flex-col | max-h-full'>
+    <div className='flex flex-col | sm:max-h-full'>
       <TodosDeleteModal
         isShow={isShowDeleteModal}
         close={() => router.back()}
@@ -108,6 +133,11 @@ export default function Todos(props: PageProps<'/todos'>) {
         todos={[timeTargetTodo].filter((todo) => !!todo)}
         updateTime={updateTime}
         close={router.back}
+      />
+      <TodosTagModal
+        isShow={isShowTagModal}
+        close={router.back}
+        select={changeTag}
       />
       <div className='mb-[24px] | hidden sm:block'>
         <h1 className='text-[20px] opacity-80'>Todos</h1>
@@ -135,11 +165,13 @@ export default function Todos(props: PageProps<'/todos'>) {
       <TodosTable
         key={`table_${loadKey}`}
         todos={todos}
+        isLoading={isTodosLoading}
         updateStatus={updateStatus}
       />
       <TodosCards
         key={`cards${loadKey}`}
         todos={todos}
+        isLoading={isTodosLoading}
         updateStatus={updateStatus}
       />
     </div>

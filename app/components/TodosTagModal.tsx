@@ -27,7 +27,7 @@ export function TodosTagModal(props: Props) {
       open={props.isShow ?? false}
       close={() => props.close()}
       content={() => (
-        <div className='flex gap-[6px] flex-wrap | max-w-[320px] | pb-[2px]'>
+        <div className='flex gap-[6px] flex-wrap | max-w-[320px] | pb-[2px] px-[2px]'>
           {tagsStore.tags.map((tag) => (
             <div
               key={tag.id}
@@ -37,7 +37,7 @@ export function TodosTagModal(props: Props) {
                 click={() => setSelectedTag(tag)}
               />
               {selectedTag?.color === tag.color && (
-                <div className='flex items-center justify-center  | absolute top-0 left-0 | w-full h-full rounded-full | bg-black/50'>
+                <div className='flex items-center justify-center  | absolute top-0 left-0 z-[1] | w-full h-full rounded-full | bg-black/50'>
                   <Icon
                     name='check'
                     className='text-white text-[24px]'

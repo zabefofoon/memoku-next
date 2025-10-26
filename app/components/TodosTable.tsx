@@ -8,9 +8,11 @@ import TagBadge from './TagBadge'
 import { TodosDropdown } from './TodosDropdown'
 import TodosPeriodText from './TodosPeriodText'
 import TodosStatus from './TodosStatus'
+import UISpinner from './UISpinner'
 
 export interface Props {
   todos?: Todo[]
+  isLoading?: boolean
   updateStatus?: (status: Todo['status'], todoId?: number) => void
 }
 
@@ -66,25 +68,41 @@ export default function TodosTable(props: Props) {
           </tr>
         </thead>
         <tbody>
-          {props.todos?.map((todo) => (
-            <Fragment key={todo.id}>
-              <TodosTableRow
-                todo={todo}
-                getDescendantsFlat={getDescendantsFlat}
-                idExpanded={!!(todo.id && isExpandMap[todo.id])}
-                updateStatus={props.updateStatus}
-              />
-              {todo.id &&
-                isExpandMap[todo.id] &&
-                childrenMap[todo.id]?.map((child) => (
-                  <TodosTableRow
-                    key={child.id}
-                    todo={child}
-                    updateStatus={props.updateStatus}
-                  />
-                ))}
-            </Fragment>
-          ))}
+          {(props.isLoading || !props.todos?.length) && (
+            <tr>
+              <td
+                colSpan={6}
+                className='text-center'>
+                {props.isLoading && <p className='w-fit | mx-auto py-[80px]'>{<UISpinner />}</p>}
+                {!props.isLoading && !props.todos?.length && (
+                  <p className='w-fit | mx-auto py-[80px] | text-[13px] opacity-70'>
+                    데이터가 없습니다.
+                  </p>
+                )}
+              </td>
+            </tr>
+          )}
+          {!props.isLoading &&
+            props.todos?.map((todo, index) => (
+              <Fragment key={todo.id}>
+                <TodosTableRow
+                  index={index}
+                  todo={todo}
+                  getDescendantsFlat={getDescendantsFlat}
+                  idExpanded={!!(todo.id && isExpandMap[todo.id])}
+                  updateStatus={props.updateStatus}
+                />
+                {todo.id &&
+                  isExpandMap[todo.id] &&
+                  childrenMap[todo.id]?.map((child) => (
+                    <TodosTableRow
+                      key={child.id}
+                      todo={child}
+                      updateStatus={props.updateStatus}
+                    />
+                  ))}
+              </Fragment>
+            ))}
         </tbody>
       </table>
     </div>
@@ -95,6 +113,7 @@ function TodosTableRow(props: {
   todo: Todo
   idExpanded?: boolean
   updateStatus?: Props['updateStatus']
+  index?: number
   getDescendantsFlat?: (todoId?: number) => Promise<void>
 }) {
   return (
@@ -125,10 +144,13 @@ function TodosTableRow(props: {
           </button>
         )}
       </td>
-      <td>
+      <td
+        className={etcUtil.classNames({
+          'overflow-hidden': props.index === 0,
+        })}>
         <Link
           className='relative py-[12px] flex justify-center'
-          href={`/todos/${props.todo.id}`}>
+          href={`/todos/?todoTag=${props.todo.id}`}>
           {props.todo.parentId && props.todo.parentId !== -1 && (
             <div className='absolute top-[-30px] | border-l-[2px] border-dotted border-slate-300 dark:border-zinc-600 | h-[40px]'></div>
           )}

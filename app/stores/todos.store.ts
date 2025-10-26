@@ -19,16 +19,17 @@ export const useTodosStore = create(() => {
 
     const tags = params?.tags?.filter(Boolean)
     const status = params?.status?.trim()
-    const q = params?.searchText?.trim().toLowerCase()
+    const query = params?.searchText?.trim().toLowerCase()
 
     let coll: Collection<Todo, number>
     if (tags && tags.length > 0) coll = db.todos.where('tagId').anyOf(tags)
     else if (status) coll = db.todos.where('status').equals(status)
     else coll = db.todos.toCollection()
 
-    coll = coll.and(isRoot)
+    coll = query?.length
+      ? coll.and((t) => (t.description ?? '').toLowerCase().includes(query))
+      : coll.and(isRoot)
     if (status) coll = coll.and((t) => t.status === status)
-    if (q?.length) coll = coll.and((t) => (t.description ?? '').toLowerCase().includes(q))
 
     return (await coll.sortBy('created')).reverse()
   }

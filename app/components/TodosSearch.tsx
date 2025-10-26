@@ -61,19 +61,20 @@ export default function TodosSearch() {
         }}
       />
 
-      <button
-        type='button'
-        className='close'
-        onClick={() => {
-          setValue('')
-          debouncedUpdate('')
-        }}
-        aria-label='검색어 지우기'>
-        <Icon
-          name='close'
-          className='text-[20px]'
-        />
-      </button>
+      {value && (
+        <button
+          type='button'
+          onClick={() => {
+            setValue('')
+            debouncedUpdate('')
+          }}
+          aria-label='검색어 지우기'>
+          <Icon
+            name='close'
+            className='text-[20px]'
+          />
+        </button>
+      )}
     </label>
   )
 }
