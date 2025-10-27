@@ -12,7 +12,7 @@ import TodosTimeModal from '@/app/components/TodosTimeModal'
 import { Tag, Todo } from '@/app/models/Todo'
 import { useTodosStore } from '@/app/stores/todos.store'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export default function Todos(props: PageProps<'/todos'>) {
   const todosStore = useTodosStore()
@@ -23,8 +23,10 @@ export default function Todos(props: PageProps<'/todos'>) {
 
   const [isShowDeleteModal, setIsShowDeleteModal] = useState<boolean>(false)
   const [isShowTimeModal, setIsShowTimeModal] = useState<boolean>(false)
-  const [loadKey, setLoadKey] = useState<number>(0)
   const [isShowTagModal, setIsShowTagModal] = useState(false)
+
+  const [childrenMap, setChildrenMap] = useState<Record<number, Todo[]>>({})
+  const [isExpandMap, setIsExpandMap] = useState<Record<number, boolean>>({})
 
   const timeTargetTodo = todos?.find((todo) => {
     const timeQuery = searchParams.get('time')
@@ -33,7 +35,13 @@ export default function Todos(props: PageProps<'/todos'>) {
     return todo.id === todoId
   })
 
-  const loadTodos = async (): Promise<void> => {
+  const searchText = searchParams.get('searchText') ?? ''
+  const status = searchParams.get('status') ?? ''
+  const tags = searchParams.get('tags') ?? '' // e.g. "1,2,3"
+
+  const filterKey = useMemo(() => `${searchText}|${status}|${tags}`, [searchText, status, tags])
+
+  const loadTodos = useCallback(async (): Promise<void> => {
     setIsTodosLoading(true)
     const searchParams = await props.searchParams
     const tags = (searchParams.tags as string)?.split(',')
@@ -42,28 +50,59 @@ export default function Todos(props: PageProps<'/todos'>) {
     const res = await todosStore.getTodos({ tags, status, searchText })
     setTodos(res)
     setIsTodosLoading(false)
-  }
+  }, [todosStore, tags, status, searchText])
 
   const createTodo = async (): Promise<void> => {
     const res = await todosStore.postDescription('')
     router.push(`/todos/${res}`)
   }
 
-  const handleSearchParams = async (): Promise<void> => {
-    const searchParams = await props.searchParams
-    setIsShowDeleteModal(!!searchParams.deleteModal)
-    setIsShowTimeModal(!!searchParams.time)
-    setIsShowTagModal(!!searchParams.todoTag)
-  }
-
   const deleteTodo = async (): Promise<void> => {
-    const searchParams = await props.searchParams
-    if (searchParams.deleteModal && !isNaN(+searchParams.deleteModal)) {
-      await todosStore.deleteTodo(+searchParams.deleteModal)
-      loadTodos()
-      setLoadKey((prev) => ++prev)
-    }
+    const deleteParmas = searchParams.get('deleteModal')
+    const todoId = deleteParmas ? +deleteParmas : undefined
+    if (!todoId || isNaN(todoId)) return
 
+    await todosStore.deleteTodo(todoId)
+    const todoIndex = todos?.findIndex(({ id }) => id === todoId) ?? -1
+    if (todoIndex !== -1) {
+      const todo = todos?.[todoIndex]
+      if (!todo) return
+
+      let child: Todo
+
+      if (todo.childId) child = await todosStore.getTodo(todo.childId)
+      setTodos((prev) => {
+        const sliced = prev?.slice() ?? []
+        if (child) sliced?.splice(todoIndex, 1, child)
+        else sliced?.splice(todoIndex, 1)
+        return sliced
+      })
+    } else {
+      const todo = Object.values(childrenMap)
+        .flat()
+        .find(({ id }) => id === todoId)
+      if (!todo) return
+
+      const bucketKey = Object.keys(childrenMap)
+        .map((k) => Number(k))
+        .find((k) => childrenMap[k]?.some((c) => c.id === todoId))
+
+      if (bucketKey == null) return
+
+      setChildrenMap((prev) => {
+        const arr = prev[bucketKey] ?? []
+        const nextArr = arr.filter(({ id }) => id !== todoId)
+        return { ...prev, [bucketKey]: nextArr }
+      })
+
+      const parentId = todo.parentId
+      if (parentId != null) {
+        setTodos((prev) => {
+          if (!prev) return prev
+          return prev.map((t) => (t.id === parentId ? { ...t, childId: todo.childId } : t))
+        })
+      }
+    }
     router.back()
   }
 
@@ -71,11 +110,11 @@ export default function Todos(props: PageProps<'/todos'>) {
     if (todoId == null) return
     if (todos == null) return
 
-    await todosStore.updateStatus(todoId, status)
-    setTodos(
-      (prev) => prev?.map((todo) => (todo.id === todoId ? { ...todo, status } : todo)) ?? prev
-    )
-    setLoadKey((prev) => ++prev)
+    todosStore.updateStatus(todoId, status)
+    if (todos.find((todo) => todo.id === todoId))
+      setTodos(
+        (prev) => prev?.map((todo) => (todo.id === todoId ? { ...todo, status } : todo)) ?? prev
+      )
   }
 
   const updateTime = async (
@@ -114,11 +153,12 @@ export default function Todos(props: PageProps<'/todos'>) {
 
   useEffect(() => {
     loadTodos()
-  }, [])
+  }, [filterKey, loadTodos])
 
   useEffect(() => {
-    handleSearchParams()
-    loadTodos()
+    setIsShowDeleteModal(!!searchParams.get('deleteModal'))
+    setIsShowTimeModal(!!searchParams.get('time'))
+    setIsShowTagModal(!!searchParams.get('todoTag'))
   }, [props.searchParams])
 
   return (
@@ -163,16 +203,22 @@ export default function Todos(props: PageProps<'/todos'>) {
         <TodosTagsFilter />
       </div>
       <TodosTable
-        key={`table_${loadKey}`}
         todos={todos}
         isLoading={isTodosLoading}
         updateStatus={updateStatus}
+        childrenMap={childrenMap}
+        setChildrenMap={setChildrenMap}
+        isExpandMap={isExpandMap}
+        setIsExpandMap={setIsExpandMap}
       />
       <TodosCards
-        key={`cards${loadKey}`}
         todos={todos}
         isLoading={isTodosLoading}
         updateStatus={updateStatus}
+        childrenMap={childrenMap}
+        setChildrenMap={setChildrenMap}
+        isExpandMap={isExpandMap}
+        setIsExpandMap={setIsExpandMap}
       />
     </div>
   )

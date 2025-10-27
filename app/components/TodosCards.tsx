@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Fragment, useState } from 'react'
+import { Dispatch, Fragment, SetStateAction } from 'react'
 import { Todo } from '../models/Todo'
 import { useTodosStore } from '../stores/todos.store'
 import { Icon } from './Icon'
@@ -11,30 +11,42 @@ import UISpinner from './UISpinner'
 
 export interface Props {
   todos?: Todo[]
-  isLoading?: boolean
-  updateStatus?: (status: Todo['status'], todoId?: number) => void
+  isLoading: boolean
+  childrenMap: Record<number, Todo[]>
+  isExpandMap: Record<number, boolean>
+  updateStatus: (status: Todo['status'], todoId?: number) => void
+  setChildrenMap: Dispatch<SetStateAction<Record<number, Todo[]>>>
+  setIsExpandMap: Dispatch<SetStateAction<Record<number, boolean>>>
 }
 
 export default function TodosCards(props: Props) {
   const todosStore = useTodosStore()
 
-  const [childrenMap, setChildrenMap] = useState<Record<number, Todo[]>>({})
-  const [isExpandMap, setIsExpandMap] = useState<Record<number, boolean>>({})
-
   const getDescendantsFlat = async (todoId?: number): Promise<void> => {
     if (todoId == null) return
-    if (!isExpandMap[todoId] && childrenMap[todoId] == null) {
+    if (!props.isExpandMap[todoId] && props.childrenMap[todoId] == null) {
       const res = await todosStore.getDescendantsFlat(todoId)
-      setChildrenMap((prev) => ({ ...prev, [todoId]: res }))
+      props.setChildrenMap((prev) => ({ ...prev, [todoId]: res }))
     }
 
-    setIsExpandMap((prev) => ({ ...prev, [todoId]: !isExpandMap[todoId] }))
+    props.setIsExpandMap((prev) => ({ ...prev, [todoId]: !props.isExpandMap[todoId] }))
+  }
+  const updateStatus = (status: Todo['status'], index: number, parentTodoId?: number): void => {
+    if (parentTodoId == null) return
+
+    if (props.childrenMap[parentTodoId][index].id)
+      todosStore.updateStatus(props.childrenMap[parentTodoId][index].id, status)
+
+    props.setChildrenMap((prev) => {
+      prev[parentTodoId][index].status = status
+      return { ...prev }
+    })
   }
 
   return (
     <>
       {(props.isLoading || !props.todos?.length) && (
-        <div className='flex-1 h-full | py-[80px] | text-center'>
+        <div className='sm:hidden | flex-1 h-full | py-[80px] | text-center'>
           {props.isLoading && <UISpinner />}
           {!props.isLoading && !props.todos?.length && (
             <p className='text-[13px] opacity-70'>데이터가 없습니다.</p>
@@ -48,11 +60,12 @@ export default function TodosCards(props: Props) {
               <TodoCard
                 todo={todo}
                 getDescendantsFlat={getDescendantsFlat}
-                idExpanded={!!(todo.id && isExpandMap[todo.id])}
+                updateStatus={props.updateStatus}
+                idExpanded={!!(todo.id && props.isExpandMap[todo.id])}
               />
               {todo.id &&
-                isExpandMap[todo.id] &&
-                childrenMap[todo.id]?.map((child) => (
+                props.isExpandMap[todo.id] &&
+                props.childrenMap[todo.id]?.map((child, index) => (
                   <div
                     key={child.id}
                     className='flex items-center gap-[4px]'>
@@ -60,7 +73,10 @@ export default function TodosCards(props: Props) {
                       name='reply'
                       className='text-[16px]'
                     />
-                    <TodoCard todo={child} />
+                    <TodoCard
+                      todo={child}
+                      updateStatus={(status) => updateStatus(status, index, todo.id)}
+                    />
                   </div>
                 ))}
             </Fragment>

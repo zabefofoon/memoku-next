@@ -49,14 +49,6 @@ export default forwardRef<UICarouselHandle, PropsWithChildren<Props>>(function U
     axis: props.vertical ? 'y' : 'x',
   })
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      scrollTo: (index: number) => emblaApi?.scrollTo(index),
-    }),
-    [emblaApi]
-  )
-
   const dotsNode = useRef<HTMLDivElement>(null)
 
   const addDotBtnsAndClickHandlers = (dotsNode: HTMLElement): (() => string) => {
@@ -127,6 +119,14 @@ export default forwardRef<UICarouselHandle, PropsWithChildren<Props>>(function U
       api.scrollTo(nearest)
     })
   }, [emblaApi, props.scrollSnap, props.change])
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      scrollTo: (index: number) => emblaApi?.scrollTo(index),
+    }),
+    [emblaApi]
+  )
 
   return (
     <CarouselContext.Provider

@@ -20,6 +20,7 @@ export default function HomeTotal() {
     setTotal(res.length)
 
     const dones = res.filter((todo) => todo.status === 'done')
+
     setdone(dones.length)
 
     setData([

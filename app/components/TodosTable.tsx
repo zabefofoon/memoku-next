@@ -1,6 +1,6 @@
 import { Todo } from '@/app/models/Todo'
 import Link from 'next/link'
-import { Fragment, useState } from 'react'
+import { Dispatch, Fragment, SetStateAction } from 'react'
 import { useTodosStore } from '../stores/todos.store'
 import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
@@ -12,24 +12,37 @@ import UISpinner from './UISpinner'
 
 export interface Props {
   todos?: Todo[]
-  isLoading?: boolean
-  updateStatus?: (status: Todo['status'], todoId?: number) => void
+  isLoading: boolean
+  childrenMap: Record<number, Todo[]>
+  isExpandMap: Record<number, boolean>
+  updateStatus: (status: Todo['status'], todoId?: number) => void
+  setChildrenMap: Dispatch<SetStateAction<Record<number, Todo[]>>>
+  setIsExpandMap: Dispatch<SetStateAction<Record<number, boolean>>>
 }
 
-export default function TodosTable(props: Props) {
+export default function TodosTableImpl(props: Props) {
   const todosStore = useTodosStore()
-
-  const [childrenMap, setChildrenMap] = useState<Record<number, Todo[]>>({})
-  const [isExpandMap, setIsExpandMap] = useState<Record<number, boolean>>({})
 
   const getDescendantsFlat = async (todoId?: number): Promise<void> => {
     if (todoId == null) return
-    if (!isExpandMap[todoId] && childrenMap[todoId] == null) {
+    if (!props.isExpandMap[todoId] && props.childrenMap[todoId] == null) {
       const res = await todosStore.getDescendantsFlat(todoId)
-      setChildrenMap((prev) => ({ ...prev, [todoId]: res }))
+      props.setChildrenMap((prev) => ({ ...prev, [todoId]: res }))
     }
 
-    setIsExpandMap((prev) => ({ ...prev, [todoId]: !isExpandMap[todoId] }))
+    props.setIsExpandMap((prev) => ({ ...prev, [todoId]: !props.isExpandMap[todoId] }))
+  }
+
+  const updateStatus = (status: Todo['status'], index: number, parentTodoId?: number): void => {
+    if (parentTodoId == null) return
+
+    if (props.childrenMap?.[parentTodoId][index].id)
+      todosStore.updateStatus(props.childrenMap?.[parentTodoId][index].id, status)
+
+    props?.setChildrenMap((prev) => {
+      prev[parentTodoId][index].status = status
+      return { ...prev }
+    })
   }
 
   return (
@@ -89,16 +102,16 @@ export default function TodosTable(props: Props) {
                   index={index}
                   todo={todo}
                   getDescendantsFlat={getDescendantsFlat}
-                  idExpanded={!!(todo.id && isExpandMap[todo.id])}
+                  idExpanded={!!(todo?.id && props.isExpandMap[todo.id])}
                   updateStatus={props.updateStatus}
                 />
-                {todo.id &&
-                  isExpandMap[todo.id] &&
-                  childrenMap[todo.id]?.map((child) => (
+                {todo?.id &&
+                  props.isExpandMap[todo.id] &&
+                  props.childrenMap[todo.id]?.map((child, index) => (
                     <TodosTableRow
                       key={child.id}
                       todo={child}
-                      updateStatus={props.updateStatus}
+                      updateStatus={(status) => updateStatus(status, index, todo.id)}
                     />
                   ))}
               </Fragment>
