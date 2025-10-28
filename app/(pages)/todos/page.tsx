@@ -126,10 +126,29 @@ export default function Todos(props: PageProps<'/todos'>) {
 
     await todosStore.updateTimes(id, values)
 
-    if (id === timeTargetTodo?.id)
+    const found = todos?.findIndex((todo) => todo.id === id) ?? -1
+    if (found >= 0)
       setTodos(
         (prev) => prev?.map((todo) => (todo.id === todoId ? { ...todo, ...values } : todo)) ?? prev
       )
+    else {
+      const todo = Object.values(childrenMap)
+        .flat()
+        .find(({ id }) => id === todoId)
+      if (!todo) return
+
+      const bucketKey = Object.keys(childrenMap)
+        .map((k) => Number(k))
+        .find((k) => childrenMap[k]?.some((c) => c.id === todoId))
+
+      if (bucketKey == null) return
+
+      setChildrenMap((prev) => {
+        const arr = prev[bucketKey] ?? []
+        const nextArr = arr.map((c) => (c.id === id ? { ...c, ...values } : c))
+        return { ...prev, [bucketKey]: nextArr }
+      })
+    }
   }
 
   const changeTag = async (tag: Tag): Promise<void> => {

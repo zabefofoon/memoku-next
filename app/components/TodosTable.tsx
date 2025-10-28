@@ -47,20 +47,20 @@ export default function TodosTableImpl(props: Props) {
 
   return (
     <div className='hidden sm:block flex-1 w-full h-full overflow-auto | bg-white dark:bg-zinc-800 shadow-md rounded-xl'>
-      <table className='table-fixed | w-full | text-[13px]'>
+      <table className='w-full | text-[13px]'>
         <thead className='border-b-3 border-gray-100 dark:border-zinc-700'>
           <tr>
             <th
               scope='col'
-              className='py-[12px] w-[52px]'></th>
+              className='py-[12px]'></th>
             <th
               scope='col'
-              className='py-[12px] w-[52px]'>
+              className='py-[12px]'>
               태그
             </th>
             <th
               scope='col'
-              className='py-[12px] w-[100px]'>
+              className='py-[12px]'>
               진행상태
             </th>
             <th
@@ -70,12 +70,12 @@ export default function TodosTableImpl(props: Props) {
             </th>
             <th
               scope='col'
-              className='py-[12px] w-[260px]'>
+              className='py-[12px]'>
               일정
             </th>
             <th
               scope='col'
-              className='py-[12px] w-[128px]'>
+              className='py-[12px]'>
               <span className='sr-only'>Edit</span>
             </th>
           </tr>
@@ -137,7 +137,7 @@ function TodosTableRow(props: {
           'border-t first:border-b-0': props.todo.parentId == null || props.todo.parentId === -1,
         },
       ])}>
-      <td>
+      <td className='pl-[8px]'>
         {(props.todo.parentId == null || props.todo.parentId === -1) && props.todo.childId && (
           <button
             type='button'
@@ -199,7 +199,7 @@ function TodosTableRow(props: {
         </div>
       </td>
 
-      <td className='py-[12px]'>
+      <td className='py-[12px] pr-[8px]'>
         <div className='w-[20px] mx-auto'>
           {props.todo.id && <TodosDropdown todo={props.todo} />}
         </div>

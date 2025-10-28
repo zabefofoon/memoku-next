@@ -56,7 +56,7 @@ export default function TodosStatusDropdown() {
               key={item.name}
               type='button'
               className={etcUtil.classNames([
-                'px-[12px] py-[3px] | flex justify-center hover:bg-slate-50 hover:dark:bg-zinc-600',
+                'px-[20px] py-[3px] | flex justify-center hover:bg-slate-50 hover:dark:bg-zinc-600 | text-[14px]',
                 { 'bg-slate-50 dark:bg-zinc-600': selectedItem?.value === item.value },
               ])}
               onClick={() => toggle(false, () => moveTo(item.value))}>

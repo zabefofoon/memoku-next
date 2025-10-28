@@ -189,7 +189,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
     )
 
   return (
-    <div className='flex-1 | flex flex-col'>
+    <div className='flex-1 | flex flex-col | max-h-full'>
       <TodosTimeModal
         isShow={isShowTimeModal}
         todos={[todo].filter((todo) => !!todo)}
@@ -244,7 +244,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
         </Link>
       )}
       {
-        <div className='flex-1 overflow-hidden | flex gap-[16px] flex-col sm:flex-row'>
+        <div className='pb-[4px] | flex-1 overflow-hidden | flex gap-[16px] flex-col sm:flex-row'>
           <div className='flex-1 w-full h-full | flex flex-col | sm:overflow-auto | bg-white dark:bg-zinc-800 shadow-md rounded-xl'>
             <TodosEditor
               todo={todo}
