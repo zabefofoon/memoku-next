@@ -41,6 +41,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
         const params = await props.params
         setTextValue(text)
         if (!isNaN(+params.id)) todosStore.updateDescription(+params.id, text)
+        window.dispatchEvent(new CustomEvent('updateText', { detail: text }))
       }, 250),
     []
   )
@@ -72,6 +73,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
     if (res.id) todosStore.getChildTodo(res.id).then(setChildTodo)
 
     setIsLoading(false)
+    window.dispatchEvent(new CustomEvent('updateText', { detail: res.description }))
   }
 
   const deleteTodo = async (): Promise<void> => {
@@ -221,6 +223,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
               name='chevron-left'
               className='text-[24px]'
             />
+
             <p className='text-[20px] truncate'>
               {textValue.split(/\n/)[0] || '내용을 입력하세요.'}
             </p>

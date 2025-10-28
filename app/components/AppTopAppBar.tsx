@@ -3,12 +3,10 @@
 import etcUtil from '@/app/utils/etc.util'
 import { AGE_1_YEAR, COOKIE_THEME } from '@/const'
 import Link from 'next/link'
-import { useParams, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
-import { Todo } from '../models/Todo'
 import { useThemeStore } from '../stores/theme.store'
-import { useTodosStore } from '../stores/todos.store'
 import { Icon } from './Icon'
 import UIToggle from './UIToggle'
 
@@ -71,21 +69,18 @@ export function AppTopAppBar() {
 }
 
 export function TodosDetailHeader() {
-  const todosStore = useTodosStore()
-  const params = useParams()
-
-  const [todo, setTodo] = useState<Todo>()
-
-  const loadTodo = async (): Promise<void> => {
-    const id = params.id ? +params.id : undefined
-    if (!id || isNaN(id)) return
-
-    const currentTodo = await todosStore.getTodo(id)
-    if (currentTodo != null) setTodo(currentTodo)
-  }
+  const [textValue, setTextValue] = useState<string>('')
 
   useEffect(() => {
-    loadTodo()
+    const handleUpdateText = (event: Event): void => {
+      const res = (event as CustomEvent<string>).detail
+      setTextValue(res)
+    }
+
+    window.addEventListener('updateText', handleUpdateText)
+    return () => {
+      window.removeEventListener('updateText', handleUpdateText)
+    }
   }, [])
 
   return (
@@ -99,9 +94,7 @@ export function TodosDetailHeader() {
             name='chevron-left'
             className='text-[24px]'
           />
-          <p className='text-[16px] truncate'>
-            {todo?.description?.slice(0, 50) || '내용을 입력하세요.'}
-          </p>
+          <p className='text-[16px] truncate'>{textValue.split(/\n/)[0] || ''}</p>
         </button>
       </div>
     </header>
