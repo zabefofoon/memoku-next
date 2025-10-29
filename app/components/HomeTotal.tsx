@@ -3,7 +3,7 @@
 import { useTodosStore } from '@/app/stores/todos.store'
 import { useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
-import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
+import { PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer } from 'recharts'
 
 export default function HomeTotal() {
   const [cookies] = useCookies()
@@ -11,22 +11,46 @@ export default function HomeTotal() {
   const todoStore = useTodosStore()
 
   const [total, setTotal] = useState<number>(0)
-  const [done, setdone] = useState<number>(0)
 
-  const [data, setData] = useState<{ name: string; value: number }[]>([])
+  const [data, setData] = useState<{ name: string; value: number; fill: string }[]>([])
 
   const loadTodos = async () => {
-    const res = await todoStore.getTodos()
+    const res = await todoStore.getAllTodos()
     setTotal(res.length)
 
+    const createds = res.filter((todo) => todo.status === 'created')
+    const inprogresses = res.filter((todo) => todo.status === 'inprogress')
     const dones = res.filter((todo) => todo.status === 'done')
+    const holds = res.filter((todo) => todo.status === 'hold')
 
-    setdone(dones.length)
-
-    setData([
-      { name: 'done', value: dones.length },
-      { name: 'total', value: res.length ?? 0 },
-    ])
+    setData(
+      [
+        {
+          name: 'created',
+          value: createds.length,
+          fill: cookies['x-theme'] === 'dark' ? 'var(--color-slate-600)' : 'var(--color-slate-500)',
+        },
+        {
+          name: 'inprogress',
+          value: inprogresses.length,
+          fill:
+            cookies['x-theme'] === 'dark' ? 'var(--color-indigo-600)' : 'var(--color-indigo-500)',
+        },
+        {
+          name: 'done',
+          value: dones.length,
+          fill: cookies['x-theme'] === 'dark' ? 'var(--color-green-600)' : 'var(--color-green-500)',
+        },
+        {
+          name: 'hold',
+          value: holds.length,
+          fill:
+            cookies['x-theme'] === 'dark' ? 'var(--color-orange-600)' : 'var(--color-orange-500)',
+        },
+      ]
+        .slice()
+        .sort((a, b) => b.value - a.value)
+    )
   }
 
   useEffect(() => {
@@ -39,59 +63,52 @@ export default function HomeTotal() {
         width={'100%'}
         height={'100%'}
         minHeight={'300px'}>
-        <PieChart margin={{ top: 0, left: 0, right: 0, bottom: 0 }}>
-          <defs>
-            <linearGradient
-              id='colorUv'
-              x1='1'
-              y1='1'
-              x2='0'
-              y2='0'>
-              <stop
-                offset='30%'
-                stopColor='#6584FF'
-                stopOpacity={0.5}
-              />
-              <stop
-                offset='95%'
-                stopColor='#FFFFFF'
-                stopOpacity={0.5}
-              />
-            </linearGradient>
-          </defs>
-          <Pie
-            data={data}
-            innerRadius={'82%'}
-            outerRadius={'92%'}
+        <RadialBarChart
+          margin={{ top: 0, left: 0, right: 0, bottom: 0 }}
+          data={data}
+          barSize={10}
+          startAngle={90}
+          endAngle={-180}
+          innerRadius={60}>
+          <PolarAngleAxis
+            type='number'
+            domain={[0, total]}
+            tick={false}
+          />
+          <RadialBar
+            background={{ color: 'var(--color-gray-100)' }}
             dataKey='value'
-            isAnimationActive={false}>
-            {data?.map((entry, index) => (
-              <Cell
-                key={entry.name + index}
-                fill={
-                  entry.name === 'done'
-                    ? 'var(--color-indigo-500)'
-                    : cookies['x-theme'] === 'dark'
-                      ? 'var(--color-zinc-700)'
-                      : 'var(--color-gray-200)'
-                }
-                style={{
-                  outline: '0',
-                  filter:
-                    cookies['x-theme'] === 'dark'
-                      ? `drop-shadow(0px 2px 5px var(--color-gray-800))`
-                      : `drop-shadow(0px 2px 3px var(--color-gray-400))`,
-                }}
-                stroke='0'
-              />
-            ))}
-          </Pie>
-        </PieChart>
+            cornerRadius={50}
+            isAnimationActive={false}
+            style={{
+              outline: '0',
+              filter:
+                cookies['x-theme'] === 'dark'
+                  ? `drop-shadow(0px 2px 5px var(--color-gray-800))`
+                  : `drop-shadow(0px 2px 3px var(--color-gray-400))`,
+            }}
+          />
+        </RadialBarChart>
       </ResponsiveContainer>
+      <div className='absolute top-[calc(50%-90px)] left-[calc(50%-40px)] -translate-x-1/2 -translate-y-1/2 | flex flex-col items-end'>
+        {data
+          .slice()
+          .reverse()
+          .map((item) => (
+            <div
+              key={item.name}
+              className='flex items-center gap-[4px]'>
+              <p
+                className='w-[8px] aspect-square rounded-full | leading-[100%]'
+                style={{ background: item.fill }}></p>
+              <p className='text-[1.2cqh] sm:text-[1.2cqh]'>{item.name}</p>
+            </div>
+          ))}
+      </div>
       <div className='font-[700] | flex flex-col items-center justify-center | absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'>
-        <p className='text-[15px]'>전체</p>
-        <p className='text-[18px] | flex gap-[4px]'>
-          <span>{done}개</span>/<span className='opacity-50'>{total}개</span>
+        <p className='text-[16px] | flex gap-[4px]'>
+          <span>{data.find(({ name }) => name === 'done')?.value}개</span>/
+          <span className='opacity-50'>{total}개</span>
         </p>
       </div>
     </div>

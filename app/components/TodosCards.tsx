@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Dispatch, Fragment, SetStateAction } from 'react'
 import { Todo } from '../models/Todo'
 import { useTodosStore } from '../stores/todos.store'
@@ -93,10 +94,17 @@ function TodoCard(props: {
   updateStatus?: Props['updateStatus']
   getDescendantsFlat?: (todoId?: number) => Promise<void>
 }) {
+  const searchParams = useSearchParams()
+
+  const isFiltered =
+    !!searchParams.get('tags') || !!searchParams.get('status') || !!searchParams.get('searchText')
+
+  const isShowBadge = isFiltered ? true : !props.todo.parentId || props.todo.parentId === -1
+
   return (
     <div className='w-full overflow-hidden | flex flex-col gap-[8px] | bg-white dark:bg-zinc-800 shadow-md rounded-xl | p-[8px]'>
       <div className='flex items-center'>
-        {(!props.todo.parentId || props.todo.parentId === -1) && <TagBadge id={props.todo.tagId} />}
+        {isShowBadge && <TagBadge id={props.todo.tagId} />}
         <Link
           href={`/todos/${props.todo.id}`}
           className='block | text-[14px] truncate | w-full | px-[6px]'>
@@ -119,24 +127,26 @@ function TodoCard(props: {
       <div className='flex items-center | pt-[8px] | border-t border-gray-100 dark:border-zinc-600'>
         <div className='w-full | flex items-center gap-[4px]'>
           <TodosPeriodText todo={props.todo} />
-          {(props.todo.parentId == null || props.todo.parentId === -1) && props.todo.childId && (
-            <button
-              type='button'
-              className='ml-auto'
-              onClick={() => props.getDescendantsFlat?.(props.todo.id)}>
-              {props.idExpanded ? (
-                <Icon
-                  name='chevron-up'
-                  className='text-[20px]'
-                />
-              ) : (
-                <Icon
-                  name='chevron-down'
-                  className='text-[20px]'
-                />
-              )}
-            </button>
-          )}
+          {!isFiltered &&
+            (props.todo.parentId == null || props.todo.parentId === -1) &&
+            props.todo.childId && (
+              <button
+                type='button'
+                className='ml-auto'
+                onClick={() => props.getDescendantsFlat?.(props.todo.id)}>
+                {props.idExpanded ? (
+                  <Icon
+                    name='chevron-up'
+                    className='text-[20px]'
+                  />
+                ) : (
+                  <Icon
+                    name='chevron-down'
+                    className='text-[20px]'
+                  />
+                )}
+              </button>
+            )}
         </div>
       </div>
     </div>

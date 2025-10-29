@@ -14,22 +14,26 @@ export const useTodosStore = create(() => {
     const [res] = await db.todos.where({ id }).toArray()
     return res
   }
-  const getTodos = async (params?: GetTodosParams): Promise<Todo[]> => {
-    const isRoot = (t: Todo) => t.parentId == null || t.parentId === -1
 
+  const getAllTodos = (): Promise<Todo[]> => {
+    return db.todos.toArray()
+  }
+
+  const getTodos = async (params?: GetTodosParams): Promise<Todo[]> => {
     const tags = params?.tags?.filter(Boolean)
     const status = params?.status?.trim()
     const query = params?.searchText?.trim().toLowerCase()
 
-    let coll: Collection<Todo, number>
-    if (tags && tags.length > 0) coll = db.todos.where('tagId').anyOf(tags)
-    else if (status) coll = db.todos.where('status').equals(status)
-    else coll = db.todos.toCollection()
+    const isRoot = (todo: Todo) => todo.parentId == null || todo.parentId === -1
 
-    coll = query?.length
-      ? coll.and((t) => (t.description ?? '').toLowerCase().includes(query))
-      : coll.and(isRoot)
-    if (status) coll = coll.and((t) => t.status === status)
+    let coll: Collection<Todo, number> = db.todos.toCollection()
+
+    if (!tags && !status && !query) coll = coll.and(isRoot)
+    else {
+      if (tags?.length) coll = db.todos.where('tagId').anyOf(tags)
+      if (status) coll = db.todos.where('status').equals(status)
+      if (query?.length) coll = coll.and((t) => (t.description ?? '').toLowerCase().includes(query))
+    }
 
     return (await coll.sortBy('created')).reverse()
   }
@@ -229,5 +233,6 @@ export const useTodosStore = create(() => {
     addNewTodo,
     deleteTodo,
     updateTag,
+    getAllTodos,
   }
 })

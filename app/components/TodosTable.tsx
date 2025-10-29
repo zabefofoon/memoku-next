@@ -1,5 +1,6 @@
 import { Todo } from '@/app/models/Todo'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Dispatch, Fragment, SetStateAction } from 'react'
 import { useTodosStore } from '../stores/todos.store'
 import etcUtil from '../utils/etc.util'
@@ -52,15 +53,18 @@ export default function TodosTableImpl(props: Props) {
           <tr>
             <th
               scope='col'
-              className='py-[12px]'></th>
+              className='py-[12px]'
+              style={{ width: '50px' }}></th>
             <th
               scope='col'
-              className='py-[12px]'>
+              className='py-[12px]'
+              style={{ width: '50px' }}>
               태그
             </th>
             <th
               scope='col'
-              className='py-[12px]'>
+              className='py-[12px]'
+              style={{ width: '100px' }}>
               진행상태
             </th>
             <th
@@ -129,33 +133,41 @@ function TodosTableRow(props: {
   index?: number
   getDescendantsFlat?: (todoId?: number) => Promise<void>
 }) {
+  const searchParams = useSearchParams()
+
+  const isFiltered =
+    !!searchParams.get('tags') || !!searchParams.get('status') || !!searchParams.get('searchText')
+
   return (
     <tr
       className={etcUtil.classNames([
         'text-center | bg-white dark:bg-zinc-800 hover:bg-slate-50/50 dark:hover:bg-zinc-700/50 dark:border-zinc-700 border-gray-200',
         {
-          'border-t first:border-b-0': props.todo.parentId == null || props.todo.parentId === -1,
+          'border-t first:border-b-0':
+            isFiltered || props.todo.parentId == null || props.todo.parentId === -1,
         },
       ])}>
       <td className='pl-[8px]'>
-        {(props.todo.parentId == null || props.todo.parentId === -1) && props.todo.childId && (
-          <button
-            type='button'
-            className='w-full flex justify-center'
-            onClick={() => props.getDescendantsFlat?.(props.todo.id)}>
-            {props.idExpanded ? (
-              <Icon
-                name='chevron-up'
-                className='text-[20px]'
-              />
-            ) : (
-              <Icon
-                name='chevron-down'
-                className='text-[20px]'
-              />
-            )}
-          </button>
-        )}
+        {!isFiltered &&
+          (props.todo.parentId == null || props.todo.parentId === -1) &&
+          props.todo.childId && (
+            <button
+              type='button'
+              className='w-full flex justify-center'
+              onClick={() => props.getDescendantsFlat?.(props.todo.id)}>
+              {props.idExpanded ? (
+                <Icon
+                  name='chevron-up'
+                  className='text-[20px]'
+                />
+              ) : (
+                <Icon
+                  name='chevron-down'
+                  className='text-[20px]'
+                />
+              )}
+            </button>
+          )}
       </td>
       <td
         className={etcUtil.classNames({
@@ -164,10 +176,10 @@ function TodosTableRow(props: {
         <Link
           className='relative py-[12px] flex justify-center'
           href={`/todos/?todoTag=${props.todo.id}`}>
-          {props.todo.parentId && props.todo.parentId !== -1 && (
+          {!isFiltered && props.todo.parentId && props.todo.parentId !== -1 && (
             <div className='absolute top-[-30px] | border-l-[2px] border-dotted border-slate-300 dark:border-zinc-600 | h-[40px]'></div>
           )}
-          {props.todo.parentId == null || props.todo.parentId === -1 ? (
+          {isFiltered || props.todo.parentId == null || props.todo.parentId === -1 ? (
             <TagBadge id={props.todo.tagId} />
           ) : (
             <div className='w-[10px] aspect-square | bg-slate-300 dark:bg-zinc-600 rounded-full'></div>
