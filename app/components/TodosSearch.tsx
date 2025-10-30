@@ -2,7 +2,7 @@
 
 import debounce from 'lodash.debounce'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Icon } from './Icon'
 
 export default function TodosSearch() {
@@ -12,30 +12,21 @@ export default function TodosSearch() {
 
   const [value, setValue] = useState<string>(() => searchParams.get('searchText') ?? '')
 
-  const updateQuery = useCallback(
-    (next: string) => {
-      const urlParams = new URLSearchParams(searchParams.toString())
+  const updateQuery = debounce((next: string) => {
+    const urlParams = new URLSearchParams(searchParams.toString())
 
-      const trimmed = next.trim()
-      if (trimmed) urlParams.set('searchText', trimmed)
-      else urlParams.delete('searchText')
+    const trimmed = next.trim()
+    if (trimmed) urlParams.set('searchText', trimmed)
+    else urlParams.delete('searchText')
 
-      const queryString = urlParams.toString()
-      router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false })
-    },
-    [pathname, router, searchParams]
-  )
-
-  const debouncedUpdate = useMemo(() => debounce(updateQuery, 300), [updateQuery])
-
-  useEffect(() => {
-    return () => debouncedUpdate.cancel()
-  }, [debouncedUpdate])
+    const queryString = urlParams.toString()
+    router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false })
+  }, 250)
 
   useEffect(() => {
     const urlValue = searchParams.get('searchText') ?? ''
     setValue(urlValue)
-  }, [searchParams])
+  }, [])
 
   return (
     <label className='search | w-full sm:w-fit flex items-center | border border-gray-300 dark:border-zinc-600 rounded-lg has-focus:border-indigo-500 | pr-[8px]'>
@@ -57,7 +48,7 @@ export default function TodosSearch() {
         value={value}
         onChange={(event) => {
           setValue(event.target.value)
-          debouncedUpdate(event.target.value)
+          updateQuery(event.target.value)
         }}
       />
 
@@ -66,7 +57,7 @@ export default function TodosSearch() {
           type='button'
           onClick={() => {
             setValue('')
-            debouncedUpdate('')
+            updateQuery('')
           }}
           aria-label='검색어 지우기'>
           <Icon
