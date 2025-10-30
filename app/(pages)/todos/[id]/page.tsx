@@ -69,8 +69,14 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
     setTextValue(res?.description ?? '')
     loadImages(res.id)
 
-    if (res.parentId) todosStore.getParentTodo(res.parentId).then(setParentTodo)
-    if (res.id) todosStore.getChildTodo(res.id).then(setChildTodo)
+    if (res.parentId) {
+      const result = await todosStore.getParentTodo(res.parentId)
+      setParentTodo(result)
+    }
+    if (res.id) {
+      const result = await todosStore.getChildTodo(res.id)
+      setChildTodo(result)
+    }
 
     setIsLoading(false)
     window.dispatchEvent(new CustomEvent('updateText', { detail: res.description }))

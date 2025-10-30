@@ -67,11 +67,11 @@ export function TodosImages(props: Props) {
           <p className='text-[12px] sm:text-[13px] opacity-70'>이미지 추가</p>
         </button>
       )}
-      {props.images?.map((image) => (
+      {props.images?.map((image, index) => (
         <div
           key={image.id}
           className='relative | w-[120px] sm:w-[220px] aspect-square overflow-hidden shrink-0 | rounded-lg shadow-md'>
-          <Link href={`?images=${props.todo?.id}`}>
+          <Link href={`?images=${index}`}>
             <img
               className='w-full h-full object-cover | bg-white dark:bg-zinc-800'
               src={image.image}
