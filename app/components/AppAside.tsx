@@ -106,16 +106,24 @@ export function AppAside(props: Props) {
       </nav>
       <div
         className={etcUtil.classNames([
-          'flex items-center justify-between gap-[8px] | mt-auto | px-[8px] py-[12px]',
+          'flex items-center justify-between | mt-auto | px-[8px] py-[12px]',
           { 'flex-col': !isExpand },
         ])}>
-        <UIToggle
-          id='다크모드'
-          onIcon='moon'
-          offIcon='sun'
-          checked={themeStore.isDarkMode}
-          toggle={toggleDarkMode}
-        />
+        <div className='flex items-center gap-[6px]'>
+          <Link
+            href='/api/auth/google'
+            prefetch={false}
+            className='w-[32px] aspect-square | flex items-center justify-center | rounded-full bg-white dark:bg-zinc-700 shadow-sm shadow-black/30 dark:shadow-black/60'>
+            <Icon name='google' />
+          </Link>
+          <UIToggle
+            id='다크모드'
+            onIcon='moon'
+            offIcon='sun'
+            checked={themeStore.isDarkMode}
+            toggle={toggleDarkMode}
+          />
+        </div>
         <span className='text-[13px]'>v{packageJson.version}</span>
       </div>
     </aside>

@@ -6,12 +6,13 @@ interface Props {
   onIcon?: string
   offIcon?: string
   checked?: boolean
+  trackClass?: string
   toggle?: (checked: boolean) => void
 }
 
 export default function UIToggle(props: Props) {
   return (
-    <label className='flex select-none items-center'>
+    <label className='flex select-none items-center | cursor-pointer'>
       <span className='sr-only'>{props.id}</span>
       <div className='relative'>
         <input
@@ -20,7 +21,11 @@ export default function UIToggle(props: Props) {
           onChange={() => props.toggle?.(!props.checked)}
           className='sr-only'
         />
-        <div className='h-8 w-14 rounded-full bg-[#E5E7EB] dark:bg-zinc-900'></div>
+        <div
+          className={etcUtil.classNames([
+            'h-8 w-14 rounded-full bg-[#E5E7EB] dark:bg-zinc-900',
+            props.trackClass,
+          ])}></div>
         <div
           className={etcUtil.classNames([
             'absolute left-1 top-1 h-6 w-6 rounded-full bg-white dark:bg-zinc-500 transition | flex items-center justify-center',

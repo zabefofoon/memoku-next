@@ -4,11 +4,13 @@ import { useTodosStore } from '@/app/stores/todos.store'
 import { useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
 import { PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer } from 'recharts'
+import { useThemeStore } from '../stores/theme.store'
 
 export default function HomeTotal() {
   const [cookies] = useCookies()
 
   const todoStore = useTodosStore()
+  const themeStore = useThemeStore()
 
   const [total, setTotal] = useState<number>(0)
 
@@ -76,16 +78,17 @@ export default function HomeTotal() {
             tick={false}
           />
           <RadialBar
-            background={{ color: 'var(--color-gray-100)' }}
+            background={{
+              fill: cookies['x-theme'] ? 'var(--color-zinc-700)' : 'var(--color-gray-200)',
+            }}
             dataKey='value'
             cornerRadius={50}
             isAnimationActive={false}
             style={{
               outline: '0',
-              filter:
-                cookies['x-theme'] === 'dark'
-                  ? `drop-shadow(0px 2px 5px var(--color-gray-800))`
-                  : `drop-shadow(0px 2px 3px var(--color-gray-400))`,
+              filter: themeStore.isDarkMode
+                ? `drop-shadow(0px 2px 5px var(--color-gray-800))`
+                : `drop-shadow(0px 2px 3px var(--color-gray-400))`,
             }}
           />
         </RadialBarChart>

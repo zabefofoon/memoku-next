@@ -40,11 +40,12 @@ export function AppTopAppBar() {
           />
           <span className='text-[18px] font-[700]'>MEMOKU</span>
         </Link>
-        <div className='h-full | flex items-center gap-[8px] | ml-auto'>
+        <div className='h-full | flex items-center gap-[4px] | ml-auto'>
           <UIToggle
             id='다크모드'
             onIcon='moon'
             offIcon='sun'
+            trackClass='dark:!bg-zinc-700'
             checked={themeStore.isDarkMode}
             toggle={toggleDarkMode}
           />
@@ -60,6 +61,15 @@ export function AppTopAppBar() {
             <Icon
               name='notification'
               className='text-[24px]'
+            />
+          </Link>
+          <Link
+            href='/api/auth/google'
+            prefetch={false}
+            className='w-[24px] aspect-square | flex items-center justify-center | rounded-full'>
+            <Icon
+              name='google'
+              className='text-[20px]'
             />
           </Link>
         </div>
