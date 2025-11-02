@@ -11,7 +11,6 @@ export interface Todo {
   start?: number
   end?: number
   images?: (string | Blob)[]
-  linked?: 'google'
   status: 'created' | 'inprogress' | 'done' | 'hold'
   days?: WeekDay[]
 }

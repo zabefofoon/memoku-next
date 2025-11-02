@@ -8,6 +8,7 @@ import packageJson from '../../package.json'
 
 import { AGE_1_YEAR, COOKIE_EXPAND, COOKIE_THEME } from '@/const'
 import { useState } from 'react'
+import { useAuthStore } from '../stores/auth.store'
 import { useThemeStore } from '../stores/theme.store'
 import { Icon } from './Icon'
 import UIToggle from './UIToggle'
@@ -33,6 +34,8 @@ export function AppAside(props: Props) {
 
   const [isExpand, setIsExpand] = useState<boolean>(props.isExpand)
 
+  const authStore = useAuthStore((s) => s)
+
   const toggleDarkMode = (value: boolean): void => {
     themeStore.setIsDarkMode(value)
     if (value) {
@@ -48,6 +51,11 @@ export function AppAside(props: Props) {
     setIsExpand(!isExpand)
     if (isExpand) removeCookie(COOKIE_EXPAND, { path: '/' })
     else setCookie(COOKIE_EXPAND, 'true', { maxAge: AGE_1_YEAR, path: '/', sameSite: 'lax' })
+  }
+
+  const logout = async (): Promise<void> => {
+    await fetch('/api/auth/google/logout', { method: 'POST' })
+    authStore.setMemberInfo()
   }
 
   return (
@@ -104,27 +112,51 @@ export function AppAside(props: Props) {
           </div>
         ))}
       </nav>
-      <div
-        className={etcUtil.classNames([
-          'flex items-center justify-between | mt-auto | px-[8px] py-[12px]',
-          { 'flex-col': !isExpand },
-        ])}>
-        <div className='flex items-center gap-[6px]'>
-          <Link
-            href='/api/auth/google'
-            prefetch={false}
-            className='w-[32px] aspect-square | flex items-center justify-center | rounded-full bg-white dark:bg-zinc-700 shadow-sm shadow-black/30 dark:shadow-black/60'>
-            <Icon name='google' />
-          </Link>
-          <UIToggle
-            id='다크모드'
-            onIcon='moon'
-            offIcon='sun'
-            checked={themeStore.isDarkMode}
-            toggle={toggleDarkMode}
-          />
+      <div className='mt-auto'>
+        {authStore.memberInfo && (
+          <div className='border border-gray-100 dark:border-zinc-700 rounded-xl shadow-sm | flex items-center gap-[8px] | py-[12px] px-[12px] mx-[4px]'>
+            <img
+              className='rounded-full | w-[32px] aspect-square'
+              src={authStore.memberInfo.picture ?? ''}
+              alt={authStore.memberInfo.email}
+            />
+            <div className='flex flex-col gap-[2px] | overflow-hidden | leading-[100%]'>
+              <p className='text-[13px] truncate'>{authStore.memberInfo?.email}</p>
+              <div className='flex'>
+                <Icon name='logout' />
+                <button
+                  className='text-[12px]'
+                  onClick={logout}>
+                  로그아웃
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        <div
+          className={etcUtil.classNames([
+            'flex items-center justify-between | px-[8px] py-[12px]',
+            { 'flex-col': !isExpand },
+          ])}>
+          <div className='flex items-center gap-[6px]'>
+            {!authStore.memberInfo && (
+              <Link
+                href='/api/auth/google'
+                prefetch={false}
+                className='w-[32px] aspect-square | flex items-center justify-center | rounded-full bg-white dark:bg-zinc-700 shadow-sm shadow-black/30 dark:shadow-black/60'>
+                <Icon name='google' />
+              </Link>
+            )}
+            <UIToggle
+              id='다크모드'
+              onIcon='moon'
+              offIcon='sun'
+              checked={themeStore.isDarkMode}
+              toggle={toggleDarkMode}
+            />
+          </div>
+          <span className='text-[13px]'>v{packageJson.version}</span>
         </div>
-        <span className='text-[13px]'>v{packageJson.version}</span>
       </div>
     </aside>
   )

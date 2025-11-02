@@ -9,8 +9,8 @@ export async function GET() {
   const isProd = process.env.NODE_ENV === 'production'
 
   const oauth2 = new google.auth.OAuth2(
-    process.env.GOOGLE_OAUTH_CLIENT_ID!,
-    process.env.GOOGLE_OAUTH_CLIENT_SECRET!,
+    process.env.GOOGLE_OAUTH_CLIENT_ID,
+    process.env.GOOGLE_OAUTH_CLIENT_SECRET,
     `${process.env.APP_ORIGIN}/api/auth/google/callback`
   )
 
@@ -37,6 +37,7 @@ export async function GET() {
     response_type: 'code',
     access_type: 'offline',
     include_granted_scopes: true,
+    login_hint: headerCookies.get('x-google-email')?.value,
     prompt: 'consent',
     scope: [
       'openid',
