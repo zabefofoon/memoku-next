@@ -27,7 +27,7 @@ export async function GET() {
         path: '/',
         maxAge: 60 * 60 * 6,
       })
-      return NextResponse.redirect(`${process.env.APP_ORIGIN}/`, { status: 303 })
+      return NextResponse.redirect(`${process.env.APP_ORIGIN}/oauth`, { status: 303 })
     }
   }
 
