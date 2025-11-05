@@ -10,6 +10,10 @@ export interface CreatedSeriesPoint {
 }
 
 export const useTodosStore = create(() => {
+  const getAllDirtyTodos = async (): Promise<Todo[]> => {
+    return db.todos.filter(({ dirty }) => Boolean(dirty) || dirty == null).toArray()
+  }
+
   const getTodo = async (id: number): Promise<Todo> => {
     const [res] = await db.todos.where({ id }).toArray()
     return res
@@ -145,8 +149,12 @@ export const useTodosStore = create(() => {
     })
   }
 
+  const addNewTodoBulk = (todos: Todo[]): Promise<number> => {
+    return db.todos.bulkAdd(todos)
+  }
+
   const updateDescription = (id: number, description: string): Promise<number> => {
-    return db.todos.update(id, { description, modified: Date.now() })
+    return db.todos.update(id, { description, modified: Date.now(), dirty: true })
   }
 
   const updateTimes = (
@@ -162,6 +170,10 @@ export const useTodosStore = create(() => {
 
   const updateStatus = (id: number, status: Todo['status']): Promise<number> => {
     return db.todos.update(id, { status, modified: Date.now() })
+  }
+
+  const updateDirties = async (ids: number[], value: boolean): Promise<number> => {
+    return db.todos.bulkUpdate(ids.map((id) => ({ key: id, changes: { dirty: value } })))
   }
 
   const getDescendantsFlat = async (rootId: number) => {
@@ -215,6 +227,7 @@ export const useTodosStore = create(() => {
   }
 
   return {
+    getAllDirtyTodos,
     getTodo,
     getParentTodo,
     getChildTodo,
@@ -233,6 +246,8 @@ export const useTodosStore = create(() => {
     addNewTodo,
     deleteTodo,
     updateTag,
+    updateDirties,
     getAllTodos,
+    addNewTodoBulk,
   }
 })

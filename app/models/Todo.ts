@@ -13,6 +13,7 @@ export interface Todo {
   images?: (string | Blob)[]
   status: 'created' | 'inprogress' | 'done' | 'hold'
   days?: WeekDay[]
+  dirty?: boolean
 }
 
 export interface Setting {

@@ -196,7 +196,7 @@ function TodosTableRow(props: {
       </td>
       <th scope='row'>
         <Link
-          className='text-left truncate | py-[12px] | block'
+          className='text-left truncate | py-[12px] | block | max-w-[600px]'
           href={`/todos/${props.todo.id}`}>
           {props.todo.description?.split(/\n/)[0]}
         </Link>
