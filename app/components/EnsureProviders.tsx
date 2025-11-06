@@ -4,6 +4,7 @@ import { useTagsStore } from '@/app/stores/tags.store'
 import { PropsWithChildren, useEffect } from 'react'
 import { CookiesProvider } from 'react-cookie'
 import { googleApi } from '../lib/googleApi'
+import { Todo } from '../models/Todo'
 import { useAuthStore } from '../stores/auth.store'
 import { useSheetStore } from '../stores/sheet.store'
 import { useThemeStore } from '../stores/theme.store'
@@ -44,7 +45,7 @@ export function EnsureProviders(props: Props) {
       body: JSON.stringify({ fileId, todos }),
     })
     if (res.ok) {
-      const ids = todos.map(({ id }) => id).filter((id): id is number => Boolean(id))
+      const ids = todos.map(({ id }) => id).filter((id): id is string => Boolean(id))
       todosStore.updateDirties(ids, false)
 
       const res = await fetch(`/api/sheet/google/bulk?fileId=${fileId}`, {
@@ -52,7 +53,7 @@ export function EnsureProviders(props: Props) {
         headers: { 'Content-Type': 'application/json' },
       })
       if (res.ok) {
-        const result = await res.json()
+        const result = (await res.json()) as { todos: Todo[] }
         const allTodos = await todosStore.getAllTodos()
         const allTodosIds = allTodos.map(({ id }) => id)
         const notExistTodosInLocalDB = result.todos.filter((todo) => !allTodosIds.includes(todo.id))
