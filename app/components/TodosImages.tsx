@@ -9,7 +9,7 @@ import { TodosDeleteModal } from './TodosDeleteModal'
 
 interface Props {
   todo?: Todo
-  images?: { id?: number; image: string; todoId: number }[]
+  images?: { id?: string; image: string; todoId: string }[]
   addImage: (file: Blob) => Promise<void>
   deleteImage: () => Promise<void>
 }

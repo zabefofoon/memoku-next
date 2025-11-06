@@ -3,6 +3,7 @@ import { GetTodosParams, Todo, WeekDay } from '@/app/models/Todo'
 import dayjs from 'dayjs'
 import { Collection } from 'dexie'
 import { create } from 'zustand'
+import etcUtil from '../utils/etc.util'
 
 export interface CreatedSeriesPoint {
   day: string
@@ -14,7 +15,7 @@ export const useTodosStore = create(() => {
     return db.todos.filter(({ dirty }) => Boolean(dirty) || dirty == null).toArray()
   }
 
-  const getTodo = async (id: number): Promise<Todo> => {
+  const getTodo = async (id: string): Promise<Todo> => {
     const [res] = await db.todos.where({ id }).toArray()
     return res
   }
@@ -28,7 +29,7 @@ export const useTodosStore = create(() => {
     const status = params?.status?.trim()
     const query = params?.searchText?.trim().toLowerCase()
 
-    const isRoot = (todo: Todo) => todo.parentId == null || todo.parentId === -1
+    const isRoot = (todo: Todo) => todo.parentId == null
 
     let coll: Collection<Todo, number> = db.todos.toCollection()
 
@@ -42,12 +43,12 @@ export const useTodosStore = create(() => {
     return (await coll.sortBy('created')).reverse()
   }
 
-  const getParentTodo = async (parentId: number): Promise<Todo> => {
+  const getParentTodo = async (parentId: string): Promise<Todo> => {
     const [res] = await db.todos.where({ id: parentId }).toArray()
     return res
   }
 
-  const getChildTodo = async (id: number): Promise<Todo> => {
+  const getChildTodo = async (id: string): Promise<Todo> => {
     const [res] = await db.todos.where({ parentId: id }).toArray()
     return res
   }
@@ -130,8 +131,9 @@ export const useTodosStore = create(() => {
     return days.map((d) => ({ day: d, created: map.get(d) || 0 }))
   }
 
-  const postDescription = (description: string, parentId = -1): Promise<number> => {
+  const postDescription = (description: string, parentId?: string): Promise<number> => {
     return db.todos.add({
+      id: etcUtil.generateUniqueId(),
       description,
       parentId,
       status: 'created',
@@ -140,9 +142,14 @@ export const useTodosStore = create(() => {
     })
   }
 
-  const addNewTodo = (todo: Todo): Promise<number> => {
+  const addNewTodo = (todo: Todo): Promise<string> => {
     return db.transaction('rw', db.todos, async () => {
-      const id = await db.todos.add({ ...todo, created: Date.now(), modified: Date.now() })
+      const id = await db.todos.add({
+        ...todo,
+        id: etcUtil.generateUniqueId(),
+        created: Date.now(),
+        modified: Date.now(),
+      })
       if (todo.parentId) await db.todos.update(todo.parentId, { childId: id })
 
       return id
@@ -153,33 +160,33 @@ export const useTodosStore = create(() => {
     return db.todos.bulkAdd(todos)
   }
 
-  const updateDescription = (id: number, description: string): Promise<number> => {
+  const updateDescription = (id: string, description: string): Promise<number> => {
     return db.todos.update(id, { description, modified: Date.now(), dirty: true })
   }
 
   const updateTimes = (
-    id: number,
+    id: string,
     range: { start?: number; end?: number; days?: WeekDay[] }
   ): Promise<number> => {
     return db.todos.update(id, { ...range, modified: Date.now() })
   }
 
-  const updateTag = (id: number, tagId: string): Promise<number> => {
+  const updateTag = (id: string, tagId: string): Promise<number> => {
     return db.todos.update(id, { tagId })
   }
 
-  const updateStatus = (id: number, status: Todo['status']): Promise<number> => {
+  const updateStatus = (id: string, status: Todo['status']): Promise<number> => {
     return db.todos.update(id, { status, modified: Date.now() })
   }
 
-  const updateDirties = async (ids: number[], value: boolean): Promise<number> => {
+  const updateDirties = async (ids: string[], value: boolean): Promise<number> => {
     return db.todos.bulkUpdate(ids.map((id) => ({ key: id, changes: { dirty: value } })))
   }
 
-  const getDescendantsFlat = async (rootId: number) => {
+  const getDescendantsFlat = async (rootId: string) => {
     const result: Todo[] = []
-    const queue: number[] = [rootId]
-    const seen = new Set<number>([rootId]) // 사이클 방지
+    const queue: string[] = [rootId]
+    const seen = new Set<string>([rootId]) // 사이클 방지
 
     while (queue.length) {
       const pid = queue.shift()!
@@ -213,7 +220,7 @@ export const useTodosStore = create(() => {
     return out.reverse()
   }
 
-  const deleteTodo = async (id: number): Promise<number> => {
+  const deleteTodo = async (id: string): Promise<number> => {
     await db.images.where('todoId').equals(id).delete()
 
     return db.transaction('rw', db.todos, async () => {

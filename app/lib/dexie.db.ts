@@ -6,7 +6,7 @@ import { Setting, Tag, Todo } from '../models/Todo'
 export class MySubClassedDexie extends Dexie {
   todos!: Table<Todo>
   setting!: Table<Setting>
-  images!: Table<{ id?: number; image: Blob; todoId: number }> // 새로운 이미지 테이블 타입 정의
+  images!: Table<{ id: string; image: Blob; todoId: string }> // 새로운 이미지 테이블 타입 정의
   tags!: Table<Tag>
 
   constructor() {
@@ -15,9 +15,9 @@ export class MySubClassedDexie extends Dexie {
     // 스키마 정의
     this.version(2).stores({
       todos:
-        '++id, description, tagId, created, modified, parentId, childId, start, end, status, days, dirty',
+        'id, description, tagId, created, modified, parentId, childId, start, end, status, days, dirty',
       setting: '++id, tags, forms',
-      images: '++id, image, todoId',
+      images: 'id, image, todoId',
       tags: 'id, color, label',
     })
 

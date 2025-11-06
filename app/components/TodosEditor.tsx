@@ -8,10 +8,10 @@ import TodosPeriodText from './TodosPeriodText'
 import TodosStatus from './TodosStatus'
 
 interface Props {
-  todo?: Todo
-  deleteTime?: (todoId?: number) => void
-  updateText?: (text: string, todoId?: number) => void
-  updateStatus?: (status: Todo['status'], todoId?: number) => void
+  todo: Todo
+  deleteTime?: (todoId: string) => void
+  updateText: (text: string, todoId: string) => void
+  updateStatus?: (status: Todo['status'], todoId: string) => void
   addImage: (file: Blob) => Promise<void>
 }
 
@@ -49,7 +49,7 @@ export default function TodosEditor(props: Props) {
       <TodosDeleteModal
         isShow={isShowDeleteTimeModal}
         close={() => router.back()}
-        delete={() => props.deleteTime?.(props.todo?.id)}
+        delete={() => props.deleteTime?.(props.todo.id)}
       />
       <div className='absolute top-[16px] right-[16px] | flex gap-[4px] sm:gap-[8px]'>
         {props.todo?.id && (
@@ -69,7 +69,7 @@ export default function TodosEditor(props: Props) {
         )}
         <TodosStatus
           status={props.todo?.status ?? 'created'}
-          select={(status) => props.updateStatus?.(status, props.todo?.id)}
+          select={(status) => props.updateStatus?.(status, props.todo.id)}
         />
       </div>
       <textarea
@@ -78,7 +78,7 @@ export default function TodosEditor(props: Props) {
         className='w-full flex-1 | resize-none | rounded-xl p-[8px] | text-[15px]'
         value={textValue}
         onChange={(e) => setTextValue(e.currentTarget.value)}
-        onInput={(event) => props.updateText?.(event.currentTarget.value, props.todo?.id)}
+        onInput={(event) => props.updateText(event.currentTarget.value, props.todo.id)}
         onPaste={handlePaste}></textarea>
       <TodosPeriodText todo={props.todo} />
     </div>

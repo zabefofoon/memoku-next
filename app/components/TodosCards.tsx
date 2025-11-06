@@ -13,17 +13,17 @@ import UISpinner from './UISpinner'
 export interface Props {
   todos?: Todo[]
   isLoading: boolean
-  childrenMap: Record<number, Todo[]>
-  isExpandMap: Record<number, boolean>
-  updateStatus: (status: Todo['status'], todoId?: number) => void
-  setChildrenMap: Dispatch<SetStateAction<Record<number, Todo[]>>>
-  setIsExpandMap: Dispatch<SetStateAction<Record<number, boolean>>>
+  childrenMap: Record<string, Todo[]>
+  isExpandMap: Record<string, boolean>
+  updateStatus: (status: Todo['status'], todoId?: string) => void
+  setChildrenMap: Dispatch<SetStateAction<Record<string, Todo[]>>>
+  setIsExpandMap: Dispatch<SetStateAction<Record<string, boolean>>>
 }
 
 export default function TodosCards(props: Props) {
   const todosStore = useTodosStore()
 
-  const getDescendantsFlat = async (todoId?: number): Promise<void> => {
+  const getDescendantsFlat = async (todoId?: string): Promise<void> => {
     if (todoId == null) return
     if (!props.isExpandMap[todoId] && props.childrenMap[todoId] == null) {
       const res = await todosStore.getDescendantsFlat(todoId)
@@ -32,7 +32,7 @@ export default function TodosCards(props: Props) {
 
     props.setIsExpandMap((prev) => ({ ...prev, [todoId]: !props.isExpandMap[todoId] }))
   }
-  const updateStatus = (status: Todo['status'], index: number, parentTodoId?: number): void => {
+  const updateStatus = (status: Todo['status'], index: number, parentTodoId?: string): void => {
     if (parentTodoId == null) return
 
     if (props.childrenMap[parentTodoId][index].id)
@@ -92,14 +92,14 @@ function TodoCard(props: {
   todo: Todo
   idExpanded?: boolean
   updateStatus?: Props['updateStatus']
-  getDescendantsFlat?: (todoId?: number) => Promise<void>
+  getDescendantsFlat?: (todoId?: string) => Promise<void>
 }) {
   const searchParams = useSearchParams()
 
   const isFiltered =
     !!searchParams.get('tags') || !!searchParams.get('status') || !!searchParams.get('searchText')
 
-  const isShowBadge = isFiltered ? true : !props.todo.parentId || props.todo.parentId === -1
+  const isShowBadge = isFiltered ? true : !props.todo.parentId
 
   return (
     <div className='w-full overflow-hidden | flex flex-col gap-[8px] | bg-white dark:bg-zinc-800 shadow-md rounded-xl | p-[8px]'>
@@ -128,7 +128,7 @@ function TodoCard(props: {
         <div className='w-full | flex items-center gap-[4px]'>
           <TodosPeriodText todo={props.todo} />
           {!isFiltered &&
-            (props.todo.parentId == null || props.todo.parentId === -1) &&
+            (props.todo.parentId == null || props.todo.parentId) &&
             props.todo.childId && (
               <button
                 type='button'

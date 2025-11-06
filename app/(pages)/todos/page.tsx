@@ -29,10 +29,7 @@ export default function Todos(props: PageProps<'/todos'>) {
   const [isExpandMap, setIsExpandMap] = useState<Record<number, boolean>>({})
 
   const timeTargetTodo = todos?.find((todo) => {
-    const timeQuery = searchParams.get('time')
-    const todoId = timeQuery ? +timeQuery : undefined
-
-    return todo.id === todoId
+    return todo.id === searchParams.get('time')
   })
 
   const searchText = searchParams.get('searchText') ?? ''
@@ -58,9 +55,7 @@ export default function Todos(props: PageProps<'/todos'>) {
   }
 
   const deleteTodo = async (): Promise<void> => {
-    const deleteParmas = searchParams.get('deleteModal')
-    const todoId = deleteParmas ? +deleteParmas : undefined
-    if (!todoId || isNaN(todoId)) return
+    const todoId = searchParams.get('deleteModal') ?? ''
 
     await todosStore.deleteTodo(todoId)
     const todoIndex = todos?.findIndex(({ id }) => id === todoId) ?? -1
@@ -106,7 +101,7 @@ export default function Todos(props: PageProps<'/todos'>) {
     router.back()
   }
 
-  const updateStatus = async (status: Todo['status'], todoId?: number): Promise<void> => {
+  const updateStatus = async (status: Todo['status'], todoId?: string): Promise<void> => {
     if (todoId == null) return
     if (todos == null) return
 
@@ -118,11 +113,10 @@ export default function Todos(props: PageProps<'/todos'>) {
   }
 
   const updateTime = async (
-    id: number,
+    id: string,
     values: { start: Todo['start']; end: Todo['end']; days?: Todo['days'] }
   ): Promise<void> => {
-    const timeQuery = searchParams.get('time')
-    const todoId = timeQuery ? +timeQuery : undefined
+    const todoId = searchParams.get('time') ?? ''
 
     await todosStore.updateTimes(id, values)
 
@@ -153,8 +147,7 @@ export default function Todos(props: PageProps<'/todos'>) {
 
   const changeTag = async (tag: Tag): Promise<void> => {
     const tagTargetTodo = todos?.find((todo) => {
-      const timeQuery = searchParams.get('todoTag')
-      const todoId = timeQuery ? +timeQuery : undefined
+      const todoId = searchParams.get('todoTag')
 
       return todo.id === todoId
     })

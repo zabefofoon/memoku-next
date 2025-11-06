@@ -23,8 +23,8 @@ export default function TodosImagesModal(props: Props) {
   const loadImages = async (): Promise<void> => {
     const id = params.id
 
-    if (!id || isNaN(+id)) return
-    const res = await imagesStore.getImages(+id)
+    if (!id) return
+    const res = await imagesStore.getImages(id.toString())
     const imageUrls = await Promise.all(res.map((item) => etcUtil.blobToBase64(item.image)))
     setImages(imageUrls)
 

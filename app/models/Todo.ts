@@ -1,13 +1,13 @@
 import { TAG_COLORS } from '@/const'
 
 export interface Todo {
-  id?: number
+  id: string
   description?: string
   tagId?: string
   created?: number
   modified?: number
-  parentId?: number
-  childId?: number
+  parentId?: string
+  childId?: string
   start?: number
   end?: number
   images?: (string | Blob)[]

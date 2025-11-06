@@ -17,7 +17,7 @@ interface Props {
   isShow: boolean
   todos: Todo[]
   updateTime: (
-    id: number,
+    id: string,
     values: { start: Todo['start']; end: Todo['end']; days?: Todo['days'] }
   ) => Promise<void>
   close: () => void
@@ -83,8 +83,7 @@ export default function TodosTimeModal(props: Props): ReactNode {
   }
 
   const getCurrentTodo = (): Todo | undefined => {
-    const timeQuery = searchParams.get('time')
-    const todoId = timeQuery ? +timeQuery : undefined
+    const todoId = searchParams.get('time')
 
     return props.todos.find((todo) => todo.id === todoId)
   }
@@ -112,10 +111,9 @@ export default function TodosTimeModal(props: Props): ReactNode {
 
   const handleSelect = (): void => {
     if (selectedMode === 'reset') {
-      const timeQuery = searchParams.get('time')
-      const todoId = timeQuery ? +timeQuery : undefined
+      const todoId = searchParams.get('time')
 
-      if (!todoId || isNaN(todoId)) return
+      if (!todoId) return
 
       props.updateTime(todoId, { start: undefined, end: undefined, days: undefined })
       props.close()
@@ -135,10 +133,9 @@ export default function TodosTimeModal(props: Props): ReactNode {
         .valueOf()
       const daysValue = selectedMode === 'iterate' && days.length ? days : undefined
 
-      const timeQuery = searchParams.get('time')
-      const todoId = timeQuery ? +timeQuery : undefined
+      const todoId = searchParams.get('time')
 
-      if (!todoId || isNaN(todoId)) return
+      if (!todoId) return
 
       props.updateTime(todoId, { start: startValue, end: endValue, days: daysValue })
       props.close()
