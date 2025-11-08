@@ -10,12 +10,14 @@ import { TodosTagModal } from '@/app/components/TodosTagModal'
 import TodosTagsFilter from '@/app/components/TodosTagsFilter'
 import TodosTimeModal from '@/app/components/TodosTimeModal'
 import { Tag, Todo } from '@/app/models/Todo'
+import { useSheetStore } from '@/app/stores/sheet.store'
 import { useTodosStore } from '@/app/stores/todos.store'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export default function Todos(props: PageProps<'/todos'>) {
   const todosStore = useTodosStore()
+  const sheetStore = useSheetStore()
   const searchParams = useSearchParams()
   const router = useRouter()
   const [todos, setTodos] = useState<Todo[]>()
@@ -40,14 +42,23 @@ export default function Todos(props: PageProps<'/todos'>) {
 
   const loadTodos = useCallback(async (): Promise<void> => {
     setIsTodosLoading(true)
-    const searchParams = await props.searchParams
-    const tags = (searchParams.tags as string)?.split(',')
-    const status = searchParams.status as string
-    const searchText = searchParams.searchText as string
-    const res = await todosStore.getTodos({ tags, status, searchText })
-    setTodos(res)
+    const tags = searchParams.get('tags') ? searchParams.get('tags')!.split(',') : undefined
+    const status = searchParams.get('status') ?? ''
+    const searchText = searchParams.get('searchText') ?? ''
+
+    if (sheetStore.fileId) {
+      const res = await fetch(
+        `/api/sheet/google?fileId=${sheetStore.fileId}&page=0&tags=${tags ?? ''}&status=${status}&search=${searchText}`
+      )
+      const result = await res.json()
+      setTodos(result.todos)
+    } else {
+      const res = await todosStore.getTodos({ tags, status, searchText })
+      setTodos(res)
+    }
+
     setIsTodosLoading(false)
-  }, [todosStore, tags, status, searchText])
+  }, [searchParams, sheetStore.fileId, todosStore])
 
   const createTodo = async (): Promise<void> => {
     const res = await todosStore.postDescription('')

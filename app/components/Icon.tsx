@@ -11,7 +11,7 @@ export function Icon(props: Props) {
   const [mounted, setMounted] = useState<boolean>()
   useEffect(() => {
     setMounted(true)
-  })
+  }, [])
   return (
     <span className={props.className}>
       <svg

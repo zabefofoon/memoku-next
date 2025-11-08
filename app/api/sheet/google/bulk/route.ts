@@ -42,7 +42,7 @@ export async function GET(req: Request) {
     const [_, ...rows] = res.data.values as string[][]
     const todos = rows.map((row) => {
       return {
-        id: Number(row[0]),
+        id: row[0],
         description: row[1],
         tagId: row[2],
         created: Number(row[3]),

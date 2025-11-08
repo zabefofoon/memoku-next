@@ -127,26 +127,24 @@ function TodoCard(props: {
       <div className='flex items-center | pt-[8px] | border-t border-gray-100 dark:border-zinc-600'>
         <div className='w-full | flex items-center gap-[4px]'>
           <TodosPeriodText todo={props.todo} />
-          {!isFiltered &&
-            (props.todo.parentId == null || props.todo.parentId) &&
-            props.todo.childId && (
-              <button
-                type='button'
-                className='ml-auto'
-                onClick={() => props.getDescendantsFlat?.(props.todo.id)}>
-                {props.idExpanded ? (
-                  <Icon
-                    name='chevron-up'
-                    className='text-[20px]'
-                  />
-                ) : (
-                  <Icon
-                    name='chevron-down'
-                    className='text-[20px]'
-                  />
-                )}
-              </button>
-            )}
+          {!isFiltered && !props.todo.parentId && props.todo.childId && (
+            <button
+              type='button'
+              className='ml-auto'
+              onClick={() => props.getDescendantsFlat?.(props.todo.id)}>
+              {props.idExpanded ? (
+                <Icon
+                  name='chevron-up'
+                  className='text-[20px]'
+                />
+              ) : (
+                <Icon
+                  name='chevron-down'
+                  className='text-[20px]'
+                />
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>

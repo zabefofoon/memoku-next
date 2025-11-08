@@ -83,11 +83,11 @@ async function transformTodoSheet(auth: any, spreadsheetId: string) {
       for (let r = 1; r < rows.length; r++) {
         const row = rows[r] || []
 
-        const id = iId >= 0 ? `9999${r}` : ''
+        const id = iId >= 0 ? (row[iId] ?? '') : ''
         const description = iDesc >= 0 ? (row[iDesc] ?? '') : ''
         const tagId = iTagId >= 0 ? (row[iTagId] ?? '') : ''
-        const created = iCreated >= 0 ? (row[iCreated] ?? '') : ''
-        const modified = iModified >= 0 ? (row[iModified] ?? '') : ''
+        const created = iCreated >= 0 ? Number(row[iCreated] ?? '') : ''
+        const modified = iModified >= 0 ? Number(row[iModified] ?? '') : ''
         const images = iImages >= 0 ? (row[iImages] ?? '') : ''
 
         let status = ''

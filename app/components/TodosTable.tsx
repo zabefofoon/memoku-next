@@ -144,11 +144,11 @@ function TodosTableRow(props: {
       className={etcUtil.classNames([
         'text-center | bg-white dark:bg-zinc-800 hover:bg-slate-50/50 dark:hover:bg-zinc-700/50 dark:border-zinc-700 border-gray-200',
         {
-          'border-t first:border-b-0': isFiltered || props.todo.parentId == null,
+          'border-t first:border-b-0': isFiltered || !props.todo.parentId,
         },
       ])}>
       <td className='pl-[8px]'>
-        {!isFiltered && props.todo.parentId == null && props.todo.childId && (
+        {!isFiltered && !props.todo.parentId && props.todo.childId && (
           <button
             type='button'
             className='w-full flex justify-center'
@@ -177,7 +177,7 @@ function TodosTableRow(props: {
           {!isFiltered && props.todo.parentId && (
             <div className='absolute top-[-30px] | border-l-[2px] border-dotted border-slate-300 dark:border-zinc-600 | h-[40px]'></div>
           )}
-          {isFiltered || props.todo.parentId == null ? (
+          {isFiltered || !props.todo.parentId ? (
             <TagBadge id={props.todo.tagId} />
           ) : (
             <div className='w-[10px] aspect-square | bg-slate-300 dark:bg-zinc-600 rounded-full'></div>
