@@ -1,7 +1,6 @@
 import { db } from '@/app/lib/dexie.db'
 import { GetTodosParams, Todo, WeekDay } from '@/app/models/Todo'
 import dayjs from 'dayjs'
-import { Collection } from 'dexie'
 import { create } from 'zustand'
 import etcUtil from '../utils/etc.util'
 
@@ -24,23 +23,33 @@ export const useTodosStore = create(() => {
     return db.todos.toArray()
   }
 
-  const getTodos = async (params?: GetTodosParams): Promise<Todo[]> => {
+  const getTodos = async (params?: GetTodosParams): Promise<{ total: number; todos: Todo[] }> => {
     const tags = params?.tags?.filter(Boolean)
     const status = params?.status?.trim()
     const query = params?.searchText?.trim().toLowerCase()
+    const page = params?.page ?? 0
+    const pageSize = 20
 
-    const isRoot = (todo: Todo) => todo.parentId == null
+    const isRoot = (t: Todo) => t.parentId == null
 
-    let coll: Collection<Todo, number> = db.todos.toCollection()
+    let coll = db.todos.orderBy('created').reverse()
 
-    if (!tags && !status && !query) coll = coll.and(isRoot)
-    else {
-      if (tags?.length) coll = db.todos.where('tagId').anyOf(tags)
-      if (status) coll = db.todos.where('status').equals(status)
-      if (query?.length) coll = coll.and((t) => (t.description ?? '').toLowerCase().includes(query))
+    if (!tags && !status && !query) {
+      coll = coll.and(isRoot)
+    } else {
+      if (tags?.length) coll = coll.and((t) => tags.includes(t.tagId ?? ''))
+      if (status) coll = coll.and((t) => t.status === status)
+      if (query) coll = coll.and((t) => (t.description ?? '').toLowerCase().includes(query))
     }
 
-    return (await coll.sortBy('created')).reverse()
+    const total = await coll.count()
+
+    const todos = await coll
+      .offset(page * pageSize)
+      .limit(pageSize)
+      .toArray()
+
+    return { todos, total }
   }
 
   const getParentTodo = async (parentId: string): Promise<Todo> => {

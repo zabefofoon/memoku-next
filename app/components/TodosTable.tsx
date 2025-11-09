@@ -1,7 +1,7 @@
 import { Todo } from '@/app/models/Todo'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Dispatch, Fragment, SetStateAction } from 'react'
+import { Dispatch, Fragment, SetStateAction, useEffect, useRef } from 'react'
 import { useTodosStore } from '../stores/todos.store'
 import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
@@ -12,6 +12,7 @@ import TodosStatus from './TodosStatus'
 import UISpinner from './UISpinner'
 
 export interface Props {
+  total?: number
   todos?: Todo[]
   isLoading: boolean
   childrenMap: Record<string, Todo[]>
@@ -19,10 +20,14 @@ export interface Props {
   updateStatus: (status: Todo['status'], todoId?: string) => void
   setChildrenMap: Dispatch<SetStateAction<Record<string, Todo[]>>>
   setIsExpandMap: Dispatch<SetStateAction<Record<string, boolean>>>
+  setPage: Dispatch<SetStateAction<number>>
+  isTodosNextLoading: boolean
 }
 
 export default function TodosTableImpl(props: Props) {
   const todosStore = useTodosStore()
+
+  const nextLoaderEl = useRef<HTMLDivElement>(null)
 
   const getDescendantsFlat = async (todoId?: string): Promise<void> => {
     if (todoId == null) return
@@ -46,42 +51,65 @@ export default function TodosTableImpl(props: Props) {
     })
   }
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !props.isTodosNextLoading && !props.isLoading) {
+        props.setPage((prev) => prev + 1)
+      }
+    })
+    if (nextLoaderEl.current) observer.observe(nextLoaderEl.current)
+
+    return () => observer.disconnect()
+  }, [props.isTodosNextLoading, props.isLoading, props.setPage])
+
   return (
     <div className='hidden sm:block flex-1 w-full h-full overflow-auto | bg-white dark:bg-zinc-800 shadow-md rounded-xl'>
       <table className='w-full | text-[13px]'>
-        <thead className='border-b-3 border-gray-100 dark:border-zinc-700'>
+        <thead>
           <tr>
             <th
               scope='col'
-              className='py-[12px]'
-              style={{ width: '50px' }}></th>
-            <th
-              scope='col'
-              className='py-[12px]'
+              className='bg-white dark:bg-zinc-800 | sticky left-0 top-0 z-[2]'
               style={{ width: '50px' }}>
-              태그
+              <div className='h-[50px] | flex items-center justify-center | border-b-3 border-gray-200 dark:border-zinc-700'></div>
             </th>
             <th
               scope='col'
-              className='py-[12px]'
+              className='bg-white dark:bg-zinc-800 | sticky left-0 top-0 z-[2]'
+              style={{ width: '50px' }}>
+              <div className='h-[50px] | flex items-center justify-center | border-b-3 border-gray-200 dark:border-zinc-700'>
+                태그
+              </div>
+            </th>
+            <th
+              scope='col'
+              className='bg-white dark:bg-zinc-800 | sticky left-0 top-0 z-[2]'
               style={{ width: '100px' }}>
-              진행상태
+              <div className='h-[50px] | flex items-center justify-center | border-b-3 border-gray-200 dark:border-zinc-700'>
+                진행상태
+              </div>
             </th>
             <th
               scope='col'
-              className='py-[12px] | text-left'>
-              내용
+              className='text-left | bg-white dark:bg-zinc-800 | sticky left-0 top-0 z-[2]'>
+              <div className='h-[50px] | flex items-center justify-center | border-b-3 border-gray-200 dark:border-zinc-700'>
+                내용
+              </div>
             </th>
             <th
               scope='col'
-              className='py-[12px] w-[240px]'>
-              일정
+              className='w-[240px] | bg-white dark:bg-zinc-800 | sticky left-0 top-0 z-[2]'>
+              <div className='h-[50px] | flex items-center justify-center | border-b-3 border-gray-200 dark:border-zinc-700'>
+                일정
+              </div>
             </th>
             <th
               scope='col'
-              className='py-[12px]'
+              className='bg-white dark:bg-zinc-800 | sticky left-0 top-0 z-[2]'
               style={{ width: '50px' }}>
-              <span className='sr-only'>Edit</span>
+              <div className='h-[50px] | flex items-center justify-center | border-b-3 border-gray-200 dark:border-zinc-700'>
+                <span className='sr-only'>Edit</span>
+              </div>
             </th>
           </tr>
         </thead>
@@ -121,6 +149,17 @@ export default function TodosTableImpl(props: Props) {
                   ))}
               </Fragment>
             ))}
+          {!props.isLoading && props.todos && (props.total ?? 0) > props.todos.length && (
+            <tr>
+              <td colSpan={6}>
+                <div
+                  ref={nextLoaderEl}
+                  className='text-center | py-[6px]'>
+                  <UISpinner />
+                </div>
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
@@ -194,9 +233,9 @@ function TodosTableRow(props: {
       </td>
       <th scope='row'>
         <Link
-          className='text-left truncate | py-[12px] | block'
+          className='text-left truncate | py-[12px] | block | max-w-[600px]'
           href={`/todos/${props.todo.id}`}>
-          {props.todo.description?.split(/\n/)[0]}
+          {props.todo.description?.slice(0, 40)?.split(/\n/)[0]}
         </Link>
       </th>
       <td>

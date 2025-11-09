@@ -13,15 +13,19 @@ import { Tag, Todo } from '@/app/models/Todo'
 import { useSheetStore } from '@/app/stores/sheet.store'
 import { useTodosStore } from '@/app/stores/todos.store'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 export default function Todos(props: PageProps<'/todos'>) {
   const todosStore = useTodosStore()
   const sheetStore = useSheetStore()
   const searchParams = useSearchParams()
   const router = useRouter()
+
+  const [page, setPage] = useState<number>(0)
   const [todos, setTodos] = useState<Todo[]>()
-  const [isTodosLoading, setIsTodosLoading] = useState<boolean>(true)
+  const [isTodosLoading, setIsTodosLoading] = useState<boolean>(false)
+  const [isTodosNextLoading, setIsTodosNextLoading] = useState<boolean>(false)
+  const [total, setTotal] = useState<number>()
 
   const [isShowDeleteModal, setIsShowDeleteModal] = useState<boolean>(false)
   const [isShowTimeModal, setIsShowTimeModal] = useState<boolean>(false)
@@ -39,26 +43,42 @@ export default function Todos(props: PageProps<'/todos'>) {
   const tags = searchParams.get('tags') ?? '' // e.g. "1,2,3"
 
   const filterKey = useMemo(() => `${searchText}|${status}|${tags}`, [searchText, status, tags])
+  const loadingRef = useRef(false)
 
-  const loadTodos = useCallback(async (): Promise<void> => {
-    setIsTodosLoading(true)
-    const tags = searchParams.get('tags') ? searchParams.get('tags')!.split(',') : undefined
-    const status = searchParams.get('status') ?? ''
-    const searchText = searchParams.get('searchText') ?? ''
+  const loadTodos = useCallback(
+    async (page = 0): Promise<void> => {
+      if (loadingRef.current) return
+      loadingRef.current = true
 
-    if (sheetStore.fileId) {
-      const res = await fetch(
-        `/api/sheet/google?fileId=${sheetStore.fileId}&page=0&tags=${tags ?? ''}&status=${status}&search=${searchText}`
-      )
-      const result = await res.json()
-      setTodos(result.todos)
-    } else {
-      const res = await todosStore.getTodos({ tags, status, searchText })
-      setTodos(res)
-    }
+      if (page === 0) setIsTodosLoading(true)
+      else setIsTodosNextLoading(true)
 
-    setIsTodosLoading(false)
-  }, [searchParams, sheetStore.fileId, todosStore])
+      const tags = searchParams.get('tags') ? searchParams.get('tags')!.split(',') : undefined
+      const status = searchParams.get('status') ?? ''
+      const searchText = searchParams.get('searchText') ?? ''
+
+      if (sheetStore.fileId) {
+        const res = await fetch(
+          `/api/sheet/google?fileId=${sheetStore.fileId}&page=${page}&tags=${tags ?? ''}&status=${status}&search=${searchText}`
+        )
+        const result = await res.json()
+        setTotal(result.total)
+        if (page === 0) setTodos(result.todos ?? [])
+        else setTodos((prev) => [...prev!, ...(result.todos ?? [])])
+      } else {
+        const res = await todosStore.getTodos({ tags, status, searchText, page })
+        setTotal(res.total)
+
+        if (page === 0) setTodos(res.todos)
+        else setTodos((prev) => [...prev!, ...res.todos])
+      }
+
+      setIsTodosLoading(false)
+      setIsTodosNextLoading(false)
+      loadingRef.current = false
+    },
+    [searchParams, sheetStore.fileId, todosStore]
+  )
 
   const createTodo = async (): Promise<void> => {
     const res = await todosStore.postDescription('')
@@ -174,9 +194,17 @@ export default function Todos(props: PageProps<'/todos'>) {
     }
   }
 
+  useLayoutEffect(() => {
+    setIsTodosLoading(true)
+  }, [])
+
+  useEffect(() => {
+    if (page) loadTodos(page)
+  }, [page])
+
   useEffect(() => {
     loadTodos()
-  }, [filterKey, loadTodos])
+  }, [filterKey])
 
   useEffect(() => {
     setIsShowDeleteModal(!!searchParams.get('deleteModal'))
@@ -188,7 +216,7 @@ export default function Todos(props: PageProps<'/todos'>) {
     <div className='flex flex-col | sm:max-h-full'>
       <TodosDeleteModal
         isShow={isShowDeleteModal}
-        close={() => router.back()}
+        close={router.back}
         delete={deleteTodo}
       />
       <TodosTimeModal
@@ -226,6 +254,7 @@ export default function Todos(props: PageProps<'/todos'>) {
         <TodosTagsFilter />
       </div>
       <TodosTable
+        total={total}
         todos={todos}
         isLoading={isTodosLoading}
         updateStatus={updateStatus}
@@ -233,8 +262,11 @@ export default function Todos(props: PageProps<'/todos'>) {
         setChildrenMap={setChildrenMap}
         isExpandMap={isExpandMap}
         setIsExpandMap={setIsExpandMap}
+        setPage={setPage}
+        isTodosNextLoading={isTodosNextLoading}
       />
       <TodosCards
+        total={total}
         todos={todos}
         isLoading={isTodosLoading}
         updateStatus={updateStatus}
@@ -242,6 +274,8 @@ export default function Todos(props: PageProps<'/todos'>) {
         setChildrenMap={setChildrenMap}
         isExpandMap={isExpandMap}
         setIsExpandMap={setIsExpandMap}
+        setPage={setPage}
+        isTodosNextLoading={isTodosNextLoading}
       />
     </div>
   )

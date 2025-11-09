@@ -27,23 +27,25 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
     if (result.ok) authStore.setMemberInfo(result)
   }
 
-  const loadSheetId = async (): Promise<void> => {
+  const loadSheetId = async (): Promise<string> => {
     const res = await fetch(`/api/sheet/google/sheetId`, {
       method: 'GET',
       credentials: 'include',
     })
     const result = await res.json()
     if (result.ok) sheetStore.setFileId(result.fileId)
+
+    return result.fileId
   }
 
-  const pushDirties = async (): Promise<void> => {
+  const pushDirties = async (fileId: string): Promise<void> => {
     const todos = await todosStore.getAllDirtyTodos()
     if (todos.length === 0) return
 
     const res = await fetch('/api/sheet/google/bulk', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileId: sheetStore.fileId, todos }),
+      body: JSON.stringify({ fileId, todos }),
     })
 
     if (res.ok) {
@@ -55,9 +57,12 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
   useEffect(() => {
     if (!props.refreshToken) setIsAuthed(true)
     else
-      loadGoogleMe()
-        .then(() => loadSheetId().then(() => setIsAuthed(true)))
-        .then(pushDirties)
+      loadGoogleMe().then(() =>
+        loadSheetId().then((fileId) => {
+          setIsAuthed(true)
+          if (fileId) pushDirties(fileId)
+        })
+      )
   }, [])
 
   if (!isAuthed)

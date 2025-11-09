@@ -24,19 +24,11 @@ export async function GET(req: Request) {
   )
   oauth2.setCredentials({ access_token: access, refresh_token: refresh })
 
-  const meta = await google.sheets({ version: 'v4', auth: oauth2 }).spreadsheets.get({
-    spreadsheetId: fileId,
-    fields: 'sheets(properties(title,sheetId))',
-  })
-  const sheet = meta.data.sheets?.find((s) => s.properties?.title === 'todo2')
-  if (!sheet?.properties?.sheetId) {
-    throw new Error('sheetId를 찾을 수 없습니다: "todo2"')
-  }
-
   if (!tagFilter && !statusFilter && !searchFilter) {
     const res = await google.sheets({ version: 'v4', auth: oauth2 }).spreadsheets.values.batchGet({
       spreadsheetId: fileId,
       ranges: ['todo2!A2:A', 'todo2!H2:H'],
+      valueRenderOption: 'UNFORMATTED_VALUE',
     })
     if (!res.ok) return NextResponse.json({ ok: res.ok, todos: undefined })
     const [colA, colH] = res.data.valueRanges ?? []
@@ -52,6 +44,8 @@ export async function GET(req: Request) {
     const pageSize = 20
     const start = page * pageSize
     const end = start + pageSize
+    const total = allTodos.length
+
     allTodos = allTodos.filter((todo) => !todo.parentId)
     allTodos = allTodos.slice(start, end)
 
@@ -62,6 +56,7 @@ export async function GET(req: Request) {
       .spreadsheets.values.batchGet({
         spreadsheetId: fileId,
         ranges,
+        valueRenderOption: 'UNFORMATTED_VALUE',
       })
 
     if (res.ok) {
@@ -84,12 +79,13 @@ export async function GET(req: Request) {
             days: _row[11]?.split(','),
           }
         })
-      return NextResponse.json({ ok: res.ok, todos })
+      return NextResponse.json({ ok: res.ok, todos, total })
     } else return NextResponse.json({ ok: res.ok, todos: undefined })
   } else {
     const res = await google.sheets({ version: 'v4', auth: oauth2 }).spreadsheets.values.batchGet({
       spreadsheetId: fileId,
       ranges: ['todo2!A2:A', 'todo2!B2:B', 'todo2!C2:C', 'todo2!G2:G'],
+      valueRenderOption: 'UNFORMATTED_VALUE',
     })
 
     if (!res.ok) return NextResponse.json({ ok: res.ok, todos: undefined })
@@ -116,7 +112,7 @@ export async function GET(req: Request) {
     if (searchFilter) allTodos = allTodos.filter((todo) => todo.description.includes(searchFilter))
     if (tagFilter?.length) allTodos = allTodos.filter((todo) => tagFilter?.includes(todo.tagId))
     if (statusFilter) allTodos = allTodos.filter((todo) => todo.status === statusFilter)
-
+    const total = allTodos.length
     allTodos = allTodos.slice(start, end)
 
     const ranges = allTodos.map(({ index }) => `todo2!A${index}:Z${index}`)
@@ -126,6 +122,7 @@ export async function GET(req: Request) {
       .spreadsheets.values.batchGet({
         spreadsheetId: fileId,
         ranges,
+        valueRenderOption: 'UNFORMATTED_VALUE',
       })
 
     if (res.ok) {
@@ -148,7 +145,7 @@ export async function GET(req: Request) {
             days: _row[11]?.split(','),
           }
         })
-      return NextResponse.json({ ok: res.ok, todos })
+      return NextResponse.json({ ok: res.ok, todos, total })
     } else return NextResponse.json({ ok: res.ok, todos: undefined })
   }
 }

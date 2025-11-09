@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Dispatch, Fragment, SetStateAction } from 'react'
+import { Dispatch, Fragment, SetStateAction, useEffect, useRef } from 'react'
 import { Todo } from '../models/Todo'
 import { useTodosStore } from '../stores/todos.store'
 import { Icon } from './Icon'
@@ -11,6 +11,7 @@ import TodosStatus from './TodosStatus'
 import UISpinner from './UISpinner'
 
 export interface Props {
+  total?: number
   todos?: Todo[]
   isLoading: boolean
   childrenMap: Record<string, Todo[]>
@@ -18,10 +19,13 @@ export interface Props {
   updateStatus: (status: Todo['status'], todoId?: string) => void
   setChildrenMap: Dispatch<SetStateAction<Record<string, Todo[]>>>
   setIsExpandMap: Dispatch<SetStateAction<Record<string, boolean>>>
+  setPage: Dispatch<SetStateAction<number>>
+  isTodosNextLoading: boolean
 }
 
 export default function TodosCards(props: Props) {
   const todosStore = useTodosStore()
+  const nextLoaderEl = useRef<HTMLDivElement>(null)
 
   const getDescendantsFlat = async (todoId?: string): Promise<void> => {
     if (todoId == null) return
@@ -43,6 +47,17 @@ export default function TodosCards(props: Props) {
       return { ...prev }
     })
   }
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !props.isTodosNextLoading && !props.isLoading) {
+        props.setPage((prev) => prev + 1)
+      }
+    })
+    if (nextLoaderEl.current) observer.observe(nextLoaderEl.current)
+
+    return () => observer.disconnect()
+  }, [props.isTodosNextLoading, props.isLoading, props.setPage])
 
   return (
     <>
@@ -82,6 +97,14 @@ export default function TodosCards(props: Props) {
                 ))}
             </Fragment>
           ))}
+
+          {!props.isLoading && props.todos && (props.total ?? 0) > props.todos.length && (
+            <div
+              ref={nextLoaderEl}
+              className='text-center | py-[6px]'>
+              <UISpinner />
+            </div>
+          )}
         </div>
       )}
     </>

@@ -79,11 +79,10 @@ export async function POST(req: Request) {
   if (body?.fileId == null) return NextResponse.json({ ok: false })
   if (body?.todos == null) return NextResponse.json({ ok: false })
 
-  const values = body.todos.map(todoToRow)
-
   const spreadsheet = google.sheets({ version: 'v4', auth: oauth2 })
-
   if (body?.todos.length) {
+    const values = body.todos.map(todoToRow)
+
     await spreadsheet.spreadsheets.values.append({
       spreadsheetId: body.fileId,
       valueInputOption: 'RAW',

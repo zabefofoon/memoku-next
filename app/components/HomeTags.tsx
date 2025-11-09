@@ -36,7 +36,7 @@ export default function HomeTags() {
 
   const loadTodos = async () => {
     const res = await todoStore.getTodos()
-    setTodos(res)
+    setTodos(res.todos)
   }
 
   useEffect(() => {

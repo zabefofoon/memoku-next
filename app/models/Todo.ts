@@ -32,6 +32,7 @@ export interface GetTodosParams {
   tags?: string[]
   status?: string
   searchText?: string
+  page: number
 }
 
 export type WeekDay = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'
