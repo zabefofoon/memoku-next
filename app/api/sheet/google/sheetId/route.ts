@@ -20,38 +20,32 @@ const TODO2_HEADERS = [
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function transformTodoSheet(auth: any, spreadsheetId: string) {
   const sheets = google.sheets({ version: 'v4', auth })
-
-  const getRes = await sheets.spreadsheets.values.get({
+  const getRes = await sheets.spreadsheets.get({
     spreadsheetId,
-    range: `todo!A1:Z`,
-    majorDimension: 'ROWS',
+    fields: 'sheets.properties(sheetId,title)',
   })
-  const rows = getRes.data.values ?? []
+  const prevTodos = getRes.data.sheets?.find((s) => s.properties?.title === 'todo')
+  const currentTodos = getRes.data.sheets?.find((s) => s.properties?.title === 'todo2')
 
-  if (rows.length === 0) {
-    await sheets.spreadsheets.values.update({
-      spreadsheetId,
-      range: `todo2!A1`,
-      valueInputOption: 'RAW',
-      requestBody: {
-        values: [TODO2_HEADERS],
-      },
-    })
+  if (!prevTodos) {
+    if (!currentTodos)
+      await sheets.spreadsheets.values.update({
+        spreadsheetId,
+        range: `todo2!A1`,
+        valueInputOption: 'RAW',
+        requestBody: {
+          values: [TODO2_HEADERS],
+        },
+      })
   } else {
-    const meta = await sheets.spreadsheets.get({
-      spreadsheetId,
-      fields: 'sheets.properties',
-    })
-    const found = meta.data.sheets?.find((s) => s.properties?.title === 'todo2')
-    if (!found?.properties?.sheetId) {
-      const todo = meta.data.sheets?.find((s) => s.properties?.title === 'todo')
-      await sheets.spreadsheets.batchUpdate({
+    if (!currentTodos) {
+      const dup = await sheets.spreadsheets.batchUpdate({
         spreadsheetId,
         requestBody: {
           requests: [
             {
               duplicateSheet: {
-                sourceSheetId: todo?.properties?.sheetId,
+                sourceSheetId: prevTodos.properties?.sheetId,
                 insertSheetIndex: 0,
                 newSheetName: 'todo2',
               },
@@ -59,6 +53,8 @@ async function transformTodoSheet(auth: any, spreadsheetId: string) {
           ],
         },
       })
+
+      const newSheetId = dup.data.replies?.[0]?.duplicateSheet?.properties?.sheetId
 
       const getRes = await sheets.spreadsheets.values.get({
         spreadsheetId,
@@ -78,7 +74,7 @@ async function transformTodoSheet(auth: any, spreadsheetId: string) {
       const iImages = idx('images')
       const iDone = idx('done')
 
-      const out: string[][] = [TODO2_HEADERS]
+      const values: string[][] = [TODO2_HEADERS]
 
       for (let r = 1; r < rows.length; r++) {
         const row = rows[r] || []
@@ -102,7 +98,7 @@ async function transformTodoSheet(auth: any, spreadsheetId: string) {
         const end = ''
         const days = undefined
 
-        out.push([
+        values.push([
           id,
           description,
           tagId,
@@ -122,7 +118,25 @@ async function transformTodoSheet(auth: any, spreadsheetId: string) {
         spreadsheetId,
         range: `todo2!A1`,
         valueInputOption: 'RAW',
-        requestBody: { values: out },
+        requestBody: { values },
+      })
+
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: {
+          requests: [
+            {
+              sortRange: {
+                range: {
+                  sheetId: newSheetId,
+                  startRowIndex: 1,
+                  startColumnIndex: 0,
+                },
+                sortSpecs: [{ dimensionIndex: 4, sortOrder: 'DESCENDING' }],
+              },
+            },
+          ],
+        },
       })
     }
   }
@@ -144,13 +158,14 @@ export async function GET() {
 
   const res = await google.drive({ version: 'v3', auth: oauth2 }).files.list({
     q: `name='${fileName}' and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`,
-    fields: 'files(id, name)',
+    pageSize: 1,
+    fields: 'files(id)',
     spaces: 'drive',
   })
-
   const fileId = res.data.files && res.data.files.length > 0 ? res.data.files[0].id : undefined
   if (fileId) {
     await transformTodoSheet(oauth2, fileId)
+
     return NextResponse.json({ ok: true, fileId })
   } else {
     const sheets = google.sheets({ version: 'v4', auth: oauth2 })

@@ -81,12 +81,39 @@ export async function POST(req: Request) {
 
   const values = body.todos.map(todoToRow)
 
-  const res = await google.sheets({ version: 'v4', auth: oauth2 }).spreadsheets.values.append({
-    spreadsheetId: body.fileId,
-    valueInputOption: 'RAW',
-    range: 'todo2',
-    requestBody: { values },
-  })
+  const spreadsheet = google.sheets({ version: 'v4', auth: oauth2 })
 
-  return NextResponse.json({ ok: res.ok })
+  if (body?.todos.length) {
+    await spreadsheet.spreadsheets.values.append({
+      spreadsheetId: body.fileId,
+      valueInputOption: 'RAW',
+      range: 'todo2',
+      requestBody: { values },
+    })
+
+    const meta = await spreadsheet.spreadsheets.get({
+      spreadsheetId: body.fileId,
+      fields: 'sheets(properties(title,sheetId))',
+    })
+    const sheet = meta.data.sheets?.find((s) => s.properties?.title === 'todo2')
+    await spreadsheet.spreadsheets.batchUpdate({
+      spreadsheetId: body.fileId,
+      requestBody: {
+        requests: [
+          {
+            sortRange: {
+              range: {
+                sheetId: sheet?.properties?.sheetId,
+                startRowIndex: 1,
+                startColumnIndex: 0,
+              },
+              sortSpecs: [{ dimensionIndex: 4, sortOrder: 'DESCENDING' }],
+            },
+          },
+        ],
+      },
+    })
+  }
+
+  return NextResponse.json({ ok: true })
 }

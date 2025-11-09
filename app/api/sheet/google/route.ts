@@ -32,31 +32,8 @@ export async function GET(req: Request) {
   if (!sheet?.properties?.sheetId) {
     throw new Error('sheetId를 찾을 수 없습니다: "todo2"')
   }
-  const sheetId = sheet.properties.sheetId
-  await google.sheets({ version: 'v4', auth: oauth2 }).spreadsheets.batchUpdate({
-    spreadsheetId: fileId,
-    requestBody: {
-      requests: [
-        {
-          sortRange: {
-            range: {
-              sheetId,
-              startRowIndex: 1,
-              startColumnIndex: 0,
-            },
-            sortSpecs: [{ dimensionIndex: 4, sortOrder: 'DESCENDING' }],
-          },
-        },
-      ],
-    },
-  })
 
   if (!tagFilter && !statusFilter && !searchFilter) {
-    // const pageSize = 20
-    // const start = page * pageSize + 1 // 1행은 header라 +2
-    // const end = start + pageSize - 1
-    // const range = `todo2!A${start}:Z${end}`
-
     const res = await google.sheets({ version: 'v4', auth: oauth2 }).spreadsheets.values.batchGet({
       spreadsheetId: fileId,
       ranges: ['todo2!A2:A', 'todo2!H2:H'],
