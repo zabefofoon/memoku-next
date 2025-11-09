@@ -10,23 +10,26 @@ import TodosTimeModal from '@/app/components/TodosTimeModal'
 import UISpinner from '@/app/components/UISpinner'
 import { Tag, Todo } from '@/app/models/Todo'
 import { useImagesStore } from '@/app/stores/images.store'
+import { useSheetStore } from '@/app/stores/sheet.store'
 import { useTodosStore } from '@/app/stores/todos.store'
 import etcUtil from '@/app/utils/etc.util'
 import debounce from 'lodash.debounce'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 
 export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
   const router = useRouter()
+  const params = useParams()
   const todosStore = useTodosStore()
   const imagesStore = useImagesStore()
+  const sheetStore = useSheetStore()
 
   const [todo, setTodo] = useState<Todo>()
   const [parentTodo, setParentTodo] = useState<Todo>()
   const [childTodo, setChildTodo] = useState<Todo>()
   const [textValue, setTextValue] = useState<string>('')
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const [isShowDeleteModal, setIsShowDeleteModal] = useState(false)
   const [isShowTagModal, setIsShowTagModal] = useState(false)
@@ -60,26 +63,49 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
   }
 
   const loadTodo = async (): Promise<void> => {
-    const params = await props.params
-
     setIsLoading(true)
-    const res = await todosStore.getTodo(params.id)
 
-    setTodo(res)
-    setTextValue(res?.description ?? '')
-    loadImages(res.id)
+    if (sheetStore.fileId) {
+      const res = await fetch(`/api/sheet/google/todo?fileId=${sheetStore.fileId}&id=${params.id}`)
+      const result = await res.json()
+      setTodo(result.todo)
+      setTextValue(result.todo.description)
+      window.dispatchEvent(new CustomEvent('updateText', { detail: result.todo.description }))
 
-    if (res.parentId) {
-      const result = await todosStore.getParentTodo(res.parentId)
-      setParentTodo(result)
-    }
-    if (res.id) {
-      const result = await todosStore.getChildTodo(res.id)
-      setChildTodo(result)
+      if (result.todo.parentId) {
+        const parentRes = await fetch(
+          `/api/sheet/google/todo?fileId=${sheetStore.fileId}&id=${result.todo.parentId}`
+        )
+        const parent = await parentRes.json()
+        setParentTodo(parent.todo)
+      }
+      if (result.todo.childId) {
+        const childRes = await fetch(
+          `/api/sheet/google/todo?fileId=${sheetStore.fileId}&id=${result.todo.childId}`
+        )
+        const child = await childRes.json()
+        setChildTodo(child.todo)
+      }
+    } else {
+      setIsLoading(true)
+      const res = await todosStore.getTodo(params.id as string)
+      setTodo(res)
+      window.dispatchEvent(new CustomEvent('updateText', { detail: res.description }))
+
+      setTextValue(res?.description ?? '')
+      loadImages(res.id)
+
+      if (res.parentId) {
+        const result = await todosStore.getParentTodo(res.parentId)
+        setParentTodo(result)
+      }
+      if (res.childId) {
+        const result = await todosStore.getChildTodo(res.id)
+        setChildTodo(result)
+      }
     }
 
     setIsLoading(false)
-    window.dispatchEvent(new CustomEvent('updateText', { detail: res.description }))
   }
 
   const deleteTodo = async (): Promise<void> => {
@@ -177,6 +203,10 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
     setImages((prev) => prev?.filter((item) => item.id !== image))
     router.back()
   }
+
+  useLayoutEffect(() => {
+    setIsLoading(true)
+  }, [])
 
   useEffect(() => {
     loadTodo()

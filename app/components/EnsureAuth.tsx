@@ -72,6 +72,7 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
 
   return (
     <div
+      className='h-full'
       style={{
         display: isAuthed ? 'block' : 'hidden',
       }}>
