@@ -4,14 +4,13 @@ import { Noto_Sans_KR } from 'next/font/google'
 import '@/app/assets/styles/globals.scss'
 import etcUtil from '@/app/utils/etc.util'
 import { COOKIE_THEME } from '@/const'
-import { cookies, headers } from 'next/headers'
+import { cookies } from 'next/headers'
 import { AppAside } from '../components/AppAside'
 import AppBottomAppBar from '../components/AppBottomAppBar'
 import { AppTopAppBar } from '../components/AppTopAppBar'
 import EnsureAuth from '../components/EnsureAuth'
 import { EnsureProviders } from '../components/EnsureProviders'
 import FloatingButtons from '../components/FloatingButtons'
-import { googleApi } from '../lib/googleApi'
 
 const notoSansKr = Noto_Sans_KR({
   weight: ['400', '700', '900'],
@@ -27,13 +26,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout(props: LayoutProps<'/'>) {
   const cookieStore = await cookies()
-  const requestHeaders = await headers()
+
   const isDarkMode = cookieStore.get(COOKIE_THEME)?.value === 'dark'
   const isExpandAside = cookieStore.get('x-expand-aside')?.value === 'true'
-
-  const memberInfo = cookieStore.get('x-google-access-token')
-    ? await googleApi.getAuthGoogleMe(requestHeaders)
-    : undefined
+  const accessToken = cookieStore.get('x-google-access-token')?.value ?? ''
+  const refreshToken = cookieStore.get('x-google-refresh-token')?.value ?? ''
 
   return (
     <html
@@ -41,10 +38,10 @@ export default async function RootLayout(props: LayoutProps<'/'>) {
       className={etcUtil.classNames(['h-full', { dark: isDarkMode }])}>
       <body
         className={`${notoSansKr.className} antialiased | h-full | text-slate-800 dark:text-white/95 | bg-gray-100 dark:bg-zinc-900`}>
-        <EnsureAuth memberInfo={memberInfo}>
-          <EnsureProviders
-            isDarkMode={isDarkMode}
-            headers={requestHeaders}>
+        <EnsureAuth
+          accessToken={accessToken}
+          refreshToken={refreshToken}>
+          <EnsureProviders isDarkMode={isDarkMode}>
             <div className='relative | h-full | flex flex-col sm:flex-row sm:gap-[36px] sm:p-[24px] sm:pr-[0]'>
               <AppTopAppBar />
               <AppAside isExpand={isExpandAside} />

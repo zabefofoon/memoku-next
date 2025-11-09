@@ -1,5 +1,4 @@
-import { createContext, useContext } from 'react'
-import { createStore, useStore } from 'zustand'
+import { create } from 'zustand'
 import { MemberInfo } from '../models/Member'
 
 interface AuthStore {
@@ -7,22 +6,13 @@ interface AuthStore {
   setMemberInfo: (memberInfo?: MemberInfo) => void
 }
 
-export const createAuthStore = (initial?: MemberInfo) =>
-  createStore<AuthStore>()((set) => {
-    const memberInfo = initial
+export const useAuthStore = create<AuthStore>()((set) => {
+  const memberInfo: MemberInfo | undefined = undefined
 
-    const setMemberInfo = (memberInfo?: MemberInfo): void => set({ memberInfo })
+  const setMemberInfo = (memberInfo?: MemberInfo): void => set({ memberInfo })
 
-    return {
-      memberInfo,
-      setMemberInfo,
-    }
-  })
-
-export const AuthStoreContext = createContext<ReturnType<typeof createAuthStore> | null>(null)
-
-export function useAuthStore<T>(selector: (s: AuthStore) => T) {
-  const store = useContext(AuthStoreContext)
-  if (!store) throw new Error('AuthStoreProvider가 필요합니다')
-  return useStore(store, selector)
-}
+  return {
+    memberInfo,
+    setMemberInfo,
+  }
+})
