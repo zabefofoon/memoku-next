@@ -73,27 +73,26 @@ export const useTodosStore = create(() => {
     return db.todos.orderBy('modified').limit(5).reverse().toArray()
   }
 
-  const getTodosDateRange = (start: Date, end: Date): Promise<Todo[]> => {
+  const getTodosDateRange = async (start: Date, end: Date): Promise<Todo[]> => {
     const startTs = start.getTime()
     const endTs = end.getTime()
 
     return db.transaction('r', db.todos, async () => {
       const [byCreated, byOverlap, byDays] = await Promise.all([
         db.todos.where('created').between(startTs, endTs, true, true).toArray(),
-
         db.todos
           .where('start')
           .belowOrEqual(endTs)
           .and((t) => typeof t.end === 'number' && t.end >= startTs)
           .toArray(),
-
         db.todos.filter((t) => Array.isArray(t.days) && t.days.length > 0).toArray(),
       ])
 
-      const map = new Map<number, Todo>()
+      const map = new Map<string, Todo>()
       for (const arr of [byCreated, byOverlap, byDays]) {
-        for (const t of arr) if (typeof t.id === 'number') map.set(t.id, t)
+        for (const t of arr) map.set(t.id, t)
       }
+
       return [...map.values()]
     })
   }

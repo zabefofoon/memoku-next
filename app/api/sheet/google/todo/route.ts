@@ -61,7 +61,6 @@ export async function PATCH(req: Request) {
   const url = new URL(req.url)
 
   const fileId = url.searchParams.get('fileId') ?? ''
-  const todoId = url.searchParams.get('id') ?? ''
   const index = url.searchParams.get('index') ?? ''
 
   const description = url.searchParams.get('description') ?? ''

@@ -1,4 +1,4 @@
-import { Todo } from '@/app/models/Todo'
+import { TodoWithChildren } from '@/app/models/Todo'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Dispatch, Fragment, SetStateAction, useEffect, useRef } from 'react'
@@ -13,42 +13,34 @@ import UISpinner from './UISpinner'
 
 export interface Props {
   total?: number
-  todos?: Todo[]
+  todos?: TodoWithChildren[]
+  setTodos: Dispatch<SetStateAction<TodoWithChildren[] | undefined>>
   isLoading: boolean
-  childrenMap: Record<string, Todo[]>
-  isExpandMap: Record<string, boolean>
-  updateStatus: (todo: Todo, status: Todo['status']) => void
-  setChildrenMap: Dispatch<SetStateAction<Record<string, Todo[]>>>
-  setIsExpandMap: Dispatch<SetStateAction<Record<string, boolean>>>
+  updateStatus: (
+    todo: TodoWithChildren,
+    status: TodoWithChildren['status'],
+    parentId?: string
+  ) => void
   setPage: Dispatch<SetStateAction<number>>
   isTodosNextLoading: boolean
 }
 
-export default function TodosTableImpl(props: Props) {
+export default function TodosTable(props: Props) {
   const todosStore = useTodosStore()
 
   const nextLoaderEl = useRef<HTMLDivElement>(null)
 
-  const getDescendantsFlat = async (todoId?: string): Promise<void> => {
-    if (todoId == null) return
-    if (!props.isExpandMap[todoId] && props.childrenMap[todoId] == null) {
-      const res = await todosStore.getDescendantsFlat(todoId)
-      props.setChildrenMap((prev) => ({ ...prev, [todoId]: res }))
+  const expandRow = async (todo: TodoWithChildren): Promise<void> => {
+    let children = todo.children
+    if (!todo.isExpanded && todo.childId && !todo.children) {
+      children = await todosStore.getDescendantsFlat(todo.id)
     }
 
-    props.setIsExpandMap((prev) => ({ ...prev, [todoId]: !props.isExpandMap[todoId] }))
-  }
-
-  const updateStatus = (status: Todo['status'], index: number, parentTodoId?: string): void => {
-    if (parentTodoId == null) return
-
-    if (props.childrenMap?.[parentTodoId][index].id)
-      todosStore.updateStatus(props.childrenMap?.[parentTodoId][index].id, status)
-
-    props?.setChildrenMap((prev) => {
-      prev[parentTodoId][index].status = status
-      return { ...prev }
-    })
+    props.setTodos((prev) =>
+      prev?.map((item) =>
+        item.id === todo.id ? { ...item, isExpanded: !todo.isExpanded, children } : item
+      )
+    )
   }
 
   useEffect(() => {
@@ -92,7 +84,7 @@ export default function TodosTableImpl(props: Props) {
             <th
               scope='col'
               className='text-left | bg-white dark:bg-zinc-800 | sticky left-0 top-0 z-[2]'>
-              <div className='h-[50px] | flex items-center justify-center | border-b-3 border-gray-200 dark:border-zinc-700'>
+              <div className='h-[50px] | flex items-center justify-start | border-b-3 border-gray-200 dark:border-zinc-700'>
                 내용
               </div>
             </th>
@@ -134,17 +126,16 @@ export default function TodosTableImpl(props: Props) {
                 <TodosTableRow
                   index={index}
                   todo={todo}
-                  getDescendantsFlat={getDescendantsFlat}
-                  idExpanded={!!(todo?.id && props.isExpandMap[todo.id])}
+                  expandRow={expandRow}
                   updateStatus={(status, todo) => props.updateStatus(todo, status)}
                 />
-                {todo?.id &&
-                  props.isExpandMap[todo.id] &&
-                  props.childrenMap[todo.id]?.map((child, index) => (
+                {todo.isExpanded &&
+                  todo.children?.map((child) => (
                     <TodosTableRow
                       key={child.id}
                       todo={child}
-                      updateStatus={(status) => updateStatus(status, index, todo.id)}
+                      parent={todo}
+                      updateStatus={(status) => props.updateStatus(child, status, todo.id)}
                     />
                   ))}
               </Fragment>
@@ -167,11 +158,11 @@ export default function TodosTableImpl(props: Props) {
 }
 
 function TodosTableRow(props: {
-  todo: Todo
-  idExpanded?: boolean
-  updateStatus?: (status: Todo['status'], todo: Todo) => void
+  todo: TodoWithChildren
+  parent?: TodoWithChildren
+  expandRow?: (todo: TodoWithChildren) => Promise<void>
+  updateStatus?: (status: TodoWithChildren['status'], todo: TodoWithChildren) => void
   index?: number
-  getDescendantsFlat?: (todoId?: string) => Promise<void>
 }) {
   const searchParams = useSearchParams()
 
@@ -191,8 +182,8 @@ function TodosTableRow(props: {
           <button
             type='button'
             className='w-full flex justify-center'
-            onClick={() => props.getDescendantsFlat?.(props.todo.id)}>
-            {props.idExpanded ? (
+            onClick={() => props.expandRow?.(props.todo)}>
+            {props.todo?.isExpanded ? (
               <Icon
                 name='chevron-up'
                 className='text-[20px]'
@@ -211,7 +202,7 @@ function TodosTableRow(props: {
           'overflow-hidden': props.index === 0,
         })}>
         <Link
-          className='relative py-[12px] flex justify-center'
+          className='relative py-[8px] flex justify-center'
           href={`/todos/?todoTag=${props.todo.id}`}>
           {!isFiltered && props.todo.parentId && (
             <div className='absolute top-[-30px] | border-l-[2px] border-dotted border-slate-300 dark:border-zinc-600 | h-[40px]'></div>
@@ -224,7 +215,7 @@ function TodosTableRow(props: {
         </Link>
       </td>
       <td>
-        <div className='py-[12px] | flex justify-center'>
+        <div className='py-[8px] | flex justify-center'>
           <TodosStatus
             status={props.todo.status}
             select={(status) => props.updateStatus?.(status, props.todo)}
@@ -233,7 +224,7 @@ function TodosTableRow(props: {
       </td>
       <th scope='row'>
         <Link
-          className='text-left truncate | py-[12px] | block | max-w-[600px]'
+          className='text-left truncate | py-[8px] | block | max-w-[600px]'
           href={`/todos/${props.todo.id}`}>
           {props.todo.description?.slice(0, 40)?.split(/\n/)[0]}
         </Link>
@@ -241,16 +232,23 @@ function TodosTableRow(props: {
       <td>
         <div className='flex items-center justify-center gap-[8px]'>
           <Link
-            className='w-full | py-[12px] | block'
+            className='w-full | py-[8px] | block'
             href={`/todos/${props.todo.id}`}>
             <TodosPeriodText todo={props.todo} />
           </Link>
         </div>
       </td>
 
-      <td className='py-[12px] pr-[8px]'>
+      <td className='py-[8px] pr-[8px]'>
         <div className='w-[20px] mx-auto'>
-          {props.todo.id && <TodosDropdown todo={props.todo} />}
+          {props.todo.id && (
+            <TodosDropdown
+              hideDelete
+              todo={props.todo}
+              parent={props.parent}
+              position={{ x: 'RIGHT' }}
+            />
+          )}
         </div>
       </td>
     </tr>

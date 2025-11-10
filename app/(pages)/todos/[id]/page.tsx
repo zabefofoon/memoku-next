@@ -15,12 +15,13 @@ import { useTodosStore } from '@/app/stores/todos.store'
 import etcUtil from '@/app/utils/etc.util'
 import debounce from 'lodash.debounce'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 
-export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
+export default function TodosDetail() {
   const router = useRouter()
   const params = useParams()
+  const searchParams = useSearchParams()
   const todosStore = useTodosStore()
   const imagesStore = useImagesStore()
   const sheetStore = useSheetStore()
@@ -41,9 +42,8 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
   const saveText = useMemo(
     () =>
       debounce(async (text: string): Promise<void> => {
-        const params = await props.params
         setTextValue(text)
-        if (params.id) todosStore.updateDescription(params.id, text)
+        if (params.id) todosStore.updateDescription(params.id as string, text)
         window.dispatchEvent(new CustomEvent('updateText', { detail: text }))
       }, 250),
     []
@@ -109,9 +109,9 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
   }
 
   const deleteTodo = async (): Promise<void> => {
-    const searchParams = await props.searchParams
-    if (searchParams.deleteModal) {
-      await todosStore.deleteTodo(searchParams.deleteModal.toString())
+    const deleteQuery = searchParams.get('deleteModal')
+    if (deleteQuery) {
+      await todosStore.deleteTodo(deleteQuery)
       router.back()
       await etcUtil.sleep(250)
       router.replace('/todos')
@@ -119,10 +119,9 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
   }
 
   const changeTag = async (tag: Tag): Promise<void> => {
-    const searchParams = await props.searchParams
-
-    if (searchParams.todoTag) {
-      await todosStore.updateTag(searchParams.todoTag.toString(), tag.id)
+    const tagQuery = searchParams.get('todoTag')
+    if (tagQuery) {
+      await todosStore.updateTag(tagQuery, tag.id)
       setTodo((prev) => prev && { ...prev, tagId: tag.id })
       router.back()
     }
@@ -134,12 +133,11 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
   }
 
   const updateTime = async (
-    id: string,
+    todo: Todo,
     values: { start: Todo['start']; end: Todo['end']; days?: Todo['days'] }
   ): Promise<void> => {
-    await todosStore.updateTimes(id, values)
-
-    if (id === todo?.id) setTodo((prev) => prev && { ...prev, ...values })
+    await todosStore.updateTimes(todo.id, values)
+    setTodo((prev) => prev && { ...prev, ...values })
   }
 
   const deleteTime = async (id?: string): Promise<void> => {
@@ -153,25 +151,22 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
   }
 
   const handleSearchParams = async (): Promise<void> => {
-    const searchParams = await props.searchParams
-    setIsShowDeleteModal(!!searchParams.deleteModal)
-    setIsShowTagModal(!!searchParams.todoTag)
-    setIsShowImageModal(!!searchParams.images)
-    setIsShowTimeModal(!!searchParams.time)
+    setIsShowDeleteModal(!!searchParams.get('deleteModal'))
+    setIsShowTagModal(!!searchParams.get('todoTag'))
+    setIsShowImageModal(!!searchParams.get('images'))
+    setIsShowTimeModal(!!searchParams.get('time'))
   }
 
   const addImage = async (file: Blob): Promise<void> => {
-    const params = await props.params
-
     const [blob, base64String] = await etcUtil.fileToWebp(file)
-    const id = await imagesStore.postImage(params.id, blob)
+    const id = await imagesStore.postImage(params.id as string, blob)
 
     let removedId: string | undefined
 
     setImages((prev) => {
       const items = prev ? [...prev] : []
       if (items.length >= 5) removedId = items.pop()?.id
-      items.unshift({ id, image: base64String, todoId: params.id })
+      items.unshift({ id, image: base64String, todoId: params.id as string })
       return items
     })
 
@@ -197,9 +192,8 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
   }
 
   const deleteImage = async (): Promise<void> => {
-    const searchParams = await props.searchParams
-    const image = searchParams.image ?? ''
-    if (image) await imagesStore.deleteImage(image.toString())
+    const image = searchParams.get('image') ?? ''
+    if (image) await imagesStore.deleteImage(image)
     setImages((prev) => prev?.filter((item) => item.id !== image))
     router.back()
   }
@@ -214,7 +208,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
 
   useEffect(() => {
     handleSearchParams()
-  }, [props.searchParams])
+  }, [searchParams])
 
   if (isLoading)
     return (
@@ -227,7 +221,7 @@ export default function TodosDetail(props: PageProps<'/todos/[id]'>) {
       <div className='flex-1 | flex flex-col | max-h-full'>
         <TodosTimeModal
           isShow={isShowTimeModal}
-          todos={[todo].filter((todo) => !!todo)}
+          todo={todo}
           updateTime={updateTime}
           close={router.back}
         />

@@ -15,9 +15,9 @@ import UIModal from './UIModal'
 
 interface Props {
   isShow: boolean
-  todos: Todo[]
+  todo?: Todo
   updateTime: (
-    id: string,
+    todo: Todo,
     values: { start: Todo['start']; end: Todo['end']; days?: Todo['days'] }
   ) => Promise<void>
   close: () => void
@@ -59,33 +59,26 @@ export default function TodosTimeModal(props: Props): ReactNode {
   const [days, setDays] = useState<WeekDay[]>([])
 
   const initStates = (): void => {
-    const todo = getCurrentTodo()
-    if (todo == null) return
+    if (props.todo == null) return
 
     let step: 'select' | 'plan' | 'iterate' = 'select'
-    if (todo.start && todo.days) step = 'iterate'
-    else if (todo.start) step = 'plan'
+    if (props.todo.start && props.todo.days) step = 'iterate'
+    else if (props.todo.start) step = 'plan'
 
-    const startDate = dayjs(todo.start).toDate()
-    const startHour = todo.start ? dayjs(todo.start).get('hour').valueOf() : 0
-    const startMinute = todo.start ? dayjs(todo.start).get('minute').valueOf() : 0
+    const startDate = dayjs(props.todo.start).toDate()
+    const startHour = props.todo.start ? dayjs(props.todo.start).get('hour').valueOf() : 0
+    const startMinute = props.todo.start ? dayjs(props.todo.start).get('minute').valueOf() : 0
 
-    const endtDate = dayjs(todo.end).toDate()
-    const endtHour = todo.end ? dayjs(todo.end).get('hour').valueOf() : 23
-    const endinute = todo.end ? dayjs(todo.end).get('minute').valueOf() : 55
+    const endtDate = dayjs(props.todo.end).toDate()
+    const endtHour = props.todo.end ? dayjs(props.todo.end).get('hour').valueOf() : 23
+    const endinute = props.todo.end ? dayjs(props.todo.end).get('minute').valueOf() : 55
 
     setStep(step)
     setMode('start')
-    setSelectedMode(todo.days ? 'iterate' : 'plan')
+    setSelectedMode(props.todo.days ? 'iterate' : 'plan')
     setStart({ date: startDate, hour: startHour, minute: startMinute })
     setEnd({ date: endtDate, hour: endtHour, minute: endinute })
-    setDays(todo.days ?? [])
-  }
-
-  const getCurrentTodo = (): Todo | undefined => {
-    const todoId = searchParams.get('time')
-
-    return props.todos.find((todo) => todo.id === todoId)
+    setDays(props.todo.days ?? [])
   }
 
   const setDate = (value: Date): void => {
@@ -110,12 +103,10 @@ export default function TodosTimeModal(props: Props): ReactNode {
   }
 
   const handleSelect = (): void => {
+    if (props.todo == null) return
+
     if (selectedMode === 'reset') {
-      const todoId = searchParams.get('time')
-
-      if (!todoId) return
-
-      props.updateTime(todoId, { start: undefined, end: undefined, days: undefined })
+      props.updateTime(props.todo, { start: undefined, end: undefined, days: undefined })
       props.close()
     } else if (step === 'select') setStep(selectedMode)
     else {
@@ -133,11 +124,7 @@ export default function TodosTimeModal(props: Props): ReactNode {
         .valueOf()
       const daysValue = selectedMode === 'iterate' && days.length ? days : undefined
 
-      const todoId = searchParams.get('time')
-
-      if (!todoId) return
-
-      props.updateTime(todoId, { start: startValue, end: endValue, days: daysValue })
+      props.updateTime(props.todo, { start: startValue, end: endValue, days: daysValue })
       props.close()
     }
   }

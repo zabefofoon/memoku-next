@@ -2,45 +2,42 @@
 
 import { Icon } from '@/app/components/Icon'
 import TodosCards from '@/app/components/TodosCards'
-import { TodosDeleteModal } from '@/app/components/TodosDeleteModal'
 import TodosSearch from '@/app/components/TodosSearch'
 import TodosStatusDropdown from '@/app/components/TodosStatusDropdown'
 import TodosTable from '@/app/components/TodosTable'
 import { TodosTagModal } from '@/app/components/TodosTagModal'
 import TodosTagsFilter from '@/app/components/TodosTagsFilter'
 import TodosTimeModal from '@/app/components/TodosTimeModal'
-import { Tag, Todo } from '@/app/models/Todo'
+import { Tag, TodoWithChildren } from '@/app/models/Todo'
 import { useSheetStore } from '@/app/stores/sheet.store'
 import { useTodosStore } from '@/app/stores/todos.store'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
-export default function Todos(props: PageProps<'/todos'>) {
+export default function Todos() {
   const todosStore = useTodosStore()
   const sheetStore = useSheetStore()
   const searchParams = useSearchParams()
   const router = useRouter()
 
   const [page, setPage] = useState<number>(0)
-  const [todos, setTodos] = useState<Todo[]>()
+  const [todos, setTodos] = useState<TodoWithChildren[]>()
   const [isTodosLoading, setIsTodosLoading] = useState<boolean>(false)
   const [isTodosNextLoading, setIsTodosNextLoading] = useState<boolean>(false)
   const [total, setTotal] = useState<number>()
 
-  const [isShowDeleteModal, setIsShowDeleteModal] = useState<boolean>(false)
   const [isShowTimeModal, setIsShowTimeModal] = useState<boolean>(false)
   const [isShowTagModal, setIsShowTagModal] = useState(false)
 
-  const [childrenMap, setChildrenMap] = useState<Record<number, Todo[]>>({})
-  const [isExpandMap, setIsExpandMap] = useState<Record<number, boolean>>({})
-
-  const timeTargetTodo = todos?.find((todo) => {
-    return todo.id === searchParams.get('time')
-  })
+  const timeTargetTodo = searchParams.get('parent')
+    ? todos
+        ?.find(({ id }) => id === searchParams.get('parent'))
+        ?.children?.find(({ id }) => id === searchParams.get('time'))
+    : todos?.find(({ id }) => id === searchParams.get('time'))
 
   const searchText = searchParams.get('searchText') ?? ''
   const status = searchParams.get('status') ?? ''
-  const tags = searchParams.get('tags') ?? '' // e.g. "1,2,3"
+  const tags = searchParams.get('tags') ?? ''
 
   const filterKey = useMemo(() => `${searchText}|${status}|${tags}`, [searchText, status, tags])
   const loadingRef = useRef(false)
@@ -85,122 +82,81 @@ export default function Todos(props: PageProps<'/todos'>) {
     router.push(`/todos/${res}`)
   }
 
-  const deleteTodo = async (): Promise<void> => {
-    const todoId = searchParams.get('deleteModal') ?? ''
-
-    await todosStore.deleteTodo(todoId)
-    const todoIndex = todos?.findIndex(({ id }) => id === todoId) ?? -1
-    if (todoIndex !== -1) {
-      const todo = todos?.[todoIndex]
-      if (!todo) return
-
-      let child: Todo
-
-      if (todo.childId) child = await todosStore.getTodo(todo.childId)
-      setTodos((prev) => {
-        const sliced = prev?.slice() ?? []
-        if (child) sliced?.splice(todoIndex, 1, child)
-        else sliced?.splice(todoIndex, 1)
-        return sliced
-      })
-    } else {
-      const todo = Object.values(childrenMap)
-        .flat()
-        .find(({ id }) => id === todoId)
-      if (!todo) return
-
-      const bucketKey = Object.keys(childrenMap)
-        .map((k) => Number(k))
-        .find((k) => childrenMap[k]?.some((c) => c.id === todoId))
-
-      if (bucketKey == null) return
-
-      setChildrenMap((prev) => {
-        const arr = prev[bucketKey] ?? []
-        const nextArr = arr.filter(({ id }) => id !== todoId)
-        return { ...prev, [bucketKey]: nextArr }
-      })
-
-      const parentId = todo.parentId
-      if (parentId != null) {
-        setTodos((prev) => {
-          if (!prev) return prev
-          return prev.map((t) => (t.id === parentId ? { ...t, childId: todo.childId } : t))
-        })
-      }
-    }
-    router.back()
-  }
-
-  const updateStatus = async (todo: Todo, status: Todo['status']): Promise<void> => {
+  const updateStatus = async (
+    todo: TodoWithChildren,
+    status: TodoWithChildren['status'],
+    parentId?: string
+  ): Promise<void> => {
     if (todos == null) return
     if (sheetStore.fileId) {
       await fetch(
-        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&id=${todo.id}&status=${status}&index=${todo.index}`,
+        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&status=${status}&index=${todo.index}`,
         { method: 'PATCH' }
       )
     } else {
       await todosStore.updateStatus(todo.id, status)
     }
 
-    if (todos.find(({ id }) => id === todo.id))
-      setTodos(
-        (prev) => prev?.map((item) => (item.id === todo.id ? { ...item, status } : item)) ?? prev
-      )
+    setTodos((prev) => {
+      if (!prev) return prev
+
+      return prev.map((item) => {
+        if (!parentId) return item.id === todo.id ? { ...item, status } : item
+        else {
+          return {
+            ...item,
+            children: (item.children ?? []).map((child) =>
+              child.id === todo.id ? { ...child, status } : child
+            ),
+          }
+        }
+      })
+    })
   }
 
   const updateTime = async (
-    id: string,
-    values: { start: Todo['start']; end: Todo['end']; days?: Todo['days'] }
-  ): Promise<void> => {
-    const todoId = searchParams.get('time') ?? ''
-
-    await todosStore.updateTimes(id, values)
-
-    const found = todos?.findIndex((todo) => todo.id === id) ?? -1
-    if (found >= 0)
-      setTodos(
-        (prev) => prev?.map((todo) => (todo.id === todoId ? { ...todo, ...values } : todo)) ?? prev
-      )
-    else {
-      const todo = Object.values(childrenMap)
-        .flat()
-        .find(({ id }) => id === todoId)
-      if (!todo) return
-
-      const bucketKey = Object.keys(childrenMap)
-        .map((k) => Number(k))
-        .find((k) => childrenMap[k]?.some((c) => c.id === todoId))
-
-      if (bucketKey == null) return
-
-      setChildrenMap((prev) => {
-        const arr = prev[bucketKey] ?? []
-        const nextArr = arr.map((c) => (c.id === id ? { ...c, ...values } : c))
-        return { ...prev, [bucketKey]: nextArr }
-      })
+    todo: TodoWithChildren,
+    values: {
+      start: TodoWithChildren['start']
+      end: TodoWithChildren['end']
+      days?: TodoWithChildren['days']
     }
+  ): Promise<void> => {
+    await todosStore.updateTimes(todo.id, values)
+
+    setTodos((prev) => {
+      if (!prev) return prev
+      return prev.map((item) => {
+        if (!searchParams.get('parent')) return item.id === todo.id ? { ...item, ...values } : item
+        else {
+          return {
+            ...item,
+            children: (item.children ?? []).map((child) =>
+              child.id === todo.id ? { ...child, ...values } : child
+            ),
+          }
+        }
+      })
+    })
   }
 
   const changeTag = async (tag: Tag): Promise<void> => {
     const tagTargetTodo = todos?.find(({ id }) => id === searchParams.get('todoTag'))
+    if (!tagTargetTodo?.id) return router.back()
 
-    if (tagTargetTodo?.id) {
-      if (sheetStore.fileId) {
-        await fetch(
-          `/api/sheet/google/todo?fileId=${sheetStore.fileId}&id=${tagTargetTodo.id}&tag=${tag.id}&index=${tagTargetTodo.index}`,
-          { method: 'PATCH' }
-        )
-      } else {
-        await todosStore.updateTag(tagTargetTodo.id, tag.id)
-      }
-      setTodos(
-        (prev) =>
-          prev?.map((todo) => (todo.id === tagTargetTodo.id ? { ...todo, tagId: tag.id } : todo)) ??
-          prev
+    if (sheetStore.fileId)
+      await fetch(
+        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&tag=${tag.id}&index=${tagTargetTodo.index}`,
+        { method: 'PATCH' }
       )
-      router.back()
-    }
+    else await todosStore.updateTag(tagTargetTodo.id, tag.id)
+
+    setTodos((prev) => {
+      if (!prev) return prev
+      return prev.map((todo) => (todo.id === tagTargetTodo.id ? { ...todo, tagId: tag.id } : todo))
+    })
+
+    router.back()
   }
 
   useLayoutEffect(() => {
@@ -216,21 +172,15 @@ export default function Todos(props: PageProps<'/todos'>) {
   }, [filterKey])
 
   useEffect(() => {
-    setIsShowDeleteModal(!!searchParams.get('deleteModal'))
     setIsShowTimeModal(!!searchParams.get('time'))
     setIsShowTagModal(!!searchParams.get('todoTag'))
-  }, [props.searchParams])
+  }, [searchParams])
 
   return (
     <div className='flex flex-col | sm:max-h-full'>
-      <TodosDeleteModal
-        isShow={isShowDeleteModal}
-        close={router.back}
-        delete={deleteTodo}
-      />
       <TodosTimeModal
         isShow={isShowTimeModal}
-        todos={[timeTargetTodo].filter((todo) => !!todo)}
+        todo={timeTargetTodo}
         updateTime={updateTime}
         close={router.back}
       />
@@ -265,24 +215,18 @@ export default function Todos(props: PageProps<'/todos'>) {
       <TodosTable
         total={total}
         todos={todos}
+        setTodos={setTodos}
         isLoading={isTodosLoading}
         updateStatus={updateStatus}
-        childrenMap={childrenMap}
-        setChildrenMap={setChildrenMap}
-        isExpandMap={isExpandMap}
-        setIsExpandMap={setIsExpandMap}
         setPage={setPage}
         isTodosNextLoading={isTodosNextLoading}
       />
       <TodosCards
         total={total}
         todos={todos}
+        setTodos={setTodos}
         isLoading={isTodosLoading}
         updateStatus={updateStatus}
-        childrenMap={childrenMap}
-        setChildrenMap={setChildrenMap}
-        isExpandMap={isExpandMap}
-        setIsExpandMap={setIsExpandMap}
         setPage={setPage}
         isTodosNextLoading={isTodosNextLoading}
       />

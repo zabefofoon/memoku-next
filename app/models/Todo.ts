@@ -1,5 +1,9 @@
 import { TAG_COLORS } from '@/const'
 
+export interface TodoWithChildren extends Todo {
+  isExpanded?: boolean
+  children?: Todo[]
+}
 export interface Todo {
   id: string
   description?: string

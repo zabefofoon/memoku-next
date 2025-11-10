@@ -6,6 +6,7 @@ import UIDropdown, { Position } from './UIDropdown'
 
 interface Props {
   todo: Todo
+  parent?: Todo
   position?: Partial<Position>
   hideTime?: boolean
   hideEdit?: boolean
@@ -34,7 +35,7 @@ export function TodosDropdown(props: Props) {
         <div className='py-[3px] | flex flex-col'>
           {!props.hideTime && (
             <Link
-              href={`?time=${props.todo.id}`}
+              href={`?time=${props.todo.id}&parent=${props.parent?.id ?? ''}`}
               className='px-[6px] py-[4px] | flex items-center justify-start gap-[6px] | hover:bg-slate-50 hover:dark:bg-zinc-600'
               onClick={() => toggle(false)}>
               <Icon
@@ -57,7 +58,7 @@ export function TodosDropdown(props: Props) {
           )}
           {!props.hideDelete && (
             <Link
-              href={`?deleteModal=${props.todo.id}`}
+              href={`?deleteModal=${props.todo.id}&parent=${props.parent?.id ?? ''}`}
               className='px-[6px] py-[4px] | flex items-center justify-start gap-[6px] | hover:bg-slate-100 hover:dark:bg-red-600'
               onClick={() => toggle(false)}>
               <Icon
