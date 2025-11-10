@@ -132,14 +132,20 @@ export default function Todos(props: PageProps<'/todos'>) {
     router.back()
   }
 
-  const updateStatus = async (status: Todo['status'], todoId?: string): Promise<void> => {
-    if (todoId == null) return
+  const updateStatus = async (todo: Todo, status: Todo['status']): Promise<void> => {
     if (todos == null) return
+    if (sheetStore.fileId) {
+      await fetch(
+        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&id=${todo.id}&status=${status}&index=${todo.index}`,
+        { method: 'PATCH' }
+      )
+    } else {
+      await todosStore.updateStatus(todo.id, status)
+    }
 
-    todosStore.updateStatus(todoId, status)
-    if (todos.find((todo) => todo.id === todoId))
+    if (todos.find(({ id }) => id === todo.id))
       setTodos(
-        (prev) => prev?.map((todo) => (todo.id === todoId ? { ...todo, status } : todo)) ?? prev
+        (prev) => prev?.map((item) => (item.id === todo.id ? { ...item, status } : item)) ?? prev
       )
   }
 
@@ -177,14 +183,17 @@ export default function Todos(props: PageProps<'/todos'>) {
   }
 
   const changeTag = async (tag: Tag): Promise<void> => {
-    const tagTargetTodo = todos?.find((todo) => {
-      const todoId = searchParams.get('todoTag')
-
-      return todo.id === todoId
-    })
+    const tagTargetTodo = todos?.find(({ id }) => id === searchParams.get('todoTag'))
 
     if (tagTargetTodo?.id) {
-      await todosStore.updateTag(tagTargetTodo.id, tag.id)
+      if (sheetStore.fileId) {
+        await fetch(
+          `/api/sheet/google/todo?fileId=${sheetStore.fileId}&id=${tagTargetTodo.id}&tag=${tag.id}&index=${tagTargetTodo.index}`,
+          { method: 'PATCH' }
+        )
+      } else {
+        await todosStore.updateTag(tagTargetTodo.id, tag.id)
+      }
       setTodos(
         (prev) =>
           prev?.map((todo) => (todo.id === tagTargetTodo.id ? { ...todo, tagId: tag.id } : todo)) ??

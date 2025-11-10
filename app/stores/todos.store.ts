@@ -181,7 +181,7 @@ export const useTodosStore = create(() => {
   }
 
   const updateTag = (id: string, tagId: string): Promise<number> => {
-    return db.todos.update(id, { tagId })
+    return db.todos.update(id, { tagId, modified: Date.now() })
   }
 
   const updateStatus = (id: string, status: Todo['status']): Promise<number> => {

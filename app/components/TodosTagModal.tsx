@@ -36,7 +36,7 @@ export function TodosTagModal(props: Props) {
                 id={tag.id}
                 click={() => setSelectedTag(tag)}
               />
-              {selectedTag?.color === tag.color && (
+              {selectedTag?.id === tag.id && (
                 <div className='flex items-center justify-center  | absolute top-0 left-0 z-[1] | w-full h-full rounded-full | bg-black/50'>
                   <Icon
                     name='check'

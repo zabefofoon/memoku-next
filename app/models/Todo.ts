@@ -14,6 +14,7 @@ export interface Todo {
   status: 'created' | 'inprogress' | 'done' | 'hold'
   days?: WeekDay[]
   dirty?: boolean
+  index?: number
 }
 
 export interface Setting {

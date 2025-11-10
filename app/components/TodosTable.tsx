@@ -17,7 +17,7 @@ export interface Props {
   isLoading: boolean
   childrenMap: Record<string, Todo[]>
   isExpandMap: Record<string, boolean>
-  updateStatus: (status: Todo['status'], todoId?: string) => void
+  updateStatus: (todo: Todo, status: Todo['status']) => void
   setChildrenMap: Dispatch<SetStateAction<Record<string, Todo[]>>>
   setIsExpandMap: Dispatch<SetStateAction<Record<string, boolean>>>
   setPage: Dispatch<SetStateAction<number>>
@@ -136,7 +136,7 @@ export default function TodosTableImpl(props: Props) {
                   todo={todo}
                   getDescendantsFlat={getDescendantsFlat}
                   idExpanded={!!(todo?.id && props.isExpandMap[todo.id])}
-                  updateStatus={props.updateStatus}
+                  updateStatus={(status, todo) => props.updateStatus(todo, status)}
                 />
                 {todo?.id &&
                   props.isExpandMap[todo.id] &&
@@ -169,7 +169,7 @@ export default function TodosTableImpl(props: Props) {
 function TodosTableRow(props: {
   todo: Todo
   idExpanded?: boolean
-  updateStatus?: Props['updateStatus']
+  updateStatus?: (status: Todo['status'], todo: Todo) => void
   index?: number
   getDescendantsFlat?: (todoId?: string) => Promise<void>
 }) {
@@ -227,7 +227,7 @@ function TodosTableRow(props: {
         <div className='py-[12px] | flex justify-center'>
           <TodosStatus
             status={props.todo.status}
-            select={(status) => props.updateStatus?.(status, props.todo.id)}
+            select={(status) => props.updateStatus?.(status, props.todo)}
           />
         </div>
       </td>

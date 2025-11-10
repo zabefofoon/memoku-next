@@ -64,6 +64,7 @@ export async function GET(req: Request) {
         ?.flatMap(({ values }) => values)
         .map((row) => {
           const _row = row!
+
           return {
             id: _row[0],
             description: _row[1],
@@ -77,6 +78,7 @@ export async function GET(req: Request) {
             start: Number(_row[9]),
             end: Number(_row[10]),
             days: _row[11]?.split(','),
+            index: allTodos.find(({ id }) => id === _row[0])?.index,
           }
         })
       return NextResponse.json({ ok: res.ok, todos, total })
@@ -143,6 +145,7 @@ export async function GET(req: Request) {
             start: Number(_row[9]),
             end: Number(_row[10]),
             days: _row[11]?.split(','),
+            index: allTodos.find(({ id }) => id === _row[0])?.index,
           }
         })
       return NextResponse.json({ ok: res.ok, todos, total })

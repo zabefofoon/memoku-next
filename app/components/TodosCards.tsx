@@ -16,7 +16,7 @@ export interface Props {
   isLoading: boolean
   childrenMap: Record<string, Todo[]>
   isExpandMap: Record<string, boolean>
-  updateStatus: (status: Todo['status'], todoId?: string) => void
+  updateStatus: (todo: Todo, status: Todo['status']) => void
   setChildrenMap: Dispatch<SetStateAction<Record<string, Todo[]>>>
   setIsExpandMap: Dispatch<SetStateAction<Record<string, boolean>>>
   setPage: Dispatch<SetStateAction<number>>
@@ -76,7 +76,7 @@ export default function TodosCards(props: Props) {
               <TodoCard
                 todo={todo}
                 getDescendantsFlat={getDescendantsFlat}
-                updateStatus={props.updateStatus}
+                updateStatus={(status, todo) => props.updateStatus(todo, status)}
                 idExpanded={!!(todo.id && props.isExpandMap[todo.id])}
               />
               {todo.id &&
@@ -114,7 +114,7 @@ export default function TodosCards(props: Props) {
 function TodoCard(props: {
   todo: Todo
   idExpanded?: boolean
-  updateStatus?: Props['updateStatus']
+  updateStatus?: (status: Todo['status'], todo: Todo) => void
   getDescendantsFlat?: (todoId?: string) => Promise<void>
 }) {
   const searchParams = useSearchParams()
@@ -127,7 +127,13 @@ function TodoCard(props: {
   return (
     <div className='w-full overflow-hidden | flex flex-col gap-[8px] | bg-white dark:bg-zinc-800 shadow-md rounded-xl | p-[8px]'>
       <div className='flex items-center'>
-        {isShowBadge && <TagBadge id={props.todo.tagId} />}
+        {isShowBadge && (
+          <Link
+            className='relative py-[12px] flex justify-center'
+            href={`/todos/?todoTag=${props.todo.id}`}>
+            <TagBadge id={props.todo.tagId} />
+          </Link>
+        )}
         <Link
           href={`/todos/${props.todo.id}`}
           className='block | text-[14px] truncate | w-full | px-[6px]'>
@@ -136,7 +142,7 @@ function TodoCard(props: {
         <div className='flex items-center gap-[6px]'>
           <TodosStatus
             status={props.todo.status}
-            select={(status) => props.updateStatus?.(status, props.todo.id)}
+            select={(status) => props.updateStatus?.(status, props.todo)}
           />
           {props.todo.id && (
             <TodosDropdown
