@@ -241,6 +241,10 @@ export const useTodosStore = create(() => {
     })
   }
 
+  const getMetas = async (): Promise<{ id: string; modified?: number }[]> => {
+    return db.todos.toArray((todos) => todos.map(({ id, modified }) => ({ id, modified })))
+  }
+
   return {
     getAllDirtyTodos,
     getTodo,
@@ -264,5 +268,6 @@ export const useTodosStore = create(() => {
     updateDirties,
     getAllTodos,
     addNewTodoBulk,
+    getMetas,
   }
 })

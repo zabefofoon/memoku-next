@@ -1,6 +1,7 @@
 'use client'
 
 import { PropsWithChildren, useEffect, useState } from 'react'
+import { Todo } from '../models/Todo'
 import { useAuthStore } from '../stores/auth.store'
 import { useSheetStore } from '../stores/sheet.store'
 import { useTodosStore } from '../stores/todos.store'
@@ -54,13 +55,55 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
     }
   }
 
+  const loadRemoteMetaRows = async (
+    fileId: string
+  ): Promise<{ id: string; modified: number; index: number }[]> => {
+    const res = await fetch(`/api/sheet/google/meta?fileId=${fileId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    const result = await res.json()
+    return result.metas
+  }
+
+  const loadLocalMetaRows = async (): Promise<{ id: string; modified?: number }[]> => {
+    return await todosStore.getMetas()
+  }
+
+  const loadNewOrUpdated = async (
+    fileId: string,
+    meta: { id: string; index: number }[]
+  ): Promise<Todo[]> => {
+    if (meta.length === 0) return []
+    const res = await fetch(`/api/sheet/google/meta`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileId, meta }),
+    })
+    const result = await res.json()
+    return result.todos
+  }
+
   useEffect(() => {
     if (!props.refreshToken) setIsAuthed(true)
     else
       loadGoogleMe().then(() =>
         loadSheetId().then((fileId) => {
           setIsAuthed(true)
-          if (fileId) pushDirties(fileId)
+          if (fileId)
+            pushDirties(fileId).then(() =>
+              loadRemoteMetaRows(fileId).then((remoteMeta) => {
+                loadLocalMetaRows().then((localMeta) => {
+                  const localMap = new Map(localMeta.map((l) => [l.id, l.modified]))
+                  const remoteNewOrUpdated = remoteMeta
+                    .filter((r) => !localMap.has(r.id) || r.modified > (localMap.get(r.id) ?? 0))
+                    .map(({ id, index }) => ({ id, index }))
+                  loadNewOrUpdated(fileId, remoteNewOrUpdated).then((todos) => {
+                    todosStore.addNewTodoBulk(todos)
+                  })
+                })
+              })
+            )
         })
       )
   }, [])
