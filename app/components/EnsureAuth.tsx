@@ -43,29 +43,48 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
     const todos = await todosStore.getAllDirtyTodos()
     if (todos.length === 0) return
 
-    const res = await fetch('/api/sheet/google/bulk', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileId, todos }),
-    })
+    const chunkSize = 200
+    for (let i = 0; i < todos.length; i += chunkSize) {
+      const chunk = todos.slice(i, i + chunkSize)
 
-    if (res.ok) {
-      const ids = todos.map(({ id }) => id).filter((id): id is string => Boolean(id))
-      todosStore.updateDirties(ids, false)
+      const res = await fetch('/api/sheet/google/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileId, todos: chunk }),
+      })
+
+      if (res.ok) {
+        const ids = chunk.map(({ id }) => id).filter((id): id is string => Boolean(id))
+        todosStore.updateDirties(ids, false)
+      } else break
     }
   }
 
   const loadRemoteMetaRows = async (
     fileId: string
   ): Promise<{ id: string; modified: number; index: number }[]> => {
-    const res = await fetch(`/api/sheet/google/meta?fileId=${fileId}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    })
-    const result = await res.json()
-    return result.metas
-  }
+    const chunkSize = 1000
+    let start = 2
+    const allMetas: { id: string; modified: number; index: number }[] = []
 
+    while (true) {
+      const end = start + chunkSize - 1
+      const res = await fetch(`/api/sheet/google/meta?fileId=${fileId}&start=${start}&end=${end}`, {
+        method: 'GET',
+      })
+      const result = await res.json()
+
+      if (!result.metas?.length) break
+
+      allMetas.push(...result.metas)
+
+      // 더 이상 데이터가 없으면 종료
+      if (result.metas.length < chunkSize) break
+      start += chunkSize
+    }
+
+    return allMetas
+  }
   const loadLocalMetaRows = async (): Promise<{ id: string; modified?: number }[]> => {
     return await todosStore.getMetas()
   }
@@ -75,23 +94,39 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
     meta: { id: string; index: number }[]
   ): Promise<Todo[]> => {
     if (meta.length === 0) return []
-    const res = await fetch(`/api/sheet/google/meta`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileId, meta }),
-    })
-    const result = await res.json()
-    return result.todos
+
+    const chunkSize = 200
+    const allTodos: Todo[] = []
+
+    for (let i = 0; i < meta.length; i += chunkSize) {
+      const chunk = meta.slice(i, i + chunkSize)
+
+      const res = await fetch(`/api/sheet/google/meta`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileId, meta: chunk }),
+      })
+
+      const result = await res.json()
+      if (result.ok && result.todos?.length) {
+        allTodos.push(...result.todos)
+      } else {
+        console.warn(`Chunk ${i / chunkSize + 1} failed`)
+        break
+      }
+    }
+
+    return allTodos
   }
 
   useEffect(() => {
     if (!props.refreshToken) setIsAuthed(true)
-    else
+    else {
       loadGoogleMe().then(() =>
         loadSheetId().then((fileId) => {
           setIsAuthed(true)
           if (fileId)
-            pushDirties(fileId).then(() =>
+            pushDirties(fileId).then(() => {
               loadRemoteMetaRows(fileId).then((remoteMeta) => {
                 loadLocalMetaRows().then((localMeta) => {
                   const localMap = new Map(localMeta.map((l) => [l.id, l.modified]))
@@ -103,9 +138,10 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
                   })
                 })
               })
-            )
+            })
         })
       )
+    }
   }, [])
 
   if (!isAuthed)

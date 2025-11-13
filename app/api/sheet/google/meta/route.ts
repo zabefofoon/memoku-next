@@ -5,8 +5,10 @@ import { NextResponse } from 'next/server'
 export async function GET(req: Request) {
   const url = new URL(req.url)
   const fileId = url.searchParams.get('fileId') ?? ''
+  const start = Number(url.searchParams.get('start') ?? '2')
+  const end = Number(url.searchParams.get('end') ?? start + 999)
 
-  if (fileId == null) return NextResponse.json({ ok: false })
+  if (!fileId) return NextResponse.json({ ok: false })
 
   const headerCookies = await cookies()
   const access = headerCookies.get('x-google-access-token')?.value
@@ -23,21 +25,19 @@ export async function GET(req: Request) {
 
   const res = await sheets.spreadsheets.values.batchGet({
     spreadsheetId: fileId,
-    ranges: ['todo2!A2:A', 'todo2!E2:E'],
+    ranges: [`todo2!A${start}:A${end}`, `todo2!E${start}:E${end}`],
     valueRenderOption: 'UNFORMATTED_VALUE',
   })
 
-  const [colA, colB] = res.data.valueRanges!
-  return NextResponse.json({
-    ok: res.ok,
-    metas: colA.values!.map((value, index) => {
-      return {
-        id: value[0],
-        modified: colB.values![index][0],
-        index: index + 2,
-      }
-    }),
-  })
+  const [colA, colB] = res.data.valueRanges ?? []
+  const metas =
+    colA?.values?.map((value, index) => ({
+      id: value[0],
+      modified: colB?.values?.[index]?.[0],
+      index: start + index,
+    })) ?? []
+
+  return NextResponse.json({ ok: true, metas })
 }
 
 export async function POST(req: Request) {
