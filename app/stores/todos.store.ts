@@ -10,6 +10,9 @@ export interface CreatedSeriesPoint {
 }
 
 export const useTodosStore = create(() => {
+  const checkExistTodo = async (id: string): Promise<boolean> => {
+    return (await db.todos.where('id').equals(id).count()) > 0
+  }
   const getAllDirtyTodos = async (): Promise<Todo[]> => {
     return db.todos.filter(({ dirty }) => Boolean(dirty) || dirty == null).toArray()
   }
@@ -30,7 +33,7 @@ export const useTodosStore = create(() => {
     const page = params?.page ?? 0
     const pageSize = 20
 
-    const isRoot = (t: Todo) => t.parentId == null
+    const isRoot = (t: Todo) => !t.parentId
 
     let coll = db.todos.orderBy('created').reverse()
 
@@ -139,56 +142,70 @@ export const useTodosStore = create(() => {
     return days.map((d) => ({ day: d, created: map.get(d) || 0 }))
   }
 
-  const postDescription = (description: string, parentId?: string): Promise<number> => {
-    return db.todos.add({
+  const postDescription = async (description: string, parentId?: string): Promise<Todo> => {
+    const todo = {
       id: etcUtil.generateUniqueId(),
       description,
       parentId,
       status: 'created',
       created: Date.now(),
       modified: Date.now(),
-    })
+      dirty: true,
+    } as Todo
+    await db.todos.add(todo)
+    return todo
   }
 
-  const addNewTodo = (todo: Todo): Promise<string> => {
+  const addNewTodo = (todo: Todo): Promise<Todo> => {
+    const newTodo = {
+      ...todo,
+      created: Date.now(),
+      modified: Date.now(),
+      dirty: true,
+    }
     return db.transaction('rw', db.todos, async () => {
-      const id = await db.todos.add({
-        ...todo,
-        id: etcUtil.generateUniqueId(),
-        created: Date.now(),
-        modified: Date.now(),
-      })
+      const id = await db.todos.add(newTodo)
       if (todo.parentId) await db.todos.update(todo.parentId, { childId: id })
 
-      return id
+      return newTodo
     })
   }
 
   const addNewTodoBulk = (todos: Todo[]): Promise<number> => {
-    return db.todos.bulkAdd(todos)
+    return db.todos.bulkPut(todos)
   }
 
   const updateDescription = (id: string, description: string): Promise<number> => {
     return db.todos.update(id, { description, modified: Date.now(), dirty: true })
   }
 
-  const updateTimes = (
+  const updateTimes = async (
     id: string,
     range: { start?: number; end?: number; days?: WeekDay[] }
   ): Promise<number> => {
-    return db.todos.update(id, { ...range, modified: Date.now() })
+    const now = Date.now()
+    await db.todos.update(id, { ...range, dirty: true, modified: Date.now() })
+    return now
   }
 
-  const updateTag = (id: string, tagId: string): Promise<number> => {
-    return db.todos.update(id, { tagId, modified: Date.now() })
+  const updateTag = async (id: string, tagId: string): Promise<number> => {
+    const now = Date.now()
+    await db.todos.update(id, { tagId, dirty: true, modified: Date.now() })
+    return now
   }
 
-  const updateStatus = (id: string, status: Todo['status']): Promise<number> => {
-    return db.todos.update(id, { status, modified: Date.now() })
+  const updateStatus = async (id: string, status: Todo['status']): Promise<number> => {
+    const now = Date.now()
+    db.todos.update(id, { status, dirty: true, modified: now })
+    return now
   }
 
   const updateDirties = async (ids: string[], value: boolean): Promise<number> => {
     return db.todos.bulkUpdate(ids.map((id) => ({ key: id, changes: { dirty: value } })))
+  }
+
+  const updateIndex = async (id: string, index: number): Promise<number> => {
+    return db.todos.update(id, { index })
   }
 
   const getDescendantsFlat = async (rootId: string) => {
@@ -241,11 +258,38 @@ export const useTodosStore = create(() => {
     })
   }
 
+  const deleteTodos = async (ids: string[]): Promise<number> => {
+    if (!ids.length) return 0
+
+    // 먼저 images 테이블에서 todoId가 ids 중 하나인 모든 이미지를 삭제
+    await db.images.where('todoId').anyOf(ids).delete()
+
+    return db.transaction('rw', db.todos, async () => {
+      let deletedCount = 0
+
+      for (const id of ids) {
+        const target = await db.todos.get(id)
+        if (!target) continue
+
+        // 부모/자식 관계 정리
+        await db.todos.where('parentId').equals(id).modify({ parentId: target.parentId })
+        await db.todos.where('childId').equals(id).modify({ childId: target.childId })
+
+        // 해당 todo 삭제
+        const count = await db.todos.where({ id }).delete()
+        deletedCount += count
+      }
+
+      return deletedCount
+    })
+  }
+
   const getMetas = async (): Promise<{ id: string; modified?: number }[]> => {
     return db.todos.toArray((todos) => todos.map(({ id, modified }) => ({ id, modified })))
   }
 
   return {
+    checkExistTodo,
     getAllDirtyTodos,
     getTodo,
     getParentTodo,
@@ -264,10 +308,12 @@ export const useTodosStore = create(() => {
     getAncestorsFlat,
     addNewTodo,
     deleteTodo,
+    deleteTodos,
     updateTag,
     updateDirties,
     getAllTodos,
     addNewTodoBulk,
     getMetas,
+    updateIndex,
   }
 })

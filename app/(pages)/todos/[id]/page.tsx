@@ -45,132 +45,47 @@ export default function TodosDetail() {
         setTextValue(text)
         if (params.id) todosStore.updateDescription(params.id as string, text)
         window.dispatchEvent(new CustomEvent('updateText', { detail: text }))
+
+        syncText(text)
       }, 250),
     []
   )
 
-  const addChildren = async (): Promise<void> => {
-    const newChild: Todo = {
-      id: etcUtil.generateUniqueId(),
-      description: '',
-      parentId: todo?.id,
-      tagId: todo?.tagId,
-      status: 'created',
-    }
-    const res = await todosStore.addNewTodo(newChild)
-    newChild.id = res
-    router.replace(`/todos/${res}`)
-  }
+  const syncText = debounce(async (text) => {
+    const currentTodo = await todosStore.getTodo(params.id as string)
+    if (currentTodo == null) return
+
+    fetch(
+      `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${currentTodo.index}&description=${encodeURIComponent(
+        text
+      )}&modified=${currentTodo.modified}`,
+      { method: 'PATCH' }
+    ).then((res) => {
+      if (res.ok) todosStore.updateDirties([currentTodo.id], false)
+    })
+  }, 2000)
 
   const loadTodo = async (): Promise<void> => {
     setIsLoading(true)
 
-    if (sheetStore.fileId) {
-      const res = await fetch(`/api/sheet/google/todo?fileId=${sheetStore.fileId}&id=${params.id}`)
-      const result = await res.json()
-      setTodo(result.todo)
-      setTextValue(result.todo.description)
-      window.dispatchEvent(new CustomEvent('updateText', { detail: result.todo.description }))
+    const res = await todosStore.getTodo(params.id as string)
+    setTodo(res)
 
-      if (result.todo.parentId) {
-        const parentRes = await fetch(
-          `/api/sheet/google/todo?fileId=${sheetStore.fileId}&id=${result.todo.parentId}`
-        )
-        const parent = await parentRes.json()
-        setParentTodo(parent.todo)
-      }
-      if (result.todo.childId) {
-        const childRes = await fetch(
-          `/api/sheet/google/todo?fileId=${sheetStore.fileId}&id=${result.todo.childId}`
-        )
-        const child = await childRes.json()
-        setChildTodo(child.todo)
-      }
-    } else {
-      setIsLoading(true)
-      const res = await todosStore.getTodo(params.id as string)
-      setTodo(res)
-      window.dispatchEvent(new CustomEvent('updateText', { detail: res.description }))
+    window.dispatchEvent(new CustomEvent('updateText', { detail: res.description }))
 
-      setTextValue(res?.description ?? '')
-      loadImages(res.id)
+    setTextValue(res?.description ?? '')
+    loadImages(res.id)
 
-      if (res.parentId) {
-        const result = await todosStore.getParentTodo(res.parentId)
-        setParentTodo(result)
-      }
-      if (res.childId) {
-        const result = await todosStore.getChildTodo(res.id)
-        setChildTodo(result)
-      }
+    if (res.parentId) {
+      const result = await todosStore.getParentTodo(res.parentId)
+      setParentTodo(result)
+    }
+    if (res.childId) {
+      const result = await todosStore.getChildTodo(res.id)
+      setChildTodo(result)
     }
 
     setIsLoading(false)
-  }
-
-  const deleteTodo = async (): Promise<void> => {
-    const deleteQuery = searchParams.get('deleteModal')
-    if (deleteQuery) {
-      await todosStore.deleteTodo(deleteQuery)
-      router.back()
-      await etcUtil.sleep(250)
-      router.replace('/todos')
-    }
-  }
-
-  const changeTag = async (tag: Tag): Promise<void> => {
-    const tagQuery = searchParams.get('todoTag')
-    if (tagQuery) {
-      await todosStore.updateTag(tagQuery, tag.id)
-      setTodo((prev) => prev && { ...prev, tagId: tag.id })
-      router.back()
-    }
-  }
-
-  const updateStatus = async (status: Todo['status'], todoId: string): Promise<void> => {
-    await todosStore.updateStatus(todoId, status)
-    if (todoId === todo?.id) setTodo((prev) => ({ ...prev!, status }))
-  }
-
-  const updateTime = async (
-    todo: Todo,
-    values: { start: Todo['start']; end: Todo['end']; days?: Todo['days'] }
-  ): Promise<void> => {
-    await todosStore.updateTimes(todo.id, values)
-    setTodo((prev) => prev && { ...prev, ...values })
-  }
-
-  const deleteTime = async (id?: string): Promise<void> => {
-    if (id == null) return
-    const values = { start: undefined, end: undefined, days: undefined }
-    await todosStore.updateTimes(id, values)
-
-    if (id === todo?.id) setTodo((prev) => prev && { ...prev, ...values })
-
-    router.back()
-  }
-
-  const handleSearchParams = async (): Promise<void> => {
-    setIsShowDeleteModal(!!searchParams.get('deleteModal'))
-    setIsShowTagModal(!!searchParams.get('todoTag'))
-    setIsShowImageModal(!!searchParams.get('images'))
-    setIsShowTimeModal(!!searchParams.get('time'))
-  }
-
-  const addImage = async (file: Blob): Promise<void> => {
-    const [blob, base64String] = await etcUtil.fileToWebp(file)
-    const id = await imagesStore.postImage(params.id as string, blob)
-
-    let removedId: string | undefined
-
-    setImages((prev) => {
-      const items = prev ? [...prev] : []
-      if (items.length >= 5) removedId = items.pop()?.id
-      items.unshift({ id, image: base64String, todoId: params.id as string })
-      return items
-    })
-
-    if (removedId) await imagesStore.deleteImage(removedId)
   }
 
   const loadImages = async (todoId?: string): Promise<void> => {
@@ -191,6 +106,170 @@ export default function TodosDetail() {
     setImages(imageData)
   }
 
+  const addChildren = async (): Promise<void> => {
+    const currentTodo = await todosStore.getTodo(params.id as string)
+    if (currentTodo == null) return
+
+    await todosStore.updateDirties([currentTodo.id], true)
+
+    const newTodo = await todosStore.addNewTodo({
+      id: etcUtil.generateUniqueId(),
+      description: '',
+      parentId: todo?.id,
+      tagId: todo?.tagId,
+      status: 'created',
+    })
+
+    fetch(
+      `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${currentTodo.index}&parent=${currentTodo.parentId}&child=${newTodo.id}&modified=${Date.now()}`,
+      { method: 'PATCH' }
+    ).then((res) => {
+      if (res.ok) todosStore.updateDirties([currentTodo.id], false)
+    })
+
+    fetch(
+      `/api/sheet/google/todo?fileId=${sheetStore.fileId}&id=${newTodo.id}&created=${newTodo.created}&modified=${newTodo.modified}&parent=${currentTodo.id}`,
+      { method: 'POST' }
+    ).then((res) => {
+      if (res.ok) {
+        todosStore.updateDirties([newTodo.id], false)
+        res.json().then((result) => {
+          todosStore.updateIndex(newTodo.id, result.index)
+        })
+      }
+    })
+
+    router.replace(`/todos/${newTodo.id}`)
+  }
+
+  const deleteTodo = async (): Promise<void> => {
+    if (todo == null) return
+
+    const currentTodo = await todosStore.getTodo(params.id as string)
+    if (currentTodo == null) return
+
+    const deleteQuery = searchParams.get('deleteModal')
+    if (deleteQuery) {
+      fetch(
+        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${currentTodo.index}&deleted=${true}`,
+        { method: 'PATCH' }
+      ).then((res) => {
+        if (res.ok) todosStore.updateDirties([todo.id], false)
+      })
+      const now = Date.now()
+      if (currentTodo.parentId) {
+        const parentTodo = await todosStore.getTodo(currentTodo.parentId as string)
+        if (parentTodo == null) return
+
+        fetch(
+          `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${parentTodo.index}&parent=${parentTodo.parentId}&child=${currentTodo.childId}&modified=${now}`,
+          { method: 'PATCH' }
+        ).then((res) => {
+          if (res.ok) todosStore.updateDirties([todo.id], false)
+        })
+      }
+
+      if (currentTodo.childId) {
+        const childTodo = await todosStore.getTodo(currentTodo.childId as string)
+        if (childTodo == null) return
+
+        fetch(
+          `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${childTodo.index}&parent=${currentTodo.parentId}&child=${childTodo.childId}&modified=${now}`,
+          { method: 'PATCH' }
+        ).then((res) => {
+          if (res.ok) todosStore.updateDirties([todo.id], false)
+        })
+      }
+
+      await todosStore.deleteTodo(deleteQuery)
+
+      router.back()
+      await etcUtil.sleep(250)
+      router.replace('/todos')
+    }
+  }
+
+  const changeTag = async (tag: Tag): Promise<void> => {
+    const tagQuery = searchParams.get('todoTag')
+    if (tagQuery) {
+      const modified = await todosStore.updateTag(tagQuery, tag.id)
+      if (todo != null)
+        fetch(
+          `/api/sheet/google/todo?fileId=${sheetStore.fileId}&modified=${modified}&index=${todo.index}&tag=${tag.id}`,
+          { method: 'PATCH' }
+        ).then((res) => {
+          if (res.ok) todosStore.updateDirties([todo.id], false)
+        })
+
+      setTodo((prev) => prev && { ...prev, tagId: tag.id })
+      router.back()
+    }
+  }
+
+  const updateStatus = async (status: Todo['status'], todoId: string): Promise<void> => {
+    const modified = await todosStore.updateStatus(todoId, status)
+
+    if (todo != null)
+      fetch(
+        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${todo?.index}&modified=${modified}&status=${status}`,
+        { method: 'PATCH' }
+      ).then((res) => {
+        if (res.ok) todosStore.updateDirties([todo.id], false)
+      })
+
+    if (todoId === todo?.id) setTodo((prev) => ({ ...prev!, status }))
+  }
+
+  const updateTime = async (
+    todo: Todo,
+    values: { start: Todo['start']; end: Todo['end']; days?: Todo['days'] }
+  ): Promise<void> => {
+    const modified = await todosStore.updateTimes(todo.id, values)
+
+    fetch(
+      `/api/sheet/google/todo?fileId=${sheetStore.fileId}&modified=${modified}&index=${todo?.index}&start=${values.start}&end=${values.end}&days=${values.days ? values.days.join(',') : ''}`,
+      { method: 'PATCH' }
+    ).then((res) => {
+      if (res.ok) todosStore.updateDirties([todo.id], false)
+    })
+
+    setTodo((prev) => prev && { ...prev, ...values })
+  }
+
+  const deleteTime = async (id?: string): Promise<void> => {
+    if (id == null) return
+    const values = { start: undefined, end: undefined, days: undefined }
+    const modified = await todosStore.updateTimes(id, values)
+
+    if (todo != null)
+      fetch(
+        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&modified=${modified}&index=${todo?.index}&start=''&end=''&days=''`,
+        { method: 'PATCH' }
+      ).then((res) => {
+        if (res.ok) todosStore.updateDirties([todo.id], false)
+      })
+
+    if (id === todo?.id) setTodo((prev) => prev && { ...prev, ...values })
+
+    router.back()
+  }
+
+  const addImage = async (file: Blob): Promise<void> => {
+    const [blob, base64String] = await etcUtil.fileToWebp(file)
+    const id = await imagesStore.postImage(params.id as string, blob)
+
+    let removedId: string | undefined
+
+    setImages((prev) => {
+      const items = prev ? [...prev] : []
+      if (items.length >= 5) removedId = items.pop()?.id
+      items.unshift({ id, image: base64String, todoId: params.id as string })
+      return items
+    })
+
+    if (removedId) await imagesStore.deleteImage(removedId)
+  }
+
   const deleteImage = async (): Promise<void> => {
     const image = searchParams.get('image') ?? ''
     if (image) await imagesStore.deleteImage(image)
@@ -207,7 +286,10 @@ export default function TodosDetail() {
   }, [])
 
   useEffect(() => {
-    handleSearchParams()
+    setIsShowDeleteModal(!!searchParams.get('deleteModal'))
+    setIsShowTagModal(!!searchParams.get('todoTag'))
+    setIsShowImageModal(!!searchParams.get('images'))
+    setIsShowTimeModal(!!searchParams.get('time'))
   }, [searchParams])
 
   if (isLoading)

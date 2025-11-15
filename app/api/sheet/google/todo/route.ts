@@ -57,11 +57,55 @@ export async function GET(req: Request) {
   return NextResponse.json({ ok: true, todo })
 }
 
+export async function POST(req: Request) {
+  const url = new URL(req.url)
+
+  const fileId = url.searchParams.get('fileId') ?? ''
+  if (!fileId) return NextResponse.json({ ok: false })
+
+  const id = url.searchParams.get('id') ?? ''
+  const created = url.searchParams.get('created') ?? ''
+  const modified = url.searchParams.get('modified') ?? ''
+  const parent = url.searchParams.get('parent') ?? ''
+
+  const headerCookies = await cookies()
+  const access = headerCookies.get('x-google-access-token')?.value
+  const refresh = headerCookies.get('x-google-refresh-token')?.value
+
+  const oauth2 = new google.auth.OAuth2(
+    process.env.GOOGLE_OAUTH_CLIENT_ID!,
+    process.env.GOOGLE_OAUTH_CLIENT_SECRET!,
+    `${process.env.APP_ORIGIN}/api/auth/google/callback`
+  )
+  oauth2.setCredentials({ access_token: access, refresh_token: refresh })
+
+  const sheets = google.sheets({ version: 'v4', auth: oauth2 })
+  const res = await sheets.spreadsheets.values.append({
+    spreadsheetId: fileId,
+    valueInputOption: 'RAW',
+    range: 'todo2',
+    requestBody: {
+      values: [[id, '', '', created, modified, '', 'created', parent.replace('undefined', '')]],
+    },
+  })
+
+  let index: number | undefined
+  const updatedRange = res.data.updates?.updatedRange
+
+  if (updatedRange) {
+    const match = updatedRange.match(/![A-Z]+(\d+):/)
+    if (match?.[1]) index = Number(match[1])
+  }
+
+  return NextResponse.json({ ok: res.status === 200, index })
+}
+
 export async function PATCH(req: Request) {
   const url = new URL(req.url)
 
   const fileId = url.searchParams.get('fileId') ?? ''
   const index = url.searchParams.get('index') ?? ''
+  if (!fileId || !index) return NextResponse.json({ ok: false })
 
   const description = url.searchParams.get('description') ?? ''
   const tag = url.searchParams.get('tag') ?? ''
@@ -69,7 +113,12 @@ export async function PATCH(req: Request) {
   const end = url.searchParams.get('end') ?? ''
   const images = url.searchParams.get('images') ?? ''
   const status = url.searchParams.get('status') ?? ''
-  const days = url.searchParams.get('days') ? url.searchParams.get('days')?.split(',') : ''
+  const childId = url.searchParams.get('child') ?? ''
+  const parentId = url.searchParams.get('parent') ?? ''
+  const deleted = url.searchParams.get('deleted') ?? ''
+  const modified = url.searchParams.get('modified') ?? ''
+  const daysParam = url.searchParams.get('days')
+  const days = daysParam ? daysParam.split(',') : undefined
 
   const headerCookies = await cookies()
   const access = headerCookies.get('x-google-access-token')?.value
@@ -84,19 +133,41 @@ export async function PATCH(req: Request) {
 
   const sheets = google.sheets({ version: 'v4', auth: oauth2 })
 
-  let targetData
-  if (description) targetData = { range: `todo2!B${index}:B${index}`, values: [[description]] }
-  if (tag) targetData = { range: `todo2!C${index}:C${index}`, values: [[tag]] }
-  if (images) targetData = { range: `todo2!F${index}:F${index}`, values: [[images]] }
-  if (status) targetData = { range: `todo2!G${index}:G${index}`, values: [[status]] }
-  if (days) targetData = { range: `todo2!L${index}:L${index}`, values: [[days]] }
+  const data: { range: string; values: any[][] }[] = []
+
+  if (deleted) data.push({ range: `todo2!M${index}:M${index}`, values: [[true]] })
+  if (description) data.push({ range: `todo2!B${index}:B${index}`, values: [[description]] })
+  if (tag) data.push({ range: `todo2!C${index}:C${index}`, values: [[tag]] })
+  if (images) data.push({ range: `todo2!F${index}:F${index}`, values: [[images]] })
+  if (status) data.push({ range: `todo2!G${index}:G${index}`, values: [[status]] })
+  if (childId || parentId)
+    data.push({
+      range: `todo2!H${index}:I${index}`,
+      values: [[parentId.replace('undefined', ''), childId.replace('undefined', '')]],
+    })
+
+  if (start || end || daysParam) {
+    data.push({
+      range: `todo2!J${index}:L${index}`,
+      values: [
+        [
+          start.replace('undefined', '') || '',
+          end.replace('undefined', '') || '',
+          days ? days.join(',') : '',
+        ],
+      ],
+    })
+  }
+
+  data.push({ range: `todo2!E${index}:E${index}`, values: [[modified]] })
 
   const res = await sheets.spreadsheets.values.batchUpdate({
     spreadsheetId: fileId,
     requestBody: {
       valueInputOption: 'RAW',
-      data: [targetData ?? {}, { range: `todo2!E${index}:E${index}`, values: [[Date.now()]] }],
+      data,
     },
   })
-  return NextResponse.json({ ok: res.ok })
+
+  return NextResponse.json({ ok: res.status === 200 })
 }

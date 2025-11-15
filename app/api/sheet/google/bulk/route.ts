@@ -32,8 +32,7 @@ export async function POST(req: Request) {
   )
   oauth2.setCredentials({ access_token: access, refresh_token: refresh })
 
-  if (body?.fileId == null) return NextResponse.json({ ok: false })
-  if (body?.todos == null) return NextResponse.json({ ok: false })
+  if (body?.fileId == null || body?.todos == null) return NextResponse.json({ ok: false })
 
   const spreadsheet = google.sheets({ version: 'v4', auth: oauth2 })
   if (body?.todos.length) {

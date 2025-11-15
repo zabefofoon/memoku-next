@@ -3,7 +3,9 @@ import { MS } from '@/const'
 export const useDateUtil = () => {
   return {
     parseDate(dateNumber?: number) {
-      const date = dateNumber ? new Date(dateNumber) : new Date()
+      let date = new Date().getTime()
+      if (typeof dateNumber === 'number') date = dateNumber
+      if (typeof dateNumber === 'string') date = +dateNumber
 
       return new Intl.DateTimeFormat('ko', {
         dateStyle: 'short',

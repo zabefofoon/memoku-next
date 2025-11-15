@@ -25,23 +25,33 @@ export async function GET(req: Request) {
 
   const res = await sheets.spreadsheets.values.batchGet({
     spreadsheetId: fileId,
-    ranges: [`todo2!A${start}:A${end}`, `todo2!E${start}:E${end}`],
+    ranges: [
+      `todo2!A${start}:A${end}`, // id
+      `todo2!E${start}:E${end}`, // modified
+      `todo2!M${start}:M${end}`, // deleted
+    ],
     valueRenderOption: 'UNFORMATTED_VALUE',
   })
+  const [colA, colE, colM] = res.data.valueRanges ?? []
 
-  const [colA, colB] = res.data.valueRanges ?? []
   const metas =
-    colA?.values?.map((value, index) => ({
-      id: value[0],
-      modified: colB?.values?.[index]?.[0],
-      index: start + index,
-    })) ?? []
+    colA?.values
+      ?.map((value, index) => {
+        const id = value[0]
+        const modified = colE?.values?.[index]?.[0]
+        const deleted = colM?.values?.[index]?.[0]
+        return { id, modified, index: start + index, deleted }
+      })
+      .filter(
+        (meta): meta is { id: string; modified: unknown; index: number; deleted: string } =>
+          meta != null
+      ) ?? []
 
   return NextResponse.json({ ok: true, metas })
 }
 
 export async function POST(req: Request) {
-  const body = await req.json()
+  const body = (await req.json()) as { fileId: string; meta: { id: string; index: number }[] }
 
   const headerCookies = await cookies()
   const access = headerCookies.get('x-google-access-token')?.value
@@ -55,32 +65,48 @@ export async function POST(req: Request) {
   oauth2.setCredentials({ access_token: access, refresh_token: refresh })
 
   const sheets = google.sheets({ version: 'v4', auth: oauth2 })
+
   const res = await sheets.spreadsheets.values.batchGet({
     spreadsheetId: body.fileId ?? '',
     ranges: body.meta.map(({ index }) => `todo2!A${index}:L${index}`),
     valueRenderOption: 'UNFORMATTED_VALUE',
   })
-  if (res.ok) {
-    const todos = res.data.valueRanges
-      ?.flatMap(({ values }) => values)
-      .map((row) => {
-        const _row = row!
 
-        return {
-          id: _row[0],
-          description: _row[1],
-          tagId: _row[2],
-          created: _row[3],
-          modified: _row[4],
-          images: _row[5] ? _row[5]?.split(',') : undefined,
-          status: _row[6],
-          parentId: _row[7],
-          childId: _row[8],
-          start: _row[9],
-          end: _row[10],
-          days: _row[11]?.split(','),
-        }
-      })
-    return NextResponse.json({ ok: res.ok, todos })
-  } else return NextResponse.json({ ok: res.ok, todos: undefined })
+  const valueRanges = res.data.valueRanges ?? []
+
+  const todos = valueRanges
+    .map(({ values }, i) => {
+      const row = values?.[0]
+      if (!row) return null
+
+      const meta = body.meta[i]
+
+      const images = row[5]
+        ? String(row[5])
+            .split(',')
+            .map((v: string) => v.trim())
+            .filter(Boolean)
+        : undefined
+
+      return {
+        // 여기서 index 같이 내려줌
+        index: meta.index,
+
+        id: row[0],
+        description: row[1],
+        tagId: row[2],
+        created: row[3],
+        modified: row[4],
+        images,
+        status: row[6],
+        parentId: row[7],
+        childId: row[8],
+        start: row[9],
+        end: row[10],
+        days: row[11] ? String(row[11]).split(',') : undefined,
+      }
+    })
+    .filter((todo): todo is NonNullable<typeof todo> => todo !== null)
+
+  return NextResponse.json({ ok: true, todos })
 }

@@ -15,6 +15,7 @@ const TODO2_HEADERS = [
   'start',
   'end',
   'days',
+  'deleted',
 ]
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

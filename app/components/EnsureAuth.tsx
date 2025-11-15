@@ -62,7 +62,7 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
 
   const loadRemoteMetaRows = async (
     fileId: string
-  ): Promise<{ id: string; modified: number; index: number }[]> => {
+  ): Promise<{ id: string; modified: number; index: number; deleted?: string }[]> => {
     const chunkSize = 1000
     let start = 2
     const allMetas: { id: string; modified: number; index: number }[] = []
@@ -85,6 +85,7 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
 
     return allMetas
   }
+
   const loadLocalMetaRows = async (): Promise<{ id: string; modified?: number }[]> => {
     return await todosStore.getMetas()
   }
@@ -109,7 +110,7 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
 
       const result = await res.json()
       if (result.ok && result.todos?.length) {
-        allTodos.push(...result.todos)
+        allTodos.push(...result.todos.map((todo) => ({ ...todo, dirty: false })))
       } else {
         console.warn(`Chunk ${i / chunkSize + 1} failed`)
         break
@@ -124,17 +125,25 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
     else {
       loadGoogleMe().then(() =>
         loadSheetId().then((fileId) => {
-          setIsAuthed(true)
           if (fileId)
             pushDirties(fileId).then(() => {
               loadRemoteMetaRows(fileId).then((remoteMeta) => {
                 loadLocalMetaRows().then((localMeta) => {
                   const localMap = new Map(localMeta.map((l) => [l.id, l.modified]))
+
+                  const deletedRows = remoteMeta.filter((row) => row.deleted).map(({ id }) => id)
+                  todosStore.deleteTodos(deletedRows)
+
                   const remoteNewOrUpdated = remoteMeta
-                    .filter((r) => !localMap.has(r.id) || r.modified > (localMap.get(r.id) ?? 0))
+                    .filter(
+                      (row) =>
+                        !row.deleted &&
+                        (!localMap.has(row.id) || row.modified > (localMap.get(row.id) ?? 0))
+                    )
                     .map(({ id, index }) => ({ id, index }))
                   loadNewOrUpdated(fileId, remoteNewOrUpdated).then((todos) => {
                     todosStore.addNewTodoBulk(todos)
+                    setIsAuthed(true)
                   })
                 })
               })
