@@ -147,40 +147,6 @@ export default function Todos() {
     })
   }
 
-  const deleteTime = async (id?: string): Promise<void> => {
-    if (id == null) return
-    const values = { start: undefined, end: undefined, days: undefined }
-    const modified = await todosStore.updateTimes(id, values)
-
-    if (timeTargetTodo != null)
-      fetch(
-        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&modified=${modified}&index=${timeTargetTodo?.index}&start=''&end=''&days=''`,
-        { method: 'PATCH' }
-      ).then((res) => {
-        if (res.ok) todosStore.updateDirties([timeTargetTodo.id], false)
-      })
-
-    setTodos((prev) => {
-      if (!timeTargetTodo) return prev
-      if (!prev) return prev
-
-      return prev.map((item) => {
-        if (!searchParams.get('parent'))
-          return item.id === timeTargetTodo.id ? { ...item, ...values } : item
-        else {
-          return {
-            ...item,
-            children: (item.children ?? []).map((child) =>
-              child.id === timeTargetTodo.id ? { ...child, ...values } : child
-            ),
-          }
-        }
-      })
-    })
-
-    router.back()
-  }
-
   const changeTag = async (tag: Tag): Promise<void> => {
     const tagTargetTodo = todos?.find(({ id }) => id === searchParams.get('todoTag'))
 
@@ -226,7 +192,6 @@ export default function Todos() {
         isShow={isShowTimeModal}
         todo={timeTargetTodo}
         updateTime={updateTime}
-        deleteTime={deleteTime}
         close={router.back}
       />
       <TodosTagModal

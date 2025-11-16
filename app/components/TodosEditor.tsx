@@ -2,14 +2,12 @@ import { Todo } from '@/app/models/Todo'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ClipboardEvent, useEffect, useRef, useState } from 'react'
 import TagBadge from './TagBadge'
-import { TodosDeleteModal } from './TodosDeleteModal'
 import { TodosDropdown } from './TodosDropdown'
 import TodosPeriodText from './TodosPeriodText'
 import TodosStatus from './TodosStatus'
 
 interface Props {
   todo: Todo
-  deleteTime?: (todoId: string) => void
   updateText: (text: string, todoId: string) => void
   updateStatus?: (status: Todo['status'], todoId: string) => void
   addImage: (file: Blob) => Promise<void>
@@ -21,8 +19,6 @@ export default function TodosEditor(props: Props) {
   const pathname = usePathname()
 
   const textareaEl = useRef<HTMLTextAreaElement>(null)
-
-  const [isShowDeleteTimeModal, setIsShowDeleteTimeModal] = useState<boolean>(false)
 
   const [textValue, setTextValue] = useState<string>('')
 
@@ -38,19 +34,8 @@ export default function TodosEditor(props: Props) {
     setTextValue(props.todo?.description ?? '')
   }, [props.todo?.description])
 
-  useEffect(() => {
-    if (pathname.endsWith(`${props.todo?.id}`)) {
-      setIsShowDeleteTimeModal(!!searchParams.get('deleteTime'))
-    }
-  }, [searchParams])
-
   return (
     <div className='flex flex-col gap-[12px] | flex-1 w-full overflow-auto | relative | p-[8px]'>
-      <TodosDeleteModal
-        isShow={isShowDeleteTimeModal}
-        close={() => router.back()}
-        delete={() => props.deleteTime?.(props.todo.id)}
-      />
       <div className='absolute top-[16px] right-[16px] | flex gap-[4px] sm:gap-[8px]'>
         {props.todo?.id && (
           <TodosDropdown

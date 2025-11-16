@@ -244,24 +244,6 @@ export default function TodosDetail() {
     setTodo((prev) => prev && { ...prev, ...values })
   }
 
-  const deleteTime = async (id?: string): Promise<void> => {
-    if (id == null) return
-    const values = { start: undefined, end: undefined, days: undefined }
-    const modified = await todosStore.updateTimes(id, values)
-
-    if (todo != null)
-      fetch(
-        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&modified=${modified}&index=${todo?.index}&start=''&end=''&days=''`,
-        { method: 'PATCH' }
-      ).then((res) => {
-        if (res.ok) todosStore.updateDirties([todo.id], false)
-      })
-
-    if (id === todo?.id) setTodo((prev) => prev && { ...prev, ...values })
-
-    router.back()
-  }
-
   const addImage = async (file: Blob): Promise<void> => {
     const [blob, base64String] = await etcUtil.fileToWebp(file)
     const id = await imagesStore.postImage(params.id as string, blob)
@@ -373,7 +355,6 @@ export default function TodosDetail() {
                 todo={todo}
                 updateText={saveText}
                 updateStatus={updateStatus}
-                deleteTime={deleteTime}
                 addImage={addImage}
               />
             </div>
