@@ -1,32 +1,34 @@
 'use client'
 
-import { useParams, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { Todo } from '../models/Todo'
 import { useImagesStore } from '../stores/images.store'
 import etcUtil from '../utils/etc.util'
 import UICarousel, { UICarouselSlide } from './UICarousel'
 import UIModal from './UIModal'
 
 interface Props {
+  todo: Todo
   isShow?: boolean
   close: () => void
 }
 
 export default function TodosImagesModal(props: Props) {
   const searchParams = useSearchParams()
-  const params = useParams()
   const imagesStore = useImagesStore()
 
   const [images, setImages] = useState<string[]>()
   const [startIndex, setStartIndex] = useState<number>()
 
   const loadImages = async (): Promise<void> => {
-    const id = params.id
-
-    if (!id) return
-    const res = await imagesStore.getImages(id.toString())
-    const imageUrls = await Promise.all(res.map((item) => etcUtil.blobToBase64(item.image)))
-    setImages(imageUrls)
+    if (props.todo.images) {
+      setImages(props.todo.images ?? [])
+    } else {
+      const res = await imagesStore.getImages(props.todo.id)
+      const imageUrls = await Promise.all(res.map((item) => etcUtil.blobToBase64(item.image)))
+      setImages(imageUrls)
+    }
 
     const imagesQuery = searchParams.get('images')
     const index = imagesQuery ? +imagesQuery : 0

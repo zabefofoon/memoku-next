@@ -41,7 +41,10 @@ export const useTodosStore = create(() => {
       coll = coll.and(isRoot)
     } else {
       if (tags?.length) coll = coll.and((t) => tags.includes(t.tagId ?? ''))
-      if (status) coll = coll.and((t) => t.status === status)
+      if (status)
+        coll = coll.and((t) =>
+          status === 'created' ? !t.status || t.status === 'created' : t.status === status
+        )
       if (query) coll = coll.and((t) => (t.description ?? '').toLowerCase().includes(query))
     }
 

@@ -69,7 +69,7 @@ export function TodosImages(props: Props) {
       )}
       {props.images?.map((image, index) => (
         <div
-          key={image.id}
+          key={index}
           className='relative | w-[120px] sm:w-[220px] aspect-square overflow-hidden shrink-0 | rounded-lg shadow-md'>
           <Link href={`?images=${index}`}>
             <img

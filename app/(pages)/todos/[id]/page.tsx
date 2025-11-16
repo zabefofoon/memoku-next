@@ -65,16 +65,14 @@ export default function TodosDetail() {
     })
   }, 2000)
 
-  const loadTodo = async (): Promise<void> => {
+  const loadTodo = async (): Promise<Todo> => {
     setIsLoading(true)
-
     const res = await todosStore.getTodo(params.id as string)
     setTodo(res)
 
     window.dispatchEvent(new CustomEvent('updateText', { detail: res.description }))
 
     setTextValue(res?.description ?? '')
-    loadImages(res.id)
 
     if (res.parentId) {
       const result = await todosStore.getParentTodo(res.parentId)
@@ -86,24 +84,34 @@ export default function TodosDetail() {
     }
 
     setIsLoading(false)
+
+    return res
   }
 
-  const loadImages = async (todoId?: string): Promise<void> => {
-    if (todoId == null) return
+  const loadImages = async (todo: Todo): Promise<void> => {
+    if (todo.images?.length) {
+      const images: { id: string; image: string; todoId: string }[] =
+        todo.images?.map((image) => ({
+          id: 'images',
+          image: image.toString(),
+          todoId: todo.id,
+        })) ?? []
+      setImages(images)
+    } else {
+      const res = await imagesStore.getImages(todo.id)
 
-    const res = await imagesStore.getImages(todoId)
-
-    const imageData: { id: string; image: string; todoId: string }[] = []
-    for (const key in res) {
-      const data = {
-        id: res[key].id,
-        image: await etcUtil.blobToBase64(res[key].image),
-        todoId: res[key].todoId,
+      const imageData: { id: string; image: string; todoId: string }[] = []
+      for (const key in res) {
+        const data = {
+          id: res[key].id,
+          image: await etcUtil.blobToBase64(res[key].image),
+          todoId: res[key].todoId,
+        }
+        imageData.push(data)
       }
-      imageData.push(data)
-    }
 
-    setImages(imageData)
+      setImages(imageData)
+    }
   }
 
   const addChildren = async (): Promise<void> => {
@@ -282,7 +290,7 @@ export default function TodosDetail() {
   }, [])
 
   useEffect(() => {
-    loadTodo()
+    loadTodo().then((todo) => loadImages(todo))
   }, [])
 
   useEffect(() => {
@@ -317,10 +325,13 @@ export default function TodosDetail() {
           close={router.back}
           select={changeTag}
         />
-        <TodosImagesModal
-          isShow={isShowImageModal}
-          close={router.back}
-        />
+        {todo && (
+          <TodosImagesModal
+            todo={todo}
+            isShow={isShowImageModal}
+            close={router.back}
+          />
+        )}
 
         {
           <div className='mb-[24px] hidden sm:block'>
