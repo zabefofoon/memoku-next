@@ -203,6 +203,12 @@ export const useTodosStore = create(() => {
     return now
   }
 
+  const updateImages = async (id: string, images: Todo['images']): Promise<number> => {
+    const now = Date.now()
+    db.todos.update(id, { images, dirty: true, modified: now })
+    return now
+  }
+
   const updateDirties = async (ids: string[], value: boolean): Promise<number> => {
     return db.todos.bulkUpdate(ids.map((id) => ({ key: id, changes: { dirty: value } })))
   }
@@ -318,5 +324,6 @@ export const useTodosStore = create(() => {
     addNewTodoBulk,
     getMetas,
     updateIndex,
+    updateImages,
   }
 })

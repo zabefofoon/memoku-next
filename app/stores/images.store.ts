@@ -7,8 +7,13 @@ export const useImagesStore = create(() => {
     return db.images.where('todoId').equals(todoId).reverse().toArray()
   }
 
-  const postImage = (todoId: string, blob: Blob): Promise<string> => {
-    return db.images.add({ id: etcUtil.generateUniqueId(), todoId, image: blob })
+  const postImages = async (
+    todoId: string,
+    blobs: Blob[]
+  ): Promise<{ id: string; todoId: string; image: Blob }[]> => {
+    const items = blobs.map((image) => ({ id: etcUtil.generateUniqueId(), todoId, image }))
+    await db.images.bulkAdd(items)
+    return items
   }
 
   const deleteImage = (id: string): Promise<number> => {
@@ -17,7 +22,7 @@ export const useImagesStore = create(() => {
 
   return {
     getImages,
-    postImage,
+    postImages,
     deleteImage,
   }
 })

@@ -90,13 +90,13 @@ export default function TodosDetail() {
 
   const loadImages = async (todo: Todo): Promise<void> => {
     if (todo.images?.length) {
-      const images: { id: string; image: string; todoId: string }[] =
+      setImages(
         todo.images?.map((image) => ({
           id: 'images',
           image: image.toString(),
           todoId: todo.id,
         })) ?? []
-      setImages(images)
+      )
     } else {
       const res = await imagesStore.getImages(todo.id)
 
@@ -244,26 +244,58 @@ export default function TodosDetail() {
     setTodo((prev) => prev && { ...prev, ...values })
   }
 
-  const addImage = async (file: Blob): Promise<void> => {
-    const [blob, base64String] = await etcUtil.fileToWebp(file)
-    const id = await imagesStore.postImage(params.id as string, blob)
-
-    let removedId: string | undefined
-
-    setImages((prev) => {
-      const items = prev ? [...prev] : []
-      if (items.length >= 5) removedId = items.pop()?.id
-      items.unshift({ id, image: base64String, todoId: params.id as string })
-      return items
-    })
-
-    if (removedId) await imagesStore.deleteImage(removedId)
+  const addImages = async (files: Blob[]): Promise<void> => {
+    if (images && files.length + images.length > 5) {
+      alert('이미지는 5개까지만 등록 가능합니다.')
+      return
+    }
+    const transformed = files.map((file) => etcUtil.fileToWebp(file))
+    const res = await Promise.all(transformed)
+    const blobs = res.map(([blob]) => blob)
+    const base64s = res.map(([_, base64]) => base64)
+    setImages([
+      ...base64s.map((item) => ({ id: 'uploading', image: item, todoId: todo?.id ?? '' })),
+      ...(images ?? []),
+    ])
+    if (sheetStore.fileId) {
+      if (todo) await todosStore.updateDirties([todo.id], true)
+      const formData = new FormData()
+      blobs.forEach((file) => formData.append('images', file))
+      const res = await fetch('/api/upload/google/image', {
+        method: 'POST',
+        body: formData,
+      })
+      const result = await res.json()
+      const newImages = [...result.urls, ...(images?.map(({ image }) => image) ?? [])]
+      const now = await todosStore.updateImages(params.id as string, newImages)
+      fetch(
+        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${todo?.index}&images=${encodeURIComponent(newImages.join(','))}&modified=${now}`,
+        { method: 'PATCH' }
+      ).then((res) => {
+        if (res.ok && todo) todosStore.updateDirties([todo.id], false)
+        setImages(
+          (prev) =>
+            prev?.map((item, index) => {
+              return item.id === 'uploading'
+                ? { ...item, id: 'uploaded', image: result.urls[index] }
+                : item
+            }) ?? []
+        )
+      })
+    } else {
+      const ress = await imagesStore.postImages(params.id as string, blobs)
+      setImages((prev) => [
+        ...ress.map((item, index) => ({ ...item, image: base64s[index] })),
+        ...(prev ?? []),
+      ])
+    }
   }
 
   const deleteImage = async (): Promise<void> => {
     const image = searchParams.get('image') ?? ''
-    if (image) await imagesStore.deleteImage(image)
-    setImages((prev) => prev?.filter((item) => item.id !== image))
+    const [deleted] = images?.splice(+image, 1) ?? []
+    if (deleted.id) await imagesStore.deleteImage(deleted.id)
+    setImages([...(images ?? [])])
     router.back()
   }
 
@@ -309,6 +341,7 @@ export default function TodosDetail() {
         />
         {todo && (
           <TodosImagesModal
+            images={images}
             todo={todo}
             isShow={isShowImageModal}
             close={router.back}
@@ -355,13 +388,13 @@ export default function TodosDetail() {
                 todo={todo}
                 updateText={saveText}
                 updateStatus={updateStatus}
-                addImage={addImage}
+                addImages={addImages}
               />
             </div>
             <TodosImages
               todo={todo}
               images={images}
-              addImage={addImage}
+              addImages={addImages}
               deleteImage={deleteImage}
             />
           </div>

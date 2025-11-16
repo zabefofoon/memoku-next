@@ -1,5 +1,5 @@
 import { Todo } from '@/app/models/Todo'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { ClipboardEvent, useEffect, useRef, useState } from 'react'
 import TagBadge from './TagBadge'
 import { TodosDropdown } from './TodosDropdown'
@@ -10,13 +10,11 @@ interface Props {
   todo: Todo
   updateText: (text: string, todoId: string) => void
   updateStatus?: (status: Todo['status'], todoId: string) => void
-  addImage: (file: Blob) => Promise<void>
+  addImages: (files: Blob[]) => Promise<void>
 }
 
 export default function TodosEditor(props: Props) {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
 
   const textareaEl = useRef<HTMLTextAreaElement>(null)
 
@@ -26,7 +24,7 @@ export default function TodosEditor(props: Props) {
     const files = Array.from(event.clipboardData.files ?? [])
     if (files.length > 0) {
       event.preventDefault()
-      for (const index in files) await props.addImage(files[index])
+      props.addImages(files)
     }
   }
 

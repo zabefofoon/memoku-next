@@ -3,6 +3,7 @@
 import { ReactElement, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { CSSTransition } from 'react-transition-group'
+import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
 
 interface Props {
@@ -46,7 +47,10 @@ export default function UIModal(props: Props) {
           className='fixed inset-0 bg-black/50 | w-full h-full'
         />
         <div className='flex justify-center | max-h-full py-[32px] overflow-auto | scroll-hidden'>
-          <div className='modal-card | flex flex-col gap-[12px] | relative z-10 | min-w-[320px] max-w-[calc(100%-32px)] max-h-[calc(100dvh-64px)] | p-[16px] | rounded-xl bg-white dark:bg-zinc-800 shadow-xl'>
+          <div
+            className={etcUtil.classNames([
+              'modal-card | flex flex-col gap-[12px] | relative z-10 | min-w-[320px] max-w-[calc(100%-32px)] max-h-[calc(100dvh-64px)] | p-[16px] | rounded-xl bg-white dark:bg-zinc-800 shadow-xl',
+            ])}>
             <div className='flex justify-between'>
               {props.header && <p className='text-[20px] font-[700]'>{props.header()}</p>}
               <button

@@ -3,40 +3,25 @@
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Todo } from '../models/Todo'
-import { useImagesStore } from '../stores/images.store'
-import etcUtil from '../utils/etc.util'
 import UICarousel, { UICarouselSlide } from './UICarousel'
 import UIModal from './UIModal'
 
 interface Props {
   todo: Todo
+  images?: { id: string; image: string; todoId: string }[]
   isShow?: boolean
   close: () => void
 }
 
 export default function TodosImagesModal(props: Props) {
   const searchParams = useSearchParams()
-  const imagesStore = useImagesStore()
 
-  const [images, setImages] = useState<string[]>()
   const [startIndex, setStartIndex] = useState<number>()
 
-  const loadImages = async (): Promise<void> => {
-    if (props.todo.images) {
-      setImages(props.todo.images ?? [])
-    } else {
-      const res = await imagesStore.getImages(props.todo.id)
-      const imageUrls = await Promise.all(res.map((item) => etcUtil.blobToBase64(item.image)))
-      setImages(imageUrls)
-    }
-
+  useEffect(() => {
     const imagesQuery = searchParams.get('images')
     const index = imagesQuery ? +imagesQuery : 0
     setStartIndex(index)
-  }
-
-  useEffect(() => {
-    if (searchParams.get('images')) loadImages()
   }, [searchParams])
 
   return (
@@ -46,11 +31,11 @@ export default function TodosImagesModal(props: Props) {
       content={() => (
         <div className='sm:w-[1024px]'>
           <UICarousel startIndex={startIndex}>
-            {images?.map((image, index) => (
+            {props.images?.map((image, index) => (
               <UICarouselSlide key={index}>
                 <img
                   className='w-full sm:max-w-[992px] h-[80dvh] sm:h-[50dvh] aspect-square object-contain'
-                  src={image}
+                  src={image.image}
                   alt=''
                 />
               </UICarouselSlide>
