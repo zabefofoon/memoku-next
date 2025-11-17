@@ -151,44 +151,47 @@ export default function TodosDetail() {
   }
 
   const deleteTodo = async (): Promise<void> => {
-    if (todo == null) return
-
     const currentTodo = await todosStore.getTodo(params.id as string)
     if (currentTodo == null) return
 
     const deleteQuery = searchParams.get('deleteModal')
     if (deleteQuery) {
-      fetch(
-        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${currentTodo.index}&deleted=${true}`,
-        { method: 'PATCH' }
-      ).then((res) => {
-        if (res.ok) todosStore.updateDirties([todo.id], false)
-      })
-      const now = Date.now()
-      if (currentTodo.parentId) {
-        const parentTodo = await todosStore.getTodo(currentTodo.parentId as string)
-        if (parentTodo == null) return
-
+      if (sheetStore.fileId) {
         fetch(
-          `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${parentTodo.index}&parent=${parentTodo.parentId}&child=${currentTodo.childId}&modified=${now}`,
+          `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${currentTodo.index}&deleted=${true}`,
           { method: 'PATCH' }
         ).then((res) => {
-          if (res.ok) todosStore.updateDirties([todo.id], false)
+          if (res.ok) todosStore.updateDirties([currentTodo.id], false)
         })
+        const now = Date.now()
+        if (currentTodo.parentId) {
+          const parentTodo = await todosStore.getTodo(currentTodo.parentId as string)
+          if (parentTodo == null) return
+
+          fetch(
+            `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${parentTodo.index}&parent=${parentTodo.parentId}&child=${currentTodo.childId}&modified=${now}`,
+            { method: 'PATCH' }
+          ).then((res) => {
+            if (res.ok) todosStore.updateDirties([currentTodo.id], false)
+          })
+        }
       }
 
       if (currentTodo.childId) {
         const childTodo = await todosStore.getTodo(currentTodo.childId as string)
         if (childTodo == null) return
 
-        fetch(
-          `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${childTodo.index}&parent=${currentTodo.parentId}&child=${childTodo.childId}&modified=${now}`,
-          { method: 'PATCH' }
-        ).then((res) => {
-          if (res.ok) todosStore.updateDirties([todo.id], false)
-        })
+        if (sheetStore.fileId) {
+          fetch(
+            `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${childTodo.index}&parent=${currentTodo.parentId}&child=${childTodo.childId}&modified=${now}`,
+            { method: 'PATCH' }
+          ).then((res) => {
+            if (res.ok) todosStore.updateDirties([currentTodo.id], false)
+          })
+        }
       }
 
+      deleteImageAll()
       await todosStore.deleteTodo(deleteQuery)
 
       router.back()
@@ -249,16 +252,21 @@ export default function TodosDetail() {
       alert('이미지는 5개까지만 등록 가능합니다.')
       return
     }
+
+    const currentTodo = await todosStore.getTodo(params.id as string)
+    if (currentTodo == null) return
+
     const transformed = files.map((file) => etcUtil.fileToWebp(file))
     const res = await Promise.all(transformed)
     const blobs = res.map(([blob]) => blob)
     const base64s = res.map(([_, base64]) => base64)
+
     setImages([
-      ...base64s.map((item) => ({ id: 'uploading', image: item, todoId: todo?.id ?? '' })),
+      ...base64s.map((item) => ({ id: 'uploading', image: item, todoId: currentTodo.id ?? '' })),
       ...(images ?? []),
     ])
+
     if (sheetStore.fileId) {
-      if (todo) await todosStore.updateDirties([todo.id], true)
       const formData = new FormData()
       blobs.forEach((file) => formData.append('images', file))
       const res = await fetch('/api/upload/google/image', {
@@ -269,10 +277,10 @@ export default function TodosDetail() {
       const newImages = [...result.urls, ...(images?.map(({ image }) => image) ?? [])]
       const now = await todosStore.updateImages(params.id as string, newImages)
       fetch(
-        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${todo?.index}&images=${encodeURIComponent(newImages.join(','))}&modified=${now}`,
+        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${currentTodo.index}&images=${encodeURIComponent(newImages.join(','))}&modified=${now}`,
         { method: 'PATCH' }
       ).then((res) => {
-        if (res.ok && todo) todosStore.updateDirties([todo.id], false)
+        if (res.ok) todosStore.updateDirties([currentTodo.id], false)
         setImages(
           (prev) =>
             prev?.map((item, index) => {
@@ -292,11 +300,53 @@ export default function TodosDetail() {
   }
 
   const deleteImage = async (): Promise<void> => {
+    if (images == null) return
+    if (todo == null) return
+
     const image = searchParams.get('image') ?? ''
-    const [deleted] = images?.splice(+image, 1) ?? []
-    if (deleted.id) await imagesStore.deleteImage(deleted.id)
-    setImages([...(images ?? [])])
+    const index = +image
+
+    const currentTodo = await todosStore.getTodo(params.id as string)
+    if (currentTodo == null) return
+
+    if (sheetStore.fileId) {
+      const remaineds = images.filter((_, i) => i !== index)
+      const deleteImages = images.filter((_, i) => i === index).map(({ image }) => image)
+      const ids = deleteImages.map((url) => new URL(url).pathname.split('/').at(-1))
+      const now = await todosStore.updateImages(
+        params.id as string,
+        remaineds.map(({ image }) => image)
+      )
+      fetch(`/api/upload/google/image?image_ids=${encodeURIComponent(ids.join(','))}`, {
+        method: 'DELETE',
+      })
+      const deleteQueris = remaineds.map(({ image }) => image).join(',') || 'undefined'
+      fetch(
+        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${currentTodo.index}&images=${encodeURIComponent(deleteQueris)}&modified=${now}`,
+        { method: 'PATCH' }
+      ).then((res) => {
+        if (res.ok) todosStore.updateDirties([currentTodo.id], false)
+        setImages((prev) => prev?.filter((_, i) => i !== index))
+      })
+    } else {
+      await imagesStore.deleteImages([images[index].id])
+      setImages((prev) => prev?.filter((_, i) => i !== index))
+    }
     router.back()
+  }
+
+  const deleteImageAll = async (): Promise<void> => {
+    if (images == null) return
+    if (todo == null) return
+
+    if (sheetStore.fileId) {
+      const deleteImages = images.map(({ image }) => image)
+      const ids = deleteImages.map((url) => new URL(url).pathname.split('/').at(-1))
+
+      fetch(`/api/upload/google/image?image_ids=${encodeURIComponent(ids.join(','))}`, {
+        method: 'DELETE',
+      })
+    } else imagesStore.deleteImages(images.map(({ id }) => id))
   }
 
   useLayoutEffect(() => {

@@ -60,9 +60,46 @@ export async function POST(req: Request) {
         requestBody: { role: 'reader', type: 'anyone' },
       })
 
-      return `https://drive.google.com/thumbnail?id=${upload.data.id!}&sz=w1280`
+      return `https://lh3.googleusercontent.com/d/${upload.data.id!}?p=w1280&authuser=0`
     })
   )
 
   return NextResponse.json({ ok: true, urls })
+}
+
+export async function DELETE(req: Request) {
+  const url = new URL(req.url)
+  const idsParam = url.searchParams.get('image_ids')
+
+  if (!idsParam) return NextResponse.json({ ok: false, status: 400 })
+
+  const imageIds = idsParam
+    .split(',')
+    .map((id) => id.trim())
+    .filter((id) => id.length > 0)
+
+  if (imageIds.length === 0) {
+    return NextResponse.json({ ok: false, status: 400 })
+  }
+
+  const headerCookies = await cookies()
+  const access = headerCookies.get('x-google-access-token')?.value
+  const refresh = headerCookies.get('x-google-refresh-token')?.value
+
+  const oauth2 = new google.auth.OAuth2(
+    process.env.GOOGLE_OAUTH_CLIENT_ID!,
+    process.env.GOOGLE_OAUTH_CLIENT_SECRET!,
+    `${process.env.APP_ORIGIN}/api/auth/google/callback`
+  )
+
+  oauth2.setCredentials({
+    access_token: access,
+    refresh_token: refresh,
+  })
+
+  const drive = google.drive({ version: 'v3', auth: oauth2 })
+
+  await Promise.all(imageIds.map((fileId) => drive.files.delete({ fileId })))
+
+  return NextResponse.json({ ok: true })
 }

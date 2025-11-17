@@ -16,13 +16,13 @@ export const useImagesStore = create(() => {
     return items
   }
 
-  const deleteImage = (id: string): Promise<number> => {
-    return db.images.where('id').equals(id).delete()
+  const deleteImages = (ids: string[]): Promise<void> => {
+    return db.images.bulkDelete(ids)
   }
 
   return {
     getImages,
     postImages,
-    deleteImage,
+    deleteImages,
   }
 })

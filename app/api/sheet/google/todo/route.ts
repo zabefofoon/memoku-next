@@ -138,7 +138,8 @@ export async function PATCH(req: Request) {
   if (deleted) data.push({ range: `todo2!M${index}:M${index}`, values: [[true]] })
   if (description) data.push({ range: `todo2!B${index}:B${index}`, values: [[description]] })
   if (tag) data.push({ range: `todo2!C${index}:C${index}`, values: [[tag]] })
-  if (images) data.push({ range: `todo2!F${index}:F${index}`, values: [[images]] })
+  if (images)
+    data.push({ range: `todo2!F${index}:F${index}`, values: [[images.replace('undefined', '')]] })
   if (status) data.push({ range: `todo2!G${index}:G${index}`, values: [[status]] })
   if (childId || parentId)
     data.push({
