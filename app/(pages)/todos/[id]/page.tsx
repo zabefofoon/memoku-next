@@ -55,14 +55,15 @@ export default function TodosDetail() {
     const currentTodo = await todosStore.getTodo(params.id as string)
     if (currentTodo == null) return
 
-    fetch(
-      `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${currentTodo.index}&description=${encodeURIComponent(
-        text
-      )}&modified=${currentTodo.modified}`,
-      { method: 'PATCH' }
-    ).then((res) => {
-      if (res.ok) todosStore.updateDirties([currentTodo.id], false)
-    })
+    if (sheetStore.fileId)
+      fetch(
+        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${currentTodo.index}&description=${encodeURIComponent(
+          text
+        )}&modified=${currentTodo.modified}`,
+        { method: 'PATCH' }
+      ).then((res) => {
+        if (res.ok) todosStore.updateDirties([currentTodo.id], false)
+      })
   }, 2000)
 
   const loadTodo = async (): Promise<Todo> => {
@@ -111,6 +112,63 @@ export default function TodosDetail() {
       }
 
       setImages(imageData)
+
+      if (sheetStore.fileId) {
+        const localSavedImages = imageData.filter(({ image }) => image.startsWith('data:'))
+        if (localSavedImages.length > 0) {
+          const currentTodo = await todosStore.getTodo(params.id as string)
+          if (currentTodo == null) return
+
+          // id 기준으로 res에서 blob 찾아서 formData 구성
+          const formData = new FormData()
+          const uploadBlobs: Blob[] = []
+
+          localSavedImages.forEach(({ id }) => {
+            const item = Object.values(res).find((img) => img.id === id)
+            if (item) uploadBlobs.push(item.image)
+          })
+
+          if (uploadBlobs.length > 0) {
+            uploadBlobs.forEach((blob) => formData.append('images', blob))
+
+            // 구글 드라이브로 업로드
+            const uploadRes = await fetch('/api/upload/google/image', {
+              method: 'POST',
+              body: formData,
+            })
+            const uploadResult = await uploadRes.json()
+            const uploadedUrls: string[] = uploadResult.urls ?? []
+
+            const alreadyRemoteUrls = imageData
+              .filter(({ image }) => !image.startsWith('data:'))
+              .map(({ image }) => image)
+
+            const nextImages = [...uploadedUrls, ...alreadyRemoteUrls]
+
+            // todosStore에 images 배열을 URL로 업데이트
+            const modified = await todosStore.updateImages(currentTodo.id, nextImages)
+
+            fetch(
+              `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${currentTodo.index}&images=${encodeURIComponent(
+                nextImages.join(',')
+              )}&modified=${modified}`,
+              { method: 'PATCH' }
+            ).then((res) => {
+              if (res.ok) todosStore.updateDirties([currentTodo.id], false)
+            })
+
+            await imagesStore.deleteImages(localSavedImages.map(({ id }) => id))
+
+            setImages(
+              nextImages.map((url) => ({
+                id: 'uploaded',
+                image: url,
+                todoId: currentTodo.id,
+              }))
+            )
+          }
+        }
+      }
     }
   }
 
@@ -256,17 +314,18 @@ export default function TodosDetail() {
     const currentTodo = await todosStore.getTodo(params.id as string)
     if (currentTodo == null) return
 
+    todosStore.updateDirties([currentTodo.id], true)
     const transformed = files.map((file) => etcUtil.fileToWebp(file))
     const res = await Promise.all(transformed)
     const blobs = res.map(([blob]) => blob)
     const base64s = res.map(([_, base64]) => base64)
 
-    setImages([
-      ...base64s.map((item) => ({ id: 'uploading', image: item, todoId: currentTodo.id ?? '' })),
-      ...(images ?? []),
-    ])
-
     if (sheetStore.fileId) {
+      setImages([
+        ...base64s.map((item) => ({ id: 'uploading', image: item, todoId: currentTodo.id ?? '' })),
+        ...(images ?? []),
+      ])
+
       const formData = new FormData()
       blobs.forEach((file) => formData.append('images', file))
       const res = await fetch('/api/upload/google/image', {

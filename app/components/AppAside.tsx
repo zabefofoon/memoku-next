@@ -9,6 +9,7 @@ import packageJson from '../../package.json'
 import { AGE_1_YEAR, COOKIE_EXPAND, COOKIE_THEME } from '@/const'
 import { useState } from 'react'
 import { useAuthStore } from '../stores/auth.store'
+import { useSheetStore } from '../stores/sheet.store'
 import { useThemeStore } from '../stores/theme.store'
 import { Icon } from './Icon'
 import UIToggle from './UIToggle'
@@ -28,6 +29,7 @@ const menus = [
 ]
 
 export function AppAside(props: Props) {
+  const sheetStore = useSheetStore()
   const themeStore = useThemeStore()
   const pathname = usePathname()
   const [_, setCookie, removeCookie] = useCookies([COOKIE_THEME, COOKIE_EXPAND])
@@ -56,6 +58,7 @@ export function AppAside(props: Props) {
   const logout = async (): Promise<void> => {
     await fetch('/api/auth/google/logout', { method: 'POST' })
     authStore.setMemberInfo()
+    sheetStore.setFileId('')
   }
 
   return (

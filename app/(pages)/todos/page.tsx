@@ -69,17 +69,21 @@ export default function Todos() {
 
   const createTodo = async (): Promise<void> => {
     const todo = await todosStore.postDescription('')
-    fetch(
-      `/api/sheet/google/todo?fileId=${sheetStore.fileId}&id=${todo.id}&created=${todo.created}&modified=${todo.modified}`,
-      { method: 'POST' }
-    ).then((res) => {
-      if (res.ok) {
-        todosStore.updateDirties([todo.id], false)
-        res.json().then((result) => {
-          todosStore.updateIndex(todo.id, result.index)
-        })
-      }
-    })
+    todosStore.updateDirties([todo.id], true)
+    if (sheetStore.fileId) {
+      fetch(
+        `/api/sheet/google/todo?fileId=${sheetStore.fileId}&id=${todo.id}&created=${todo.created}&modified=${todo.modified}`,
+        { method: 'POST' }
+      ).then((res) => {
+        if (res.ok) {
+          todosStore.updateDirties([todo.id], false)
+          res.json().then((result) => {
+            todosStore.updateIndex(todo.id, result.index)
+          })
+        }
+      })
+    }
+
     router.push(`/todos/${todo.id}`)
   }
 

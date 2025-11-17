@@ -32,19 +32,65 @@ export async function POST(req: Request) {
   )
   oauth2.setCredentials({ access_token: access, refresh_token: refresh })
 
-  if (body?.fileId == null || body?.todos == null) return NextResponse.json({ ok: false })
+  if (body?.fileId == null || body?.todos == null) NextResponse.json({ ok: false })
 
   const spreadsheet = google.sheets({ version: 'v4', auth: oauth2 })
-  if (body?.todos.length) {
-    const values = body.todos.map(todoToRow)
 
-    await spreadsheet.spreadsheets.values.append({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const todosWithIndex = body.todos.filter((t: any) => t.index != null)
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const todosWithoutIndex = body.todos.filter((t: any) => t.index == null)
+
+  if (todosWithIndex.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = todosWithIndex.map((todo: any) => ({
+      range: `todo2!A${todo.index}`,
+      values: [todoToRow(todo)],
+    }))
+
+    await spreadsheet.spreadsheets.values.batchUpdate({
+      spreadsheetId: body.fileId,
+      requestBody: { valueInputOption: 'RAW', data },
+    })
+  }
+
+  // 3) index 없는 애들은 append
+  let appendStartIndex: number | null = null
+
+  if (todosWithoutIndex.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const values = todosWithoutIndex.map((todo: any) => todoToRow(todo))
+
+    const res = await spreadsheet.spreadsheets.values.append({
       spreadsheetId: body.fileId,
       valueInputOption: 'RAW',
       range: 'todo2',
       requestBody: { values },
     })
+
+    const updatedRange = res.data.updates?.updatedRange
+    // 예: 'todo2!A10:K12' → 10 추출
+    if (updatedRange) {
+      const match = updatedRange.match(/![A-Z]+(\d+):/)
+      if (match?.[1]) appendStartIndex = Number(match[1])
+    }
   }
 
-  return NextResponse.json({ ok: true })
+  // 4) 응답용 indexes 배열 구성
+  //    - index 있던 애들은 그대로
+  //    - 없던 애들은 appendStartIndex 기준으로 순서대로 부여
+  let appendOffset = 0
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const indexes = body.todos.map((todo: any) => {
+    if (todo.index != null) return todo.index
+
+    if (appendStartIndex == null) return null // append 실패 시 안전장치
+
+    const rowIndex = appendStartIndex + appendOffset
+    appendOffset += 1
+    return rowIndex
+  })
+
+  return NextResponse.json({ ok: true, indexes })
 }

@@ -52,9 +52,13 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fileId, todos: chunk }),
       })
-
+      const result = await res.json()
       if (res.ok) {
         const ids = chunk.map(({ id }) => id).filter((id): id is string => Boolean(id))
+        ids.forEach(
+          (id, index) =>
+            result.indexes?.[index] && todosStore.updateIndex(id, result.indexes[index])
+        )
         todosStore.updateDirties(ids, false)
       } else break
     }
