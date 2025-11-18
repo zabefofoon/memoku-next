@@ -114,7 +114,7 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
 
       const result = await res.json()
       if (result.ok && result.todos?.length) {
-        allTodos.push(...result.todos.map((todo) => ({ ...todo, dirty: false })))
+        allTodos.push(...result.todos.map((todo: Todo) => ({ ...todo, dirty: false })))
       } else {
         console.warn(`Chunk ${i / chunkSize + 1} failed`)
         break

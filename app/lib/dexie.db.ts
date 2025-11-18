@@ -1,77 +1,109 @@
-// db.ts
-import type { Table } from 'dexie'
-import Dexie from 'dexie'
-import { Setting, Tag, Todo } from '../models/Todo'
+import Dexie, { type Table } from 'dexie'
+import type { ImageRow, Setting, Tag, Todo } from '../models/Todo'
 
 export class MySubClassedDexie extends Dexie {
   todos!: Table<Todo>
+  images!: Table<ImageRow>
   setting!: Table<Setting>
-  images!: Table<{ id: string; image: Blob; todoId: string }> // 새로운 이미지 테이블 타입 정의
   tags!: Table<Tag>
 
   constructor() {
     super('SimpleTodo')
 
-    // 스키마 정의
-    this.version(2).stores({
-      todos:
-        'id, description, tagId, created, modified, parentId, childId, start, end, status, days, dirty, index, images',
+    this.version(1).stores({
+      todos: '++id, date, description, tagId, time, created, upto, done, modified',
       setting: '++id, tags, forms',
-      images: 'id, image, todoId',
-      tags: 'id, color, label',
+      images: '++id, image, todoId',
     })
 
-    this.version(2).upgrade(async (tx) => {
-      const todos = await tx.table('todos').toArray()
-      const imageTable = tx.table('images')
+    this.version(2)
+      .stores({
+        // 기존 테이블들 (PK 그대로 유지)
+        todos: '++id, date, description, tagId, time, created, upto, done, modified',
+        images: '++id, image, todoId',
+        setting: '++id, tags, forms',
 
-      // todos 테이블에서 images 데이터를 분리하여 새로운 테이블에 삽입
-      for (const todo of todos) {
-        if (todo.images) {
-          for (const image of todo.images) {
-            await imageTable.add({ image, todoId: todo.id }) // todoId로 연결
+        // 새 테이블들 – string id를 PK로 사용
+        todos2:
+          'id, description, tagId, created, modified, parentId, childId, start, end, status, days, dirty, index',
+        images2: 'id, image, todoId',
+        tags: 'id, color, label, dirty, modified, index',
+      })
+      .upgrade(async (tx) => {
+        // 1) todos -> todos2 로 복사 (id를 string화)
+        const oldTodos = await tx.table('todos').toArray()
+        const todos2 = tx.table<Todo>('todos2')
+
+        for (const old of oldTodos) {
+          const newId = String(old.id) // number -> string
+
+          const todo: Todo = {
+            id: newId,
+            description: old.description ?? '',
+            tagId: old.tagId ?? undefined,
+            created: old.created ?? Date.now(),
+            modified: old.modified ?? Date.now(),
+            // v1에 없던 필드는 기본값/undefined로
+            parentId: old.parentId ?? undefined,
+            childId: old.childId ?? undefined,
+            start: old.start ?? undefined,
+            end: old.end ?? undefined,
+            status: old.status ?? undefined,
+            days: old.days ?? undefined,
+            dirty: old.dirty ?? true,
+            index: old.index ?? undefined,
           }
+
+          await todos2.add(todo)
         }
-        delete todo.images // 기존 테이블에서 images 필드 제거
-        todo.parentId = -1
 
-        await tx.table('todos').put(todo)
-      }
+        // 2) images -> images2 로 복사 (todoId도 string으로 변환)
+        const oldImages = await tx.table('images').toArray()
+        const images2 = tx.table<ImageRow>('images2')
 
-      const settings = await tx.table<Setting>('setting').toArray()
-      if (settings.length > 0) {
-        // 여러 row가 있을 수 있으니 전부 순회
+        for (const old of oldImages) {
+          const row: ImageRow = {
+            id: String(old.id),
+            image: old.image,
+            todoId: String(old.todoId),
+          }
+          await images2.add(row)
+        }
+
+        const settings = await tx.table<Setting>('setting').toArray()
+        const tagsTable = tx.table<Tag>('tags')
+
         const allTags: Tag[] = []
         for (const setting of settings) {
           if (Array.isArray(setting.tags) && setting.tags.length > 0) {
-            allTags.push(...setting.tags.map((tag) => ({ ...tag })))
-            await tx.table<Setting>('setting').put(setting)
+            for (const tag of setting.tags) {
+              allTags.push({ ...tag, id: String(tag.id), dirty: true })
+            }
           }
         }
-        if (allTags.length > 0) await tx.table<Tag>('tags').bulkAdd(allTags)
-      }
+
+        if (allTags.length > 0) await tagsTable.bulkAdd(allTags)
+      })
+
+    /**
+     * v3 – 더 이상 쓰지 않을 기존 테이블 제거
+     *  - 테이블 이름에 null을 넣으면 삭제됨
+     */
+    this.version(3).stores({
+      todos: null,
+      images: null,
+      setting: null,
+      todos2:
+        'id, description, tagId, created, modified, parentId, childId, start, end, status, days, dirty, index',
+      images2: 'id, image, todoId',
+      tags: 'id, color, label, dirty, modified, index',
     })
 
-    this.version(3).upgrade(async (tx) => {
-      const table = tx.table<Todo>('todos')
-      const seen = new Set<number>()
-
-      await table
-        .where('parentId')
-        .aboveOrEqual(0)
-        .each(async (child) => {
-          const pid = child.parentId
-          if (typeof pid !== 'number') return
-          if (seen.has(pid)) return
-
-          const parent = await table.get(pid)
-          if (!parent) return
-          if (parent.id === child.id) return
-
-          await table.update(pid, { childId: child.id })
-          seen.add(pid)
-        })
-    })
+    // 최종적으로 앱 코드에서 쓸 alias를 잡아줌
+    // 이제 db.todos → 실제로는 todos2 테이블을 가리키게 됨
+    this.todos = this.table('todos2')
+    this.images = this.table('images2')
+    this.tags = this.table('tags')
   }
 }
 

@@ -18,6 +18,8 @@ const TODO2_HEADERS = [
   'deleted',
 ]
 
+const TAGS_HEADERS = ['id', 'color', 'label', 'removed', 'modified']
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function transformTodoSheet(auth: any, spreadsheetId: string) {
   const sheets = google.sheets({ version: 'v4', auth })
@@ -143,6 +145,45 @@ async function transformTodoSheet(auth: any, spreadsheetId: string) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function ensureTagsSheet(auth: any, spreadsheetId: string): Promise<void> {
+  const sheets = google.sheets({ version: 'v4', auth })
+
+  // 시트 메타 정보 조회
+  const meta = await sheets.spreadsheets.get({
+    spreadsheetId,
+    fields: 'sheets.properties(sheetId,title)',
+  })
+
+  const tagsSheet = meta.data.sheets?.find((s) => s.properties?.title === 'tags')
+  let tagsId = tagsSheet?.properties?.sheetId
+
+  if (!tagsId) {
+    // tags 시트가 없으면 추가
+    const addRes = await sheets.spreadsheets.batchUpdate({
+      spreadsheetId,
+      requestBody: { requests: [{ addSheet: { properties: { title: 'tags' } } }] },
+    })
+
+    tagsId = addRes.data.replies?.[0]?.addSheet?.properties?.sheetId
+    sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: 'tags!A1',
+      valueInputOption: 'RAW',
+      requestBody: {
+        values: [TAGS_HEADERS],
+      },
+    })
+  } else {
+    sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: 'tags!A1',
+      valueInputOption: 'RAW',
+      requestBody: { values: [TAGS_HEADERS] },
+    })
+  }
+}
+
 export async function GET() {
   const fileName = 'MEMOKU_DATA'
 
@@ -163,30 +204,32 @@ export async function GET() {
     fields: 'files(id)',
     spaces: 'drive',
   })
+
   const fileId = res.data.files && res.data.files.length > 0 ? res.data.files[0].id : undefined
   if (fileId) {
-    await transformTodoSheet(oauth2, fileId)
-
+    await Promise.all([transformTodoSheet(oauth2, fileId), ensureTagsSheet(oauth2, fileId)])
     return NextResponse.json({ ok: true, fileId })
   } else {
     const sheets = google.sheets({ version: 'v4', auth: oauth2 })
     const createRes = await sheets.spreadsheets.create({
       requestBody: {
         properties: { title: 'MEMOKU_DATA', locale: 'en' },
-        sheets: [{ properties: { title: 'todo2' } }],
+        sheets: [{ properties: { title: 'todo2' } }, { properties: { title: 'tags' } }],
       },
     })
 
     const spreadsheetId = createRes.data.spreadsheetId!
-    const res = await sheets.spreadsheets.values.append({
+
+    await google.sheets({ version: 'v4', auth: oauth2 }).spreadsheets.values.batchUpdate({
       spreadsheetId,
-      valueInputOption: 'RAW',
-      range: 'todo2',
       requestBody: {
-        values: [TODO2_HEADERS],
+        data: [
+          { range: 'todo2!A1', values: [TODO2_HEADERS] },
+          { range: 'tags!A1', values: [TAGS_HEADERS] },
+        ],
       },
     })
 
-    return NextResponse.json({ ok: true, fileId: res.data.spreadsheetId })
+    return NextResponse.json({ ok: true, fileId: spreadsheetId })
   }
 }

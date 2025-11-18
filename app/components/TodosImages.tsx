@@ -62,11 +62,6 @@ export function TodosImages(props: Props) {
           type='button'
           className='shrink-0 w-[120px] sm:w-[220px] aspect-square | flex flex-col items-center justify-center gap-[6px] | rounded-lg bg-white dark:bg-zinc-800 shadow-md'
           onClick={() => !isUploading && fileInputEl.current?.click()}>
-          {(!sheetStore.fileId || !sheetStore.imageFolderId) && (
-            <>
-              <UISpinner />
-            </>
-          )}
           {isUploading && (
             <>
               <UISpinner />

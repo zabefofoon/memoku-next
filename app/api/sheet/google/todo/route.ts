@@ -133,6 +133,7 @@ export async function PATCH(req: Request) {
 
   const sheets = google.sheets({ version: 'v4', auth: oauth2 })
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: { range: string; values: any[][] }[] = []
 
   if (deleted) data.push({ range: `todo2!M${index}:M${index}`, values: [[true]] })

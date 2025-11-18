@@ -30,7 +30,7 @@ export interface Tag {
   id: string
   color: keyof typeof TAG_COLORS
   label: string
-  excludeUpload: boolean
+  dirty?: boolean
 }
 
 export interface GetTodosParams {
@@ -41,3 +41,9 @@ export interface GetTodosParams {
 }
 
 export type WeekDay = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'
+
+export interface ImageRow {
+  id: string
+  image: string | Blob
+  todoId: string
+}

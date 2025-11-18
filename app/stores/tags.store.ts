@@ -38,7 +38,7 @@ export const useTagsStore = create<TagsStore>((set, get) => {
     label: string
     color: keyof typeof TAG_COLORS
   }): Promise<string> => {
-    return db.tags.add({ ...tagInfo, id: etcUtil.generateUniqueId(), excludeUpload: false })
+    return db.tags.add({ ...tagInfo, id: etcUtil.generateUniqueId(), dirty: true })
   }
 
   const updateTag = async (
@@ -51,6 +51,10 @@ export const useTagsStore = create<TagsStore>((set, get) => {
   const deleteTag = async (id: string): Promise<void> => {
     await db.tags.where({ id }).delete()
     initTags()
+  }
+
+  const getAllDirtyTags = () => {
+    return db.tags.filter(({ dirty }) => Boolean(dirty) || dirty == null).toArray()
   }
 
   return {

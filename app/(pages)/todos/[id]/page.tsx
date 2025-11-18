@@ -105,7 +105,7 @@ export default function TodosDetail() {
       for (const key in res) {
         const data = {
           id: res[key].id,
-          image: await etcUtil.blobToBase64(res[key].image),
+          image: await etcUtil.blobToBase64(res[key].image as Blob),
           todoId: res[key].todoId,
         }
         imageData.push(data)
@@ -125,7 +125,7 @@ export default function TodosDetail() {
 
           localSavedImages.forEach(({ id }) => {
             const item = Object.values(res).find((img) => img.id === id)
-            if (item) uploadBlobs.push(item.image)
+            if (item?.image instanceof Blob) uploadBlobs.push(item.image)
           })
 
           if (uploadBlobs.length > 0) {
@@ -240,6 +240,7 @@ export default function TodosDetail() {
         if (childTodo == null) return
 
         if (sheetStore.fileId) {
+          const now = Date.now()
           fetch(
             `/api/sheet/google/todo?fileId=${sheetStore.fileId}&index=${childTodo.index}&parent=${currentTodo.parentId}&child=${childTodo.childId}&modified=${now}`,
             { method: 'PATCH' }
@@ -328,11 +329,12 @@ export default function TodosDetail() {
 
       const formData = new FormData()
       blobs.forEach((file) => formData.append('images', file))
+      formData.append('folderId', sheetStore.imageFolderId)
+
       const res = await fetch('/api/upload/google/image', {
         method: 'POST',
         body: formData,
       })
-      formData.append('folderId', sheetStore.imageFolderId)
 
       const result = await res.json()
       const newImages = [...result.urls, ...(images?.map(({ image }) => image) ?? [])]
