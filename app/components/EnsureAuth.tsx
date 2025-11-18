@@ -124,12 +124,19 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
     return allTodos
   }
 
+  const loadImageFoderId = async (): Promise<string> => {
+    const res = await fetch('/api/upload/google/image')
+    const result = await res.json()
+    return result.folderId
+  }
+
   useEffect(() => {
     if (!props.refreshToken) setIsAuthed(true)
     else {
       loadGoogleMe().then(() =>
         loadSheetId().then((fileId) => {
-          if (fileId)
+          if (fileId) {
+            loadImageFoderId().then((folderId) => sheetStore.setImageFolderId(folderId) ?? '')
             pushDirties(fileId).then(() => {
               loadRemoteMetaRows(fileId).then((remoteMeta) => {
                 loadLocalMetaRows().then((localMeta) => {
@@ -152,6 +159,7 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
                 })
               })
             })
+          }
         })
       )
     }

@@ -332,6 +332,8 @@ export default function TodosDetail() {
         method: 'POST',
         body: formData,
       })
+      formData.append('folderId', sheetStore.imageFolderId)
+
       const result = await res.json()
       const newImages = [...result.urls, ...(images?.map(({ image }) => image) ?? [])]
       const now = await todosStore.updateImages(params.id as string, newImages)

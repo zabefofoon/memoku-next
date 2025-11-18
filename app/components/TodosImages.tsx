@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ChangeEvent, useEffect, useRef, useState } from 'react'
 import { Todo } from '../models/Todo'
+import { useSheetStore } from '../stores/sheet.store'
 import { Icon } from './Icon'
 import { TodosDeleteModal } from './TodosDeleteModal'
 import UISpinner from './UISpinner'
@@ -19,6 +20,8 @@ export function TodosImages(props: Props) {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
+
+  const sheetStore = useSheetStore()
 
   const fileInputEl = useRef<HTMLInputElement>(null)
 
@@ -59,6 +62,11 @@ export function TodosImages(props: Props) {
           type='button'
           className='shrink-0 w-[120px] sm:w-[220px] aspect-square | flex flex-col items-center justify-center gap-[6px] | rounded-lg bg-white dark:bg-zinc-800 shadow-md'
           onClick={() => !isUploading && fileInputEl.current?.click()}>
+          {(!sheetStore.fileId || !sheetStore.imageFolderId) && (
+            <>
+              <UISpinner />
+            </>
+          )}
           {isUploading && (
             <>
               <UISpinner />
