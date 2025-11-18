@@ -9,12 +9,17 @@ interface TagsStore {
   tagsMap: Record<string, Tag>
   initTags: () => void
   getTagsById: (id?: string) => Tag | undefined
-  deleteTag: (id: string) => Promise<void>
+  deleteTags: (ids: string[]) => Promise<void>
   addTag: (tagInfo: { label: string; color: keyof typeof TAG_COLORS }) => Promise<string>
   updateTag: (
     id: string,
     tagInfo: { label: string; color: keyof typeof TAG_COLORS }
   ) => Promise<number>
+  getAllDirtyTags: () => Promise<Tag[]>
+  updateIndex: (id: string, index: number) => Promise<number>
+  updateDirties: (ids: string[], value: boolean) => Promise<number>
+  getMetas: () => Promise<{ id: string; modified?: number }[]>
+  addNewTagBulk: (tags: Tag[]) => Promise<number>
 }
 
 export const useTagsStore = create<TagsStore>((set, get) => {
@@ -48,13 +53,29 @@ export const useTagsStore = create<TagsStore>((set, get) => {
     return db.tags.update(id, tagInfo)
   }
 
-  const deleteTag = async (id: string): Promise<void> => {
-    await db.tags.where({ id }).delete()
+  const deleteTags = async (ids: string[]): Promise<void> => {
+    await db.tags.bulkDelete(ids)
     initTags()
   }
 
-  const getAllDirtyTags = () => {
+  const updateIndex = async (id: string, index: number): Promise<number> => {
+    return db.tags.update(id, { index })
+  }
+
+  const updateDirties = async (ids: string[], value: boolean): Promise<number> => {
+    return db.tags.bulkUpdate(ids.map((id) => ({ key: id, changes: { dirty: value } })))
+  }
+
+  const getAllDirtyTags = (): Promise<Tag[]> => {
     return db.tags.filter(({ dirty }) => Boolean(dirty) || dirty == null).toArray()
+  }
+
+  const getMetas = async (): Promise<{ id: string; modified?: number }[]> => {
+    return db.tags.toArray((tag) => tag.map(({ id, modified }) => ({ id, modified })))
+  }
+
+  const addNewTagBulk = (tags: Tag[]): Promise<number> => {
+    return db.tags.bulkPut(tags)
   }
 
   return {
@@ -62,8 +83,13 @@ export const useTagsStore = create<TagsStore>((set, get) => {
     tagsMap,
     initTags,
     getTagsById,
-    deleteTag,
+    deleteTags,
     addTag,
     updateTag,
+    getAllDirtyTags,
+    updateIndex,
+    updateDirties,
+    getMetas,
+    addNewTagBulk,
   }
 })

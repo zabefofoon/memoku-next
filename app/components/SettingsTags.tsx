@@ -23,7 +23,7 @@ export default function SettingsTags() {
 
   const deleteTag = (): void => {
     const tagId = searchParams.get('delete')
-    if (tagId) tagsStore.deleteTag(tagId)
+    if (tagId) tagsStore.deleteTags([tagId])
     router.back()
   }
 

@@ -1,9 +1,10 @@
 'use client'
 
 import { PropsWithChildren, useEffect, useState } from 'react'
-import { Todo } from '../models/Todo'
+import { Tag, Todo } from '../models/Todo'
 import { useAuthStore } from '../stores/auth.store'
 import { useSheetStore } from '../stores/sheet.store'
+import { useTagsStore } from '../stores/tags.store'
 import { useTodosStore } from '../stores/todos.store'
 import UISpinner from './UISpinner'
 
@@ -16,6 +17,7 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
   const authStore = useAuthStore()
   const sheetStore = useSheetStore()
   const todosStore = useTodosStore()
+  const tagsStore = useTagsStore()
 
   const [isAuthed, setIsAuthed] = useState<boolean>(false)
 
@@ -41,6 +43,7 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
 
   const pushDirties = async (fileId: string): Promise<void> => {
     const todos = await todosStore.getAllDirtyTodos()
+
     if (todos.length === 0) return
 
     const chunkSize = 200
@@ -130,6 +133,54 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
     return result.folderId
   }
 
+  const pushDirtyTags = async (fileId: string) => {
+    const tags = await tagsStore.getAllDirtyTags()
+    if (tags.length === 0) return
+
+    const res = await fetch('/api/sheet/google/bulk/tags', {
+      method: 'POST',
+      body: JSON.stringify({ fileId, tags }),
+    })
+    const result = await res.json()
+    if (res.ok) {
+      const ids = tags.map(({ id }) => id).filter((id): id is string => Boolean(id))
+      ids.forEach(
+        (id, index) => result.indexes?.[index] && tagsStore.updateIndex(id, result.indexes[index])
+      )
+      tagsStore.updateDirties(ids, false)
+    }
+  }
+
+  const loadRemoteMetaTagRows = async (
+    fileId: string
+  ): Promise<{ id: string; modified: number; index: number; deleted?: string }[]> => {
+    const res = await fetch(`/api/sheet/google/meta/tags?fileId=${fileId}`, {
+      method: 'GET',
+    })
+    const result = await res.json()
+    return result.metas
+  }
+
+  const loadLocalMetaTagRows = async (): Promise<{ id: string; modified?: number }[]> => {
+    return await tagsStore.getMetas()
+  }
+
+  const loadNewOrUpdatedTags = async (
+    fileId: string,
+    meta: { id: string; index: number }[]
+  ): Promise<Tag[]> => {
+    if (meta.length === 0) return []
+
+    const res = await fetch(`/api/sheet/google/meta/tags`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileId, meta }),
+    })
+
+    const result = await res.json()
+    return result.tags?.map((todo: Todo) => ({ ...todo, dirty: false })) ?? []
+  }
+
   useEffect(() => {
     if (!props.refreshToken) setIsAuthed(true)
     else {
@@ -137,6 +188,28 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
         loadSheetId().then((fileId) => {
           if (fileId) {
             loadImageFoderId().then((folderId) => sheetStore.setImageFolderId(folderId) ?? '')
+
+            pushDirtyTags(fileId).then(() => {
+              loadRemoteMetaTagRows(fileId).then((remoteMeta) => {
+                loadLocalMetaTagRows().then((localMeta) => {
+                  const localMap = new Map(localMeta.map((l) => [l.id, l.modified]))
+                  const deletedRows = remoteMeta.filter((row) => row.deleted).map(({ id }) => id)
+                  tagsStore.deleteTags(deletedRows)
+                  const remoteNewOrUpdated = remoteMeta
+                    .filter(
+                      (row) =>
+                        !row.deleted &&
+                        (!localMap.has(row.id) || (row.modified ?? 0) > (localMap.get(row.id) ?? 0))
+                    )
+                    .map(({ id, index }) => ({ id, index }))
+                  loadNewOrUpdatedTags(fileId, remoteNewOrUpdated).then((tags) => {
+                    tagsStore.addNewTagBulk(tags)
+                    tagsStore.initTags()
+                  })
+                })
+              })
+            })
+
             pushDirties(fileId).then(() => {
               loadRemoteMetaRows(fileId).then((remoteMeta) => {
                 loadLocalMetaRows().then((localMeta) => {

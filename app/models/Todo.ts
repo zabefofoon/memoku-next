@@ -31,6 +31,8 @@ export interface Tag {
   color: keyof typeof TAG_COLORS
   label: string
   dirty?: boolean
+  modified?: number
+  index?: number
 }
 
 export interface GetTodosParams {
