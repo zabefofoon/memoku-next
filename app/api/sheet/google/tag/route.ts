@@ -9,9 +9,9 @@ export async function POST(req: Request) {
   if (!fileId) return NextResponse.json({ ok: false })
 
   const id = url.searchParams.get('id') ?? ''
-  const created = url.searchParams.get('created') ?? ''
+  const color = url.searchParams.get('color') ?? ''
+  const label = url.searchParams.get('label') ?? ''
   const modified = url.searchParams.get('modified') ?? ''
-  const parent = url.searchParams.get('parent') ?? ''
 
   const headerCookies = await cookies()
   const access = headerCookies.get('x-google-access-token')?.value
@@ -28,9 +28,9 @@ export async function POST(req: Request) {
   const res = await sheets.spreadsheets.values.append({
     spreadsheetId: fileId,
     valueInputOption: 'RAW',
-    range: 'todo2',
+    range: 'tags',
     requestBody: {
-      values: [[id, '', '', created, modified, '', 'created', parent.replace('undefined', '')]],
+      values: [[id, color, label, '', modified]],
     },
   })
 
@@ -52,18 +52,10 @@ export async function PATCH(req: Request) {
   const index = url.searchParams.get('index') ?? ''
   if (!fileId || !index) return NextResponse.json({ ok: false })
 
-  const description = url.searchParams.get('description') ?? ''
-  const tag = url.searchParams.get('tag') ?? ''
-  const start = url.searchParams.get('start') ?? ''
-  const end = url.searchParams.get('end') ?? ''
-  const images = url.searchParams.get('images') ?? ''
-  const status = url.searchParams.get('status') ?? ''
-  const childId = url.searchParams.get('child') ?? ''
-  const parentId = url.searchParams.get('parent') ?? ''
-  const deleted = url.searchParams.get('deleted') ?? ''
+  const color = url.searchParams.get('color') ?? ''
+  const label = url.searchParams.get('label') ?? ''
   const modified = url.searchParams.get('modified') ?? ''
-  const daysParam = url.searchParams.get('days')
-  const days = daysParam ? daysParam.split(',') : undefined
+  const deleted = url.searchParams.get('deleted') ?? ''
 
   const headerCookies = await cookies()
   const access = headerCookies.get('x-google-access-token')?.value
@@ -81,39 +73,15 @@ export async function PATCH(req: Request) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: { range: string; values: any[][] }[] = []
 
-  if (deleted) data.push({ range: `todo2!M${index}:M${index}`, values: [[true]] })
-  if (description) data.push({ range: `todo2!B${index}:B${index}`, values: [[description]] })
-  if (tag) data.push({ range: `todo2!C${index}:C${index}`, values: [[tag]] })
-  if (images)
-    data.push({ range: `todo2!F${index}:F${index}`, values: [[images.replace('undefined', '')]] })
-  if (status) data.push({ range: `todo2!G${index}:G${index}`, values: [[status]] })
-  if (childId || parentId)
-    data.push({
-      range: `todo2!H${index}:I${index}`,
-      values: [[parentId.replace('undefined', ''), childId.replace('undefined', '')]],
-    })
-
-  if (start || end || daysParam) {
-    data.push({
-      range: `todo2!J${index}:L${index}`,
-      values: [
-        [
-          start.replace('undefined', '') || '',
-          end.replace('undefined', '') || '',
-          days ? days.join(',') : '',
-        ],
-      ],
-    })
-  }
-
-  data.push({ range: `todo2!E${index}:E${index}`, values: [[modified]] })
+  if (color) data.push({ range: `tags!B${index}:B${index}`, values: [[color]] })
+  if (label) data.push({ range: `tags!C${index}:C${index}`, values: [[label]] })
+  if (modified) data.push({ range: `tags!E${index}:E${index}`, values: [[modified]] })
+  if (deleted) data.push({ range: `tags!D${index}:D${index}`, values: [[true]] })
+  data.push({ range: `tags!E${index}:E${index}`, values: [[modified]] })
 
   const res = await sheets.spreadsheets.values.batchUpdate({
     spreadsheetId: fileId,
-    requestBody: {
-      valueInputOption: 'RAW',
-      data,
-    },
+    requestBody: { valueInputOption: 'RAW', data },
   })
 
   return NextResponse.json({ ok: res.status === 200 })

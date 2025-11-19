@@ -7,10 +7,11 @@ import etcUtil from '../utils/etc.util'
 interface TagsStore {
   tags: Tag[]
   tagsMap: Record<string, Tag>
+  getTag: (id: string) => Promise<Tag | undefined>
   initTags: () => void
   getTagsById: (id?: string) => Tag | undefined
   deleteTags: (ids: string[]) => Promise<void>
-  addTag: (tagInfo: { label: string; color: keyof typeof TAG_COLORS }) => Promise<string>
+  addTag: (tagInfo: { label: string; color: keyof typeof TAG_COLORS }) => Promise<[string, number]>
   updateTag: (
     id: string,
     tagInfo: { label: string; color: keyof typeof TAG_COLORS }
@@ -39,18 +40,28 @@ export const useTagsStore = create<TagsStore>((set, get) => {
 
   const getTagsById = (id?: string): Tag | undefined => (id ? get().tagsMap[id] : undefined)
 
+  const getTag = async (id: string): Promise<Tag | undefined> => {
+    const [res] = await db.tags.where({ id }).toArray()
+    return res
+  }
+
   const addTag = async (tagInfo: {
     label: string
     color: keyof typeof TAG_COLORS
-  }): Promise<string> => {
-    return db.tags.add({ ...tagInfo, id: etcUtil.generateUniqueId(), dirty: true })
+  }): Promise<[string, number]> => {
+    const id = etcUtil.generateUniqueId()
+    const now = Date.now()
+    db.tags.add({ ...tagInfo, id, modified: now, dirty: true })
+    return [id, now]
   }
 
   const updateTag = async (
     id: string,
     tagInfo: { label: string; color: keyof typeof TAG_COLORS }
   ): Promise<number> => {
-    return db.tags.update(id, tagInfo)
+    const now = Date.now()
+    await db.tags.update(id, { ...tagInfo, modified: Date.now(), dirty: true })
+    return now
   }
 
   const deleteTags = async (ids: string[]): Promise<void> => {
@@ -79,6 +90,7 @@ export const useTagsStore = create<TagsStore>((set, get) => {
   }
 
   return {
+    getTag,
     tags,
     tagsMap,
     initTags,
