@@ -17,7 +17,7 @@ export default function FloatingButtons() {
   }
 
   return (
-    <div className='sm:hidden | fixed right-[16px] bottom-[92px] z-[50]'>
+    <div className='sm:hidden | fixed right-[0] bottom-[92px] z-[50]'>
       <button
         className='w-[48px] aspect-square | flex items-center justify-center | bg-indigo-500 rounded-full | text-white'
         onClick={createTodo}>

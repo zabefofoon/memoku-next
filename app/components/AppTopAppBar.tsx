@@ -30,7 +30,7 @@ export function AppTopAppBar() {
   if (pathname.match(/\/todos\//gi)) return <TodosDetailHeader />
   return (
     <header className='sticky top-0 sm:hidden'>
-      <div className='bg-gray-100 dark:bg-zinc-900 | border-b border-gray-200 dark:border-zinc-700 | h-[52px] | flex items-center | px-[12px]'>
+      <div className='bg-gray-50 dark:bg-zinc-900 | border-b border-gray-200 dark:border-zinc-700 | h-[52px] | flex items-center | px-[12px]'>
         <Link
           href='/'
           className='flex items-center gap-[6px]'>
@@ -95,7 +95,7 @@ export function TodosDetailHeader() {
 
   return (
     <header className='sticky top-0 sm:hidden'>
-      <div className='bg-gray-100 dark:bg-zinc-900 | border-b border-gray-200 dark:border-zinc-700 | h-[52px] | flex items-center | px-[12px]'>
+      <div className='bg-gray-50 dark:bg-zinc-900 | border-b border-gray-200 dark:border-zinc-700 | h-[52px] | flex items-center | px-[12px]'>
         <button
           type='button'
           className='opacity-80 | flex items-center | max-w-[300px]'

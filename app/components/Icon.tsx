@@ -18,8 +18,8 @@ export function Icon(props: Props) {
         width='1em'
         height='1em'>
         <use
-          href={`/icons/icons.svg#icon-${props.name}`}
-          xlinkHref={`/icons/icons.svg#icon-${props.name}`}
+          href={`/icons/icons.svg?v=1#icon-${props.name}`}
+          xlinkHref={`/icons/icons.svg?v=1#icon-${props.name}`}
           key={`${mounted}`}
         />
       </svg>

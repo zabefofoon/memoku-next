@@ -28,23 +28,28 @@ export const useTodosStore = create(() => {
 
   const getTodos = async (params?: GetTodosParams): Promise<{ total: number; todos: Todo[] }> => {
     const tags = params?.tags?.filter(Boolean)
-    const status = params?.status?.trim()
+    const status = params?.status?.filter(Boolean)
     const query = params?.searchText?.trim().toLowerCase()
     const page = params?.page ?? 0
     const pageSize = 20
 
     const isRoot = (t: Todo) => !t.parentId
 
-    let coll = db.todos.orderBy('created').reverse()
+    let coll =
+      params?.sort === 'recent'
+        ? db.todos.orderBy('modified').reverse()
+        : db.todos.orderBy('created').reverse()
 
     if (!tags && !status && !query) {
       coll = coll.and(isRoot)
     } else {
       if (tags?.length) coll = coll.and((t) => tags.includes(t.tagId ?? ''))
       if (status)
-        coll = coll.and((t) =>
-          status === 'created' ? !t.status || t.status === 'created' : t.status === status
-        )
+        coll = coll.and((t) => {
+          if (status.includes('created'))
+            return !t.status || t.status === 'created' || status.includes(t.status)
+          else return status.includes(t.status)
+        })
       if (query) coll = coll.and((t) => (t.description ?? '').toLowerCase().includes(query))
     }
 

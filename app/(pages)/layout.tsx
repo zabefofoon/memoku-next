@@ -7,10 +7,8 @@ import { COOKIE_THEME } from '@/const'
 import { cookies } from 'next/headers'
 import { AppAside } from '../components/AppAside'
 import AppBottomAppBar from '../components/AppBottomAppBar'
-import { AppTopAppBar } from '../components/AppTopAppBar'
 import EnsureAuth from '../components/EnsureAuth'
 import { EnsureProviders } from '../components/EnsureProviders'
-import FloatingButtons from '../components/FloatingButtons'
 
 const notoSansKr = Noto_Sans_KR({
   weight: ['400', '700', '900'],
@@ -43,15 +41,13 @@ export default async function RootLayout(props: LayoutProps<'/'>) {
           refreshToken={refreshToken}>
           <EnsureProviders isDarkMode={isDarkMode}>
             <div className='relative | h-full | flex flex-col sm:flex-row sm:gap-[36px] sm:p-[24px] sm:pr-[0]'>
-              <AppTopAppBar />
+              {/* <AppTopAppBar /> */}
               <AppAside isExpand={isExpandAside} />
               <main
                 id='scroll-el'
                 className='relative z-[1] | flex flex-col | w-full h-full overflow-auto flex-1 sm:pr-[24px] pb-[4px]'>
-                <div className='sm:h-full | flex flex-col | flex-1 | p-[16px] sm:p-[0px]'>
-                  {props.children}
-                </div>
-                <FloatingButtons />
+                <div className='sm:h-full | flex flex-col | flex-1'>{props.children}</div>
+
                 <AppBottomAppBar />
               </main>
             </div>

@@ -2,15 +2,16 @@
 
 import { Icon } from '@/app/components/Icon'
 import TodosCards from '@/app/components/TodosCards'
+import { TodosFilters } from '@/app/components/TodosFilters'
 import TodosSearch from '@/app/components/TodosSearch'
-import TodosStatusDropdown from '@/app/components/TodosStatusDropdown'
+import TodosSelectedFilters from '@/app/components/TodosSelectedFilters'
 import TodosTable from '@/app/components/TodosTable'
 import { TodosTagModal } from '@/app/components/TodosTagModal'
-import TodosTagsFilter from '@/app/components/TodosTagsFilter'
 import TodosTimeModal from '@/app/components/TodosTimeModal'
-import { Tag, TodoWithChildren } from '@/app/models/Todo'
+import { Tag, Todo, TodoWithChildren } from '@/app/models/Todo'
 import { useSheetStore } from '@/app/stores/sheet.store'
 import { useTodosStore } from '@/app/stores/todos.store'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
@@ -28,6 +29,9 @@ export default function Todos() {
 
   const [isShowTimeModal, setIsShowTimeModal] = useState<boolean>(false)
   const [isShowTagModal, setIsShowTagModal] = useState(false)
+  const [isShowFilters, setIsShowFilters] = useState(false)
+
+  const [isShow, setIsShow] = useState(true)
 
   const timeTargetTodo = searchParams.get('parent')
     ? todos
@@ -38,9 +42,24 @@ export default function Todos() {
   const searchText = searchParams.get('searchText') ?? ''
   const status = searchParams.get('status') ?? ''
   const tags = searchParams.get('tags') ?? ''
+  const sort = searchParams.get('sort') ?? ''
 
-  const filterKey = useMemo(() => `${searchText}|${status}|${tags}`, [searchText, status, tags])
+  const filterKey = useMemo(
+    () => `${searchText}|${status}|${tags}|${sort}`,
+    [sort, searchText, status, tags]
+  )
   const loadingRef = useRef(false)
+
+  const applySort = (
+    sort: 'recent' | undefined,
+    status: Todo['status'][],
+    tags: Tag['id'][]
+  ): void => {
+    router.replace(
+      `?searchText=${searchText}&sort=${sort ?? ''}&status=${status.join(',')}&tags=${tags.join(',')}`,
+      { scroll: false }
+    )
+  }
 
   const loadTodos = useCallback(
     async (page = 0): Promise<void> => {
@@ -51,7 +70,9 @@ export default function Todos() {
       else setIsTodosNextLoading(true)
 
       const tags = searchParams.get('tags') ? searchParams.get('tags')!.split(',') : undefined
-      const status = searchParams.get('status') ?? ''
+      const status = searchParams.get('status')
+        ? (searchParams.get('status')!.split(',') as Todo['status'][])
+        : undefined
       const searchText = searchParams.get('searchText') ?? ''
 
       const res = await todosStore.getTodos({ tags, status, searchText, page })
@@ -178,20 +199,52 @@ export default function Todos() {
   }, [])
 
   useEffect(() => {
+    let prevScrollTop = 0
+
+    const handleScroll = (): void => {
+      const scrollEl = document.getElementById('scroll-el')
+      if (!scrollEl) return
+      if (scrollEl.scrollTop < 132) setIsShow(true)
+
+      const current = scrollEl.scrollTop
+      const diff = Math.abs(current - prevScrollTop)
+
+      if (diff < 10) return
+
+      setIsShow(current < prevScrollTop)
+      prevScrollTop = current
+    }
+
+    const el = document.getElementById('scroll-el')
+    el?.addEventListener('scroll', handleScroll)
+
+    return () => {
+      el?.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
+  useEffect(() => {
     if (page) loadTodos(page)
   }, [page])
 
   useEffect(() => {
+    setPage(0)
     loadTodos()
   }, [filterKey])
 
   useEffect(() => {
     setIsShowTimeModal(!!searchParams.get('time'))
     setIsShowTagModal(!!searchParams.get('todoTag'))
+    setIsShowFilters(!!searchParams.get('filter'))
   }, [searchParams])
 
   return (
     <div className='flex flex-col | sm:max-h-full'>
+      <TodosFilters
+        isShow={isShowFilters}
+        close={router.back}
+        apply={applySort}
+      />
       <TodosTimeModal
         isShow={isShowTimeModal}
         todo={timeTargetTodo}
@@ -203,16 +256,32 @@ export default function Todos() {
         close={router.back}
         select={changeTag}
       />
-      <div className='mb-[24px] | hidden sm:block'>
+      <div className='px-[16px] sm:px-0 mt-[24px] sm:mt-0 '>
         <h1 className='text-[20px] opacity-80'>Todos</h1>
         <p className='text-[16px] opacity-50'>할 일을 정리해보세요.</p>
       </div>
-      <div className='sticky top-0 left-0 z-[50] bg-gray-100 dark:bg-zinc-900'>
-        <div className='flex items-center gap-[12px] | mb-[8px] sm:mb-[20px]'>
+
+      <div
+        className='sticky top-0 left-0 z-[50] | pt-[16px] pb-[6px] | bg-gray-100/50 | transition-transform'
+        style={{
+          backdropFilter: 'blur(4px)',
+          transform: isShow ? 'translate(0, 0)' : 'translate(0, -100%)',
+        }}>
+        <div className='flex items-center gap-[12px] | px-[16px] mb-[8px] sm:mb-[20px]'>
           <TodosSearch />
-          <div className='shrink-0 flex items-center gap-[12px]'>
-            <TodosStatusDropdown />
-          </div>
+          <Link
+            href={`?${decodeURIComponent(searchParams.toString())}&filter=true`}
+            className='shrink-0 flex items-center gap-[12px] ml-auto sm:ml-0'
+            scroll={false}>
+            <Icon
+              name='filter'
+              className='text-[20px]'
+            />
+            <Icon
+              name='chevron-down'
+              className='ml-[-16px] | text-[16px]'
+            />
+          </Link>
           <button
             type='button'
             className='ml-auto | hidden sm:flex items-center | bg-indigo-500 dark:bg-indigo-600 rounded-lg | px-[8px] py-[6px] | text-white'
@@ -224,7 +293,7 @@ export default function Todos() {
             <p className='text-[14px]'>추가하기</p>
           </button>
         </div>
-        <TodosTagsFilter />
+        <TodosSelectedFilters />
       </div>
       <TodosTable
         total={total}

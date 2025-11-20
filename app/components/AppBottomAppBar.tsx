@@ -3,6 +3,8 @@
 import etcUtil from '@/app/utils/etc.util'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import FloatingButtons from './FloatingButtons'
 import { Icon } from './Icon'
 
 const menus = [
@@ -15,12 +17,47 @@ const menus = [
 
 export default function AppBottomAppBar() {
   const pathname = usePathname()
+  const [isShow, setIsShow] = useState(true)
+
+  useEffect(() => {
+    let prevScrollTop = 0
+
+    const handleScroll = (): void => {
+      const scrollEl = document.getElementById('scroll-el')
+      if (!scrollEl) return
+      if (scrollEl.scrollTop < 132) setIsShow(true)
+
+      const current = scrollEl.scrollTop
+      const diff = Math.abs(current - prevScrollTop)
+
+      if (diff < 10) return
+
+      setIsShow(current < prevScrollTop)
+      prevScrollTop = current
+    }
+
+    const el = document.getElementById('scroll-el')
+    el?.addEventListener('scroll', handleScroll)
+
+    return () => {
+      el?.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
 
   if (pathname.match(/\/todos\//gi)) return null
 
   return (
-    <div className='w-full | sticky bottom-0 left-0 z-[50] | px-[8px] py-[12px] mx-auto | sm:hidden | max-w-[360px]'>
-      <nav className='flex items-center | bg-white dark:bg-zinc-800 | rounded-full shadow-lg overflow-hidden'>
+    <div
+      className='w-full | fixed bottom-0 left-1/2 -translate-x-1/2 z-[50] | px-[8px] py-[12px] | sm:hidden | max-w-[360px] transition-transform'
+      style={{
+        transform: isShow ? 'translate(0, 0)' : 'translate(0, 100%)',
+      }}>
+      <FloatingButtons />
+      <nav
+        className='flex items-center | border-t border-x border-white | rounded-full shadow-lg overflow-hidden'
+        style={{
+          backdropFilter: 'blur(4px)',
+        }}>
         {menus.map((menu) => (
           <Link
             href={menu.href}

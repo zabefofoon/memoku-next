@@ -92,7 +92,7 @@ export function TodosImages(props: Props) {
           {image.id !== 'uploading' && (
             <Link
               href={`?image=${index}`}
-              className='absolute right-[6px] top-[6px] | p-[2px] | bg-gray-100 dark:bg-zinc-600 rounded-full'>
+              className='absolute right-[6px] top-[6px] | p-[2px] | bg-gray-50 dark:bg-zinc-600 rounded-full'>
               <Icon
                 name='close'
                 className='text-[14px]'

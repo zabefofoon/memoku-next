@@ -111,7 +111,7 @@ export default function SettingsTags() {
                     click={(tag) => router.push(`?tag=${tag?.id}`)}
                   />
                   <Link
-                    className='absolute z-[1] top-0 right-0 translate-x-[4px] -translate-y-[4px] | bg-gray-100 dark:bg-zinc-700 rounded-full p-[2px]'
+                    className='absolute z-[1] top-0 right-0 translate-x-[4px] -translate-y-[4px] | bg-gray-50 dark:bg-zinc-700 rounded-full p-[2px]'
                     href={`?delete=${tag.id}`}>
                     <Icon
                       name='delete'

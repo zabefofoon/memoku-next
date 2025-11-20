@@ -37,7 +37,8 @@ export interface Tag {
 
 export interface GetTodosParams {
   tags?: string[]
-  status?: string
+  status?: Todo['status'][]
+  sort?: 'recent' | 'created'
   searchText?: string
   page: number
 }

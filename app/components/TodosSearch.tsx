@@ -29,7 +29,7 @@ export default function TodosSearch() {
   }, [])
 
   return (
-    <label className='search | w-full sm:w-fit flex items-center | border border-gray-300 dark:border-zinc-600 rounded-lg has-focus:border-indigo-500 | pr-[8px]'>
+    <label className='search | w-full sm:w-fit flex items-center | border-b border-gray-300 dark:border-zinc-600 has-focus:border-indigo-500 | pr-[8px]'>
       <span className='sr-only'>검색</span>
       <button
         type='button'
@@ -59,7 +59,8 @@ export default function TodosSearch() {
             setValue('')
             updateQuery('')
           }}
-          aria-label='검색어 지우기'>
+          aria-label='검색어 지우기'
+          className='ml-auto'>
           <Icon
             name='close'
             className='text-[20px]'
