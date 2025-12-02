@@ -1,7 +1,7 @@
 'use client'
 
 import { FILTER_STATUS, STATUS_COLORS, TAG_COLORS } from '@/const'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
 import { Tag, Todo } from '../models/Todo'
@@ -13,11 +13,13 @@ import UIBottomSheet from './UIBottomSheet'
 interface Props {
   isShow?: boolean
   close: () => void
-  apply: (sort: 'recent' | undefined, status: Todo['status'][], tags: Tag['id'][]) => void
 }
 
 export function TodosFilters(props: Props) {
   const [cookies] = useCookies()
+
+  const router = useRouter()
+
   const tagsStore = useTagsStore()
   const searchParams = useSearchParams()
 
@@ -25,16 +27,31 @@ export function TodosFilters(props: Props) {
   const [selectedStatus, setSelectedStatus] = useState<Todo['status'][]>([])
   const [selectedTags, setSelectedTags] = useState<Tag['id'][]>([])
 
+  const sort = searchParams.get('sort') as 'recent' | undefined
+  const status = searchParams.get('status')
+  const tags = searchParams.get('tags')
+
   const sorts = [
     { label: '등록 순', value: undefined },
     { label: '최근 수정 순', value: 'recent' },
   ] as const
 
+  const apply = (): void => {
+    const base: Record<string, string> = {}
+    if (searchParams.get('searchText')) base.searchText = searchParams.get('searchText') as string
+    if (selectedSort) base.sort = selectedSort
+    if (selectedStatus.length) base.status = selectedStatus.join(',')
+    if (selectedTags.length) base.tags = selectedTags.join(',')
+    const params = new URLSearchParams(base)
+
+    router.replace(`?${decodeURIComponent(params.toString())}`, { scroll: false })
+  }
+
   useEffect(() => {
-    setSelectedSort((searchParams.get('sort') || undefined) as 'recent' | undefined)
-    setSelectedStatus((searchParams.get('status')?.split(',') ?? []) as Todo['status'][])
-    setSelectedTags(searchParams.get('tags')?.split(',') ?? [])
-  }, [searchParams])
+    setSelectedSort(sort || undefined)
+    setSelectedStatus((status?.split(',') ?? []) as Todo['status'][])
+    setSelectedTags(tags?.split(',') ?? [])
+  }, [sort, status, tags])
 
   return (
     <UIBottomSheet
@@ -178,7 +195,7 @@ export function TodosFilters(props: Props) {
       ok={() => (
         <button
           className='rounded-md bg-indigo-500 py-[12px]'
-          onClick={() => props.apply(selectedSort, selectedStatus, selectedTags)}>
+          onClick={apply}>
           <p className='text-white text-[15px] font-[700]'>적용하기</p>
         </button>
       )}

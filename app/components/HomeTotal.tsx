@@ -1,6 +1,6 @@
 'use client'
 
-import { useTodosStore } from '@/app/stores/todos.store'
+import { todosDB } from '@/app/lib/todos.db'
 import { useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
 import { PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer } from 'recharts'
@@ -9,7 +9,6 @@ import { useThemeStore } from '../stores/theme.store'
 export default function HomeTotal() {
   const [cookies] = useCookies()
 
-  const todoStore = useTodosStore()
   const themeStore = useThemeStore()
 
   const [total, setTotal] = useState<number>(0)
@@ -17,7 +16,7 @@ export default function HomeTotal() {
   const [data, setData] = useState<{ name: string; value: number; fill: string }[]>([])
 
   const loadTodos = async () => {
-    const res = await todoStore.getAllTodos()
+    const res = await todosDB.getAllTodos()
     setTotal(res.length)
 
     const createds = res.filter((todo) => todo.status === 'created')

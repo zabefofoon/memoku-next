@@ -1,78 +1,57 @@
 import { TAG_COLORS } from '@/const'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Dispatch, Fragment, SetStateAction, useEffect, useRef } from 'react'
+import { Fragment, useEffect, useRef } from 'react'
 import { useCookies } from 'react-cookie'
 import { TodoWithChildren } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
-import { useTodosStore } from '../stores/todos.store'
+import { useTodosPageStore } from '../stores/todosPage.store'
 import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
 import { TodosDropdown } from './TodosDropdown'
 import TodosPeriodText from './TodosPeriodText'
 import UISpinner from './UISpinner'
 
-export interface Props {
-  total?: number
-  todos?: TodoWithChildren[]
-  setTodos: Dispatch<SetStateAction<TodoWithChildren[] | undefined>>
-  isLoading: boolean
-  updateStatus: (
-    todo: TodoWithChildren,
-    status: TodoWithChildren['status'],
-    parentId?: string
-  ) => void
-  setPage: Dispatch<SetStateAction<number>>
-  isTodosNextLoading: boolean
+interface Props {
+  loadTodos: (page: number) => void
 }
 
 export default function TodosCards(props: Props) {
-  const todosStore = useTodosStore()
+  const isTodosNextLoading = useTodosPageStore((state) => state.isTodosNextLoading)
+  const isTodosLoading = useTodosPageStore((state) => state.isTodosLoading)
+  const page = useTodosPageStore((state) => state.page)
+  const setPage = useTodosPageStore((state) => state.setPage)
+  const todos = useTodosPageStore((state) => state.todos)
+  const total = useTodosPageStore((state) => state.total)
+
   const nextLoaderEl = useRef<HTMLDivElement>(null)
-
-  const expandRow = async (todo: TodoWithChildren): Promise<void> => {
-    let children = todo.children
-    if (!todo.isExpanded && todo.childId && !todo.children) {
-      children = await todosStore.getDescendantsFlat(todo.id)
-    }
-
-    props.setTodos((prev) =>
-      prev?.map((item) =>
-        item.id === todo.id ? { ...item, isExpanded: !todo.isExpanded, children } : item
-      )
-    )
-  }
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && !props.isTodosNextLoading && !props.isLoading) {
-        props.setPage((prev) => prev + 1)
+      if (entry.isIntersecting && !isTodosNextLoading && !isTodosLoading) {
+        setPage(page + 1, props.loadTodos)
       }
     })
     if (nextLoaderEl.current) observer.observe(nextLoaderEl.current)
 
     return () => observer.disconnect()
-  }, [props.isTodosNextLoading, props.isLoading, props.setPage])
+  }, [])
 
   return (
     <>
-      {(props.isLoading || !props.todos?.length) && (
+      {(isTodosLoading || !todos?.length) && (
         <div className='sm:hidden | flex-1 h-full | py-[80px] px-[16px] | text-center'>
-          {props.isLoading && <UISpinner />}
-          {!props.isLoading && !props.todos?.length && (
+          {isTodosLoading && <UISpinner />}
+          {!isTodosLoading && !todos?.length && (
             <p className='text-[13px] opacity-70'>데이터가 없습니다.</p>
           )}
         </div>
       )}
-      {!props.isLoading && !!props.todos?.length && (
+      {!isTodosLoading && !!todos?.length && (
         <div className='flex flex-col gap-[12px] sm:hidden px-[16px]'>
-          {props.todos?.map((todo) => (
+          {todos?.map((todo) => (
             <Fragment key={todo.id}>
-              <TodoCard
-                todo={todo}
-                expandRow={expandRow}
-                updateStatus={(status, todo) => props.updateStatus(todo, status)}
-              />
+              <TodoCard todo={todo} />
               {todo.isExpanded &&
                 todo.children?.map((child) => (
                   <div
@@ -85,14 +64,13 @@ export default function TodosCards(props: Props) {
                     <TodoCard
                       todo={child}
                       parent={todo}
-                      updateStatus={(status, todo) => props.updateStatus(todo, status, todo.id)}
                     />
                   </div>
                 ))}
             </Fragment>
           ))}
 
-          {!props.isLoading && props.todos && (props.total ?? 0) > props.todos.length && (
+          {!isTodosLoading && todos && (total ?? 0) > todos.length && (
             <div
               ref={nextLoaderEl}
               className='text-center | py-[6px]'>
@@ -105,13 +83,9 @@ export default function TodosCards(props: Props) {
   )
 }
 
-function TodoCard(props: {
-  todo: TodoWithChildren
-  parent?: TodoWithChildren
-  expandRow?: (todo: TodoWithChildren) => Promise<void>
-  updateStatus?: (status: TodoWithChildren['status'], todo: TodoWithChildren) => void
-}) {
+function TodoCard(props: { todo: TodoWithChildren; parent?: TodoWithChildren }) {
   const [cookies] = useCookies()
+  const expandRow = useTodosPageStore((state) => state.expandRow)
 
   const searchParams = useSearchParams()
   const tagsStore = useTagsStore()
@@ -148,7 +122,13 @@ function TodoCard(props: {
         {isShowBadge && (
           <Link
             className='relative  | flex justify-center items-center | shrink-0 w-[36px] aspect-square | rounded-full | font-[600] text-[14px] | shadow-sm'
-            href={`/todos/?todoTag=${props.todo.id}`}
+            href={{
+              pathname: '/todos',
+              query: {
+                ...Object.fromEntries(searchParams),
+                todoTag: props.todo.id,
+              },
+            }}
             style={{
               background:
                 cookies['x-theme'] === 'dark'
@@ -165,7 +145,7 @@ function TodoCard(props: {
           </Link>
         )}
         <Link
-          href={`/todos/${props.todo.id}`}
+          href={{ pathname: `/todos/${props.todo.id}` }}
           className='flex flex-col gap-[0px] | overflow-hidden | w-full'>
           <p className='text-[14px] truncate font-[600] text-gray-600'>
             {props.todo.description?.split(/\n/)[0]}
@@ -198,7 +178,7 @@ function TodoCard(props: {
           {!isFiltered && !props.todo.parentId && props.todo.childId && (
             <button
               type='button'
-              onClick={() => props.expandRow?.(props.todo)}>
+              onClick={() => expandRow(props.todo)}>
               {props.todo.isExpanded ? (
                 <Icon
                   name='chevron-up'

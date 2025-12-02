@@ -1,8 +1,8 @@
 'use client'
 
+import { todosDB } from '@/app/lib/todos.db'
 import { Todo } from '@/app/models/Todo'
 import { useTagsStore } from '@/app/stores/tags.store'
-import { useTodosStore } from '@/app/stores/todos.store'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import TagBadge from './TagBadge'
@@ -14,7 +14,6 @@ interface Group {
 }
 
 export default function HomeTags() {
-  const todoStore = useTodosStore()
   const tagsStore = useTagsStore()
 
   const [todos, setTodos] = useState<Todo[]>()
@@ -35,7 +34,7 @@ export default function HomeTags() {
   }, [todos])
 
   const loadTodos = async () => {
-    const res = await todoStore.getTodos()
+    const res = await todosDB.getTodos()
     setTodos(res.todos)
   }
 

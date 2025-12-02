@@ -1,23 +1,19 @@
 'use client'
 
 import { useDateUtil } from '@/app/hooks/useDateUtil'
+import { todosDB } from '@/app/lib/todos.db'
 import { Todo } from '@/app/models/Todo'
-import { useTagsStore } from '@/app/stores/tags.store'
-import { useTodosStore } from '@/app/stores/todos.store'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import TagBadge from './TagBadge'
 
 export default function HomeRecents() {
-  const todoStore = useTodosStore()
-  const tagsStore = useTagsStore()
-
   const dateUtil = useDateUtil()
 
   const [recentTodos, setRecentTodos] = useState<Todo[]>([])
 
   const loadRecentTodos = async (): Promise<void> => {
-    const todos = await todoStore.getRecentTodos()
+    const todos = await todosDB.getRecentTodos()
     setRecentTodos(todos)
   }
 

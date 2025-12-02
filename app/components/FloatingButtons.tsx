@@ -1,18 +1,17 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { useTodosStore } from '../stores/todos.store'
+import { todosDB } from '../lib/todos.db'
 import { Icon } from './Icon'
 
 export default function FloatingButtons() {
   const pathname = usePathname()
   const router = useRouter()
-  const todosStore = useTodosStore()
 
   if (pathname.match(/\/todos\//gi)) return null
 
   const createTodo = async (): Promise<void> => {
-    const res = await todosStore.postDescription('')
+    const res = await todosDB.postDescription('')
     router.push(`/todos/${res}`)
   }
 

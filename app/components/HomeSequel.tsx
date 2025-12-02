@@ -1,11 +1,10 @@
-import { CreatedSeriesPoint, useTodosStore } from '@/app/stores/todos.store'
+import { CreatedSeriesPoint, todosDB } from '@/app/lib/todos.db'
 import dayjs from 'dayjs'
 import { ReactElement, useEffect, useState } from 'react'
 import { CartesianGrid, ComposedChart, Line, ResponsiveContainer, XAxis } from 'recharts'
 import { ActiveDotProps } from 'recharts/types/util/types'
 
 export default function HomeSequel() {
-  const todosStore = useTodosStore()
   const [data, setData] = useState<
     (CreatedSeriesPoint & {
       createdMA: number
@@ -27,7 +26,7 @@ export default function HomeSequel() {
   }
 
   const loadData = async (): Promise<void> => {
-    const base = await todosStore.getCreatedSeries30d()
+    const base = await todosDB.getCreatedSeries30d()
     const withMA = withMovingAverage(base, 7)
     setData(withMA)
   }

@@ -44,6 +44,9 @@ dependencies:
   googleapis:
     specifier: ^164.1.0
     version: 164.1.0
+  immer:
+    specifier: ^11.0.1
+    version: 11.0.1
   lodash.debounce:
     specifier: ^4.0.8
     version: 4.0.8
@@ -73,7 +76,7 @@ dependencies:
     version: 3.3.1
   zustand:
     specifier: ^5.0.8
-    version: 5.0.8(@types/react@19.1.13)(react@19.1.0)
+    version: 5.0.8(@types/react@19.1.13)(immer@11.0.1)(react@19.1.0)
 
 devDependencies:
   '@eslint/eslintrc':
@@ -3109,6 +3112,10 @@ packages:
     resolution: {integrity: sha512-tmjF/k8QDKydUlm3mZU+tjM6zeq9/fFpPqH9SzWmBnVVKsPBg/V66qsMwb3/Bo90cgUN+ghdVBess+hPsxUyRw==}
     dev: false
 
+  /immer@11.0.1:
+    resolution: {integrity: sha512-naDCyggtcBWANtIrjQEajhhBEuL9b0Zg4zmlWK2CzS6xCWSE39/vvf4LqnMjUAWHBhot4m9MHCM/Z+mfWhUkiA==}
+    dev: false
+
   /immutable@5.1.3:
     resolution: {integrity: sha512-+chQdDfvscSF1SJqv2gn4SRO2ZyS3xL3r7IW/wWEEzrzLisnOlKiQu5ytC/BVNcS15C39WT2Hg/bjKjDMcu+zg==}
 
@@ -5056,7 +5063,7 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /zustand@5.0.8(@types/react@19.1.13)(react@19.1.0):
+  /zustand@5.0.8(@types/react@19.1.13)(immer@11.0.1)(react@19.1.0):
     resolution: {integrity: sha512-gyPKpIaxY9XcO2vSMrLbiER7QMAMGOQZVRdJ6Zi782jkbzZygq5GI9nG8g+sMgitRtndwaBSl7uiqC49o1SSiw==}
     engines: {node: '>=12.20.0'}
     peerDependencies:
@@ -5075,5 +5082,6 @@ packages:
         optional: true
     dependencies:
       '@types/react': 19.1.13
+      immer: 11.0.1
       react: 19.1.0
     dev: false

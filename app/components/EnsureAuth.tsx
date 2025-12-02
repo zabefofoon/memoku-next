@@ -1,11 +1,11 @@
 'use client'
 
 import { PropsWithChildren, useEffect, useState } from 'react'
+import { todosDB } from '../lib/todos.db'
 import { Tag, Todo } from '../models/Todo'
 import { useAuthStore } from '../stores/auth.store'
 import { useSheetStore } from '../stores/sheet.store'
 import { useTagsStore } from '../stores/tags.store'
-import { useTodosStore } from '../stores/todos.store'
 import UISpinner from './UISpinner'
 
 interface Props {
@@ -16,7 +16,6 @@ interface Props {
 export default function EnsureAuth(props: PropsWithChildren<Props>) {
   const authStore = useAuthStore()
   const sheetStore = useSheetStore()
-  const todosStore = useTodosStore()
   const tagsStore = useTagsStore()
 
   const [isAuthed, setIsAuthed] = useState<boolean>(false)
@@ -42,7 +41,7 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
   }
 
   const pushDirties = async (fileId: string): Promise<void> => {
-    const todos = await todosStore.getAllDirtyTodos()
+    const todos = await todosDB.getAllDirtyTodos()
 
     if (todos.length === 0) return
 
@@ -59,10 +58,9 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
       if (res.ok) {
         const ids = chunk.map(({ id }) => id).filter((id): id is string => Boolean(id))
         ids.forEach(
-          (id, index) =>
-            result.indexes?.[index] && todosStore.updateIndex(id, result.indexes[index])
+          (id, index) => result.indexes?.[index] && todosDB.updateIndex(id, result.indexes[index])
         )
-        todosStore.updateDirties(ids, false)
+        todosDB.updateDirties(ids, false)
       } else break
     }
   }
@@ -94,7 +92,7 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
   }
 
   const loadLocalMetaRows = async (): Promise<{ id: string; modified?: number }[]> => {
-    return await todosStore.getMetas()
+    return await todosDB.getMetas()
   }
 
   const loadNewOrUpdated = async (
@@ -216,7 +214,7 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
                   const localMap = new Map(localMeta.map((l) => [l.id, l.modified]))
 
                   const deletedRows = remoteMeta.filter((row) => row.deleted).map(({ id }) => id)
-                  todosStore.deleteTodos(deletedRows)
+                  todosDB.deleteTodos(deletedRows)
 
                   const remoteNewOrUpdated = remoteMeta
                     .filter(
@@ -226,7 +224,7 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
                     )
                     .map(({ id, index }) => ({ id, index }))
                   loadNewOrUpdated(fileId, remoteNewOrUpdated).then((todos) => {
-                    todosStore.addNewTodoBulk(todos)
+                    todosDB.addNewTodoBulk(todos)
                     setIsAuthed(true)
                   })
                 })

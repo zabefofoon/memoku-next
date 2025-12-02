@@ -1,7 +1,7 @@
 'use client'
 
+import { todosDB } from '@/app/lib/todos.db'
 import { useTagsStore } from '@/app/stores/tags.store'
-import { useTodosStore } from '@/app/stores/todos.store'
 import { CALENDAR_REPEAT, TAG_COLORS } from '@/const'
 import {
   DatesSetArg,
@@ -22,7 +22,6 @@ export default function HomeCalendar() {
   const [cookies] = useCookies()
 
   const themeStore = useThemeStore()
-  const todoStore = useTodosStore()
   const tagsStore = useTagsStore()
   const router = useRouter()
 
@@ -41,7 +40,7 @@ export default function HomeCalendar() {
   }
 
   const handleDatesSet = async (arg: DatesSetArg) => {
-    const res = await todoStore.getTodosDateRange(arg.start, arg.end)
+    const res = await todosDB.getTodosDateRange(arg.start, arg.end)
     const mapped = res.map((todo) => {
       const tagColor = tagsStore.getTagsById(todo.tagId)?.color
 

@@ -1,7 +1,6 @@
 import { db } from '@/app/lib/dexie.db'
 import { GetTodosParams, Todo, WeekDay } from '@/app/models/Todo'
 import dayjs from 'dayjs'
-import { create } from 'zustand'
 import etcUtil from '../utils/etc.util'
 
 export interface CreatedSeriesPoint {
@@ -9,24 +8,26 @@ export interface CreatedSeriesPoint {
   created: number
 }
 
-export const useTodosStore = create(() => {
-  const checkExistTodo = async (id: string): Promise<boolean> => {
+export const todosDB = {
+  checkExistTodo: async (id: string): Promise<boolean> => {
     return (await db.todos.where('id').equals(id).count()) > 0
-  }
-  const getAllDirtyTodos = async (): Promise<Todo[]> => {
+  },
+  getAllDirtyTodos: async (): Promise<Todo[]> => {
     return db.todos.filter(({ dirty }) => Boolean(dirty) || dirty == null).toArray()
-  }
-
-  const getTodo = async (id: string): Promise<Todo> => {
+  },
+  getTodo: async (id: string): Promise<Todo> => {
     const [res] = await db.todos.where({ id }).toArray()
     return res
-  }
-
-  const getAllTodos = (): Promise<Todo[]> => {
-    return db.todos.toArray()
-  }
-
-  const getTodos = async (params?: GetTodosParams): Promise<{ total: number; todos: Todo[] }> => {
+  },
+  getParentTodo: async (parentId: string): Promise<Todo> => {
+    const [res] = await db.todos.where({ id: parentId }).toArray()
+    return res
+  },
+  getChildTodo: async (id: string): Promise<Todo> => {
+    const [res] = await db.todos.where({ parentId: id }).toArray()
+    return res
+  },
+  getTodos: async (params?: GetTodosParams): Promise<{ total: number; todos: Todo[] }> => {
     const tags = params?.tags?.filter(Boolean)
     const status = params?.status?.filter(Boolean)
     const query = params?.searchText?.trim().toLowerCase()
@@ -45,11 +46,11 @@ export const useTodosStore = create(() => {
     } else {
       if (tags?.length) coll = coll.and((t) => tags.includes(t.tagId ?? ''))
       if (status)
-        coll = coll.and((t) => {
-          if (status.includes('created'))
-            return !t.status || t.status === 'created' || status.includes(t.status)
-          else return status.includes(t.status)
-        })
+        coll = coll.and(({ status }) =>
+          status.includes('created')
+            ? !status || status === 'created' || status.includes(status)
+            : status.includes(status)
+        )
       if (query) coll = coll.and((t) => (t.description ?? '').toLowerCase().includes(query))
     }
 
@@ -61,30 +62,17 @@ export const useTodosStore = create(() => {
       .toArray()
 
     return { todos, total }
-  }
-
-  const getParentTodo = async (parentId: string): Promise<Todo> => {
-    const [res] = await db.todos.where({ id: parentId }).toArray()
-    return res
-  }
-
-  const getChildTodo = async (id: string): Promise<Todo> => {
-    const [res] = await db.todos.where({ parentId: id }).toArray()
-    return res
-  }
-
-  const getTodayTodos = async (): Promise<Todo[]> => {
+  },
+  getTodayTodos: async (): Promise<Todo[]> => {
     const start = dayjs().startOf('day').valueOf()
     const end = dayjs().endOf('day').valueOf()
 
     return db.todos.where('modified').between(start, end, true, true).limit(5).reverse().toArray()
-  }
-
-  const getRecentTodos = (): Promise<Todo[]> => {
+  },
+  getRecentTodos: (): Promise<Todo[]> => {
     return db.todos.orderBy('modified').limit(5).reverse().toArray()
-  }
-
-  const getTodosDateRange = async (start: Date, end: Date): Promise<Todo[]> => {
+  },
+  getTodosDateRange: async (start: Date, end: Date): Promise<Todo[]> => {
     const startTs = start.getTime()
     const endTs = end.getTime()
 
@@ -106,9 +94,8 @@ export const useTodosStore = create(() => {
 
       return [...map.values()]
     })
-  }
-
-  const getTagsCount = async (): Promise<Record<string, number>[]> => {
+  },
+  getTagsCount: async (): Promise<Record<string, number>[]> => {
     const todos = await db.todos.toArray()
     const map = todos.reduce<Record<string, number>>((acc, current) => {
       if (acc[current.tagId ?? 'undefined'] == null) acc[current.tagId ?? 'undefined'] = 1
@@ -122,9 +109,8 @@ export const useTodosStore = create(() => {
       result.push(item)
     }
     return result
-  }
-
-  const getCreatedSeries30d = async (date?: Date): Promise<CreatedSeriesPoint[]> => {
+  },
+  getCreatedSeries30d: async (date?: Date): Promise<CreatedSeriesPoint[]> => {
     const end = dayjs(date).startOf('day')
     const start = end.subtract(29, 'day') // 총 30칸
     const days: string[] = []
@@ -148,9 +134,8 @@ export const useTodosStore = create(() => {
     }
 
     return days.map((d) => ({ day: d, created: map.get(d) || 0 }))
-  }
-
-  const postDescription = async (description: string, parentId?: string): Promise<Todo> => {
+  },
+  postDescription: async (description: string, parentId?: string): Promise<Todo> => {
     const todo = {
       id: etcUtil.generateUniqueId(),
       description,
@@ -162,67 +147,24 @@ export const useTodosStore = create(() => {
     } as Todo
     await db.todos.add(todo)
     return todo
-  }
-
-  const addNewTodo = (todo: Todo): Promise<Todo> => {
-    const newTodo = {
-      ...todo,
-      created: Date.now(),
-      modified: Date.now(),
-      dirty: true,
-    }
-    return db.transaction('rw', db.todos, async () => {
-      const id = await db.todos.add(newTodo)
-      if (todo.parentId) await db.todos.update(todo.parentId, { childId: id })
-
-      return newTodo
-    })
-  }
-
-  const addNewTodoBulk = (todos: Todo[]): Promise<number> => {
-    return db.todos.bulkPut(todos)
-  }
-
-  const updateDescription = (id: string, description: string): Promise<number> => {
+  },
+  updateDescription: (id: string, description: string): Promise<number> => {
     return db.todos.update(id, { description, modified: Date.now(), dirty: true })
-  }
-
-  const updateTimes = async (
+  },
+  updateTimes: async (
     id: string,
     range: { start?: number; end?: number; days?: WeekDay[] }
   ): Promise<number> => {
     const now = Date.now()
     await db.todos.update(id, { ...range, dirty: true, modified: Date.now() })
     return now
-  }
-
-  const updateTag = async (id: string, tagId: string): Promise<number> => {
-    const now = Date.now()
-    await db.todos.update(id, { tagId, dirty: true, modified: Date.now() })
-    return now
-  }
-
-  const updateStatus = async (id: string, status: Todo['status']): Promise<number> => {
+  },
+  updateStatus: async (id: string, status: Todo['status']): Promise<number> => {
     const now = Date.now()
     db.todos.update(id, { status, dirty: true, modified: now })
     return now
-  }
-
-  const updateImages = async (id: string, images: Todo['images']): Promise<number> => {
-    const now = Date.now()
-    db.todos.update(id, { images, dirty: true, modified: now })
-    return now
-  }
-
-  const updateDirties = async (ids: string[], value: boolean): Promise<number> => {
-    return db.todos.bulkUpdate(ids.map((id) => ({ key: id, changes: { dirty: value } })))
-  }
-
-  const updateIndex = async (id: string, index: number): Promise<number> => {
-    return db.todos.update(id, { index })
-  }
-
-  const getDescendantsFlat = async (rootId: string) => {
+  },
+  getDescendantsFlat: async (rootId: string) => {
     const result: Todo[] = []
     const queue: string[] = [rootId]
     const seen = new Set<string>([rootId]) // 사이클 방지
@@ -238,9 +180,8 @@ export const useTodosStore = create(() => {
       }
     }
     return result
-  }
-
-  const getAncestorsFlat = async (childId: number): Promise<Todo[]> => {
+  },
+  getAncestorsFlat: async (childId: number): Promise<Todo[]> => {
     const out: Todo[] = []
     const seen = new Set<number>()
 
@@ -257,9 +198,22 @@ export const useTodosStore = create(() => {
     }
 
     return out.reverse()
-  }
+  },
+  addNewTodo: (todo: Todo): Promise<Todo> => {
+    const newTodo = {
+      ...todo,
+      created: Date.now(),
+      modified: Date.now(),
+      dirty: true,
+    }
+    return db.transaction('rw', db.todos, async () => {
+      const id = await db.todos.add(newTodo)
+      if (todo.parentId) await db.todos.update(todo.parentId, { childId: id })
 
-  const deleteTodo = async (id: string): Promise<number> => {
+      return newTodo
+    })
+  },
+  deleteTodo: async (id: string): Promise<number> => {
     await db.images.where('todoId').equals(id).delete()
 
     return db.transaction('rw', db.todos, async () => {
@@ -270,9 +224,8 @@ export const useTodosStore = create(() => {
 
       return db.todos.where({ id }).delete()
     })
-  }
-
-  const deleteTodos = async (ids: string[]): Promise<number> => {
+  },
+  deleteTodos: async (ids: string[]): Promise<number> => {
     if (!ids.length) return 0
 
     // 먼저 images 테이블에서 todoId가 ids 중 하나인 모든 이미지를 삭제
@@ -296,39 +249,30 @@ export const useTodosStore = create(() => {
 
       return deletedCount
     })
-  }
-
-  const getMetas = async (): Promise<{ id: string; modified?: number }[]> => {
+  },
+  updateTag: async (id: string, tagId: string): Promise<number> => {
+    const now = Date.now()
+    await db.todos.update(id, { tagId, dirty: true, modified: Date.now() })
+    return now
+  },
+  updateDirties: async (ids: string[], value: boolean): Promise<number> => {
+    return db.todos.bulkUpdate(ids.map((id) => ({ key: id, changes: { dirty: value } })))
+  },
+  getAllTodos: (): Promise<Todo[]> => {
+    return db.todos.toArray()
+  },
+  addNewTodoBulk: (todos: Todo[]): Promise<number> => {
+    return db.todos.bulkPut(todos)
+  },
+  getMetas: async (): Promise<{ id: string; modified?: number }[]> => {
     return db.todos.toArray((todos) => todos.map(({ id, modified }) => ({ id, modified })))
-  }
-
-  return {
-    checkExistTodo,
-    getAllDirtyTodos,
-    getTodo,
-    getParentTodo,
-    getChildTodo,
-    getTodos,
-    getTodayTodos,
-    getRecentTodos,
-    getTodosDateRange,
-    getTagsCount,
-    getCreatedSeries30d,
-    postDescription,
-    updateDescription,
-    updateTimes,
-    updateStatus,
-    getDescendantsFlat,
-    getAncestorsFlat,
-    addNewTodo,
-    deleteTodo,
-    deleteTodos,
-    updateTag,
-    updateDirties,
-    getAllTodos,
-    addNewTodoBulk,
-    getMetas,
-    updateIndex,
-    updateImages,
-  }
-})
+  },
+  updateIndex: async (id: string, index: number): Promise<number> => {
+    return db.todos.update(id, { index })
+  },
+  updateImages: async (id: string, images: Todo['images']): Promise<number> => {
+    const now = Date.now()
+    db.todos.update(id, { images, dirty: true, modified: now })
+    return now
+  },
+}
