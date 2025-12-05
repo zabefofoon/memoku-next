@@ -14,7 +14,7 @@ export default function TodosTagsFilter() {
   const searchParams = useSearchParams()
   const pathname = usePathname()
 
-  const tagsStore = useTagsStore()
+  const tags = useTagsStore((s) => s.tags)
 
   const sorts = [
     { value: undefined, label: '등록순' },
@@ -109,7 +109,7 @@ export default function TodosTagsFilter() {
           </button>
         ))}
 
-        {tagsStore.tags
+        {tags
           .filter((tag) => searchParams.get('tags')?.includes(tag.id))
           .map((tag) => (
             <button

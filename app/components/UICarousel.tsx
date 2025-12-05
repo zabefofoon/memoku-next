@@ -5,6 +5,7 @@ import {
   createContext,
   forwardRef,
   PropsWithChildren,
+  useCallback,
   useContext,
   useEffect,
   useImperativeHandle,
@@ -18,7 +19,6 @@ interface Props {
   loop?: boolean
   dragFree?: boolean
   startIndex?: number
-  autoplay?: boolean
   hideDots?: boolean
   vertical?: boolean
   scrollSnap?: boolean
@@ -39,69 +39,84 @@ const CarouselContext = createContext<{
 })
 
 export default forwardRef<UICarouselHandle, PropsWithChildren<Props>>(function UICarouselImpl(
-  props: PropsWithChildren<Props>,
+  {
+    gap,
+    perview,
+    loop,
+    dragFree,
+    startIndex,
+    hideDots,
+    vertical,
+    scrollSnap,
+    className,
+    change,
+    children,
+  }: PropsWithChildren<Props>,
   ref: React.Ref<UICarouselHandle>
 ) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: props.loop ?? false,
-    dragFree: props.dragFree ?? false,
-    startIndex: props.startIndex ?? 0,
-    axis: props.vertical ? 'y' : 'x',
+    loop: loop ?? false,
+    dragFree: dragFree ?? false,
+    startIndex: startIndex ?? 0,
+    axis: vertical ? 'y' : 'x',
   })
 
   const dotsNode = useRef<HTMLDivElement>(null)
 
-  const addDotBtnsAndClickHandlers = (dotsNode: HTMLElement): (() => string) => {
-    if (emblaApi == null) return () => (dotsNode.innerHTML = '')
+  const addDotBtnsAndClickHandlers = useCallback(
+    (dotsNode: HTMLElement): (() => string) => {
+      if (emblaApi == null) return () => (dotsNode.innerHTML = '')
 
-    let dotNodes: HTMLElement[] = []
-    const addDotBtnsWithClickHandlers = (): void => {
-      dotsNode.innerHTML =
-        emblaApi
-          .scrollSnapList()
-          .map(() => '<button type="button" class="embla-dot" type="button"></button>')
-          .join('') ?? ''
+      let dotNodes: HTMLElement[] = []
+      const addDotBtnsWithClickHandlers = (): void => {
+        dotsNode.innerHTML =
+          emblaApi
+            .scrollSnapList()
+            .map(() => '<button type="button" class="embla-dot" type="button"></button>')
+            .join('') ?? ''
 
-      const scrollTo = (index: number): void => emblaApi.scrollTo(index)
+        const scrollTo = (index: number): void => emblaApi.scrollTo(index)
 
-      dotNodes = Array.from(dotsNode.querySelectorAll('.embla-dot'))
-      dotNodes.forEach((dotNode, index) =>
-        dotNode.addEventListener('click', () => scrollTo(index), false)
-      )
-    }
-
-    const toggleDotBtnsActive = (): void => {
-      const previous = emblaApi.previousScrollSnap()
-      const selected = emblaApi.selectedScrollSnap()
-      if (dotNodes[previous] && dotNodes[selected]) {
-        dotNodes[previous].classList.remove('embla-dot-selected')
-        dotNodes[selected].classList.add('embla-dot-selected')
+        dotNodes = Array.from(dotsNode.querySelectorAll('.embla-dot'))
+        dotNodes.forEach((dotNode, index) =>
+          dotNode.addEventListener('click', () => scrollTo(index), false)
+        )
       }
-    }
 
-    emblaApi
-      .on('init', addDotBtnsWithClickHandlers)
-      .on('reInit', addDotBtnsWithClickHandlers)
-      .on('init', toggleDotBtnsActive)
-      .on('reInit', toggleDotBtnsActive)
-      .on('select', toggleDotBtnsActive)
+      const toggleDotBtnsActive = (): void => {
+        const previous = emblaApi.previousScrollSnap()
+        const selected = emblaApi.selectedScrollSnap()
+        if (dotNodes[previous] && dotNodes[selected]) {
+          dotNodes[previous].classList.remove('embla-dot-selected')
+          dotNodes[selected].classList.add('embla-dot-selected')
+        }
+      }
 
-    return () => (dotsNode.innerHTML = '')
-  }
+      emblaApi
+        .on('init', addDotBtnsWithClickHandlers)
+        .on('reInit', addDotBtnsWithClickHandlers)
+        .on('init', toggleDotBtnsActive)
+        .on('reInit', toggleDotBtnsActive)
+        .on('select', toggleDotBtnsActive)
+
+      return () => (dotsNode.innerHTML = '')
+    },
+    [emblaApi]
+  )
 
   useEffect(() => {
-    if (!props.hideDots) {
+    if (!hideDots) {
       if (dotsNode.current != null) addDotBtnsAndClickHandlers(dotsNode.current)
       emblaApi?.reInit()
     }
-  }, [emblaApi, dotsNode.current])
+  }, [emblaApi, hideDots, addDotBtnsAndClickHandlers])
 
   useEffect(() => {
-    if (!props.scrollSnap) return
+    if (!scrollSnap) return
 
     emblaApi?.on('select', (event) => {
       const index = event.selectedScrollSnap() || 0
-      props.change?.(index)
+      change?.(index)
     })
 
     emblaApi?.on('pointerUp', (api) => {
@@ -118,7 +133,7 @@ export default forwardRef<UICarouselHandle, PropsWithChildren<Props>>(function U
       })
       api.scrollTo(nearest)
     })
-  }, [emblaApi, props.scrollSnap, props.change])
+  }, [emblaApi, scrollSnap, change])
 
   useImperativeHandle(
     ref,
@@ -131,29 +146,29 @@ export default forwardRef<UICarouselHandle, PropsWithChildren<Props>>(function U
   return (
     <CarouselContext.Provider
       value={{
-        gap: props.gap ?? '0px',
-        perview: props.perview ?? 1,
+        gap: gap ?? '0px',
+        perview: perview ?? 1,
       }}>
-      <div className={etcUtil.classNames(['embla', props.className])}>
+      <div className={etcUtil.classNames(['embla', className])}>
         <div
           ref={emblaRef}
           className='embla-viewport'
           role='presentation'
-          style={{ height: props.vertical ? '100%' : 'auto' }}
+          style={{ height: vertical ? '100%' : 'auto' }}
           onMouseDown={(event) => event.stopPropagation()}
           onTouchStart={(event) => event.stopPropagation()}>
           <div
             className='embla-container'
             style={{
-              flexDirection: props.vertical ? 'column' : 'row',
-              height: props.vertical ? `100%` : 'auto',
-              marginLeft: `-${props.gap ?? '0px'}`,
+              flexDirection: vertical ? 'column' : 'row',
+              height: vertical ? `100%` : 'auto',
+              marginLeft: `-${gap ?? '0px'}`,
             }}>
-            {props.children}
+            {children}
           </div>
         </div>
         <div className='embla-controls'>
-          {!props.hideDots && (
+          {!hideDots && (
             <div
               ref={dotsNode}
               className='embla-dots'></div>

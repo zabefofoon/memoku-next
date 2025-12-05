@@ -17,14 +17,17 @@ import etcUtil from '@/app/utils/etc.util'
 import debounce from 'lodash.debounce'
 import Link from 'next/link'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 
 export default function TodosDetail() {
   const router = useRouter()
   const params = useParams()
   const searchParams = useSearchParams()
-  const imagesStore = useImagesStore()
-  const sheetStore = useSheetStore()
+  const getImages = useImagesStore((state) => state.getImages)
+  const deleteImages = useImagesStore((state) => state.deleteImages)
+  const postImages = useImagesStore((state) => state.postImages)
+  const fileId = useSheetStore((state) => state.fileId)
+  const imageFolderId = useSheetStore((state) => state.imageFolderId)
 
   const [todo, setTodo] = useState<Todo>()
   const [parentTodo, setParentTodo] = useState<Todo>()
@@ -39,25 +42,13 @@ export default function TodosDetail() {
 
   const [images, setImages] = useState<{ id: string; image: string; todoId: string }[]>()
 
-  const saveText = useMemo(
-    () =>
-      debounce(async (text: string): Promise<void> => {
-        setTextValue(text)
-        if (params.id) todosDB.updateDescription(params.id as string, text)
-        window.dispatchEvent(new CustomEvent('updateText', { detail: text }))
-
-        syncText(text)
-      }, 250),
-    []
-  )
-
   const syncText = debounce(async (text) => {
     const currentTodo = await todosDB.getTodo(params.id as string)
     if (currentTodo == null) return
 
-    if (sheetStore.fileId) {
+    if (fileId) {
       api
-        .patchSheetGoogleTodo(sheetStore.fileId, {
+        .patchSheetGoogleTodo(fileId, {
           index: currentTodo.index,
           description: encodeURIComponent(text),
           modified: currentTodo.modified,
@@ -68,7 +59,19 @@ export default function TodosDetail() {
     }
   }, 2000)
 
-  const loadTodo = async (): Promise<Todo> => {
+  const saveText = useMemo(
+    () =>
+      debounce(async (text: string): Promise<void> => {
+        setTextValue(text)
+        if (params.id) todosDB.updateDescription(params.id as string, text)
+        window.dispatchEvent(new CustomEvent('updateText', { detail: text }))
+
+        syncText(text)
+      }, 250),
+    [params.id, syncText]
+  )
+
+  const loadTodo = useCallback(async (): Promise<Todo> => {
     setIsLoading(true)
     const res = await todosDB.getTodo(params.id as string)
     setTodo(res)
@@ -89,88 +92,91 @@ export default function TodosDetail() {
     setIsLoading(false)
 
     return res
-  }
+  }, [params.id])
 
-  const loadImages = async (todo: Todo): Promise<void> => {
-    if (todo.images?.length) {
-      setImages(
-        todo.images?.map((image) => ({
-          id: 'images',
-          image: image.toString(),
-          todoId: todo.id,
-        })) ?? []
-      )
-    } else {
-      const res = await imagesStore.getImages(todo.id)
+  const loadImages = useCallback(
+    async (todo: Todo): Promise<void> => {
+      if (todo.images?.length) {
+        setImages(
+          todo.images?.map((image) => ({
+            id: 'images',
+            image: image.toString(),
+            todoId: todo.id,
+          })) ?? []
+        )
+      } else {
+        const res = await getImages(todo.id)
 
-      const imageData: { id: string; image: string; todoId: string }[] = []
-      for (const key in res) {
-        const data = {
-          id: res[key].id,
-          image: await etcUtil.blobToBase64(res[key].image as Blob),
-          todoId: res[key].todoId,
+        const imageData: { id: string; image: string; todoId: string }[] = []
+        for (const key in res) {
+          const data = {
+            id: res[key].id,
+            image: await etcUtil.blobToBase64(res[key].image as Blob),
+            todoId: res[key].todoId,
+          }
+          imageData.push(data)
         }
-        imageData.push(data)
-      }
 
-      setImages(imageData)
+        setImages(imageData)
 
-      if (sheetStore.fileId) {
-        const localSavedImages = imageData.filter(({ image }) => image.startsWith('data:'))
-        if (localSavedImages.length > 0) {
-          const currentTodo = await todosDB.getTodo(params.id as string)
-          if (currentTodo == null) return
+        if (fileId) {
+          const localSavedImages = imageData.filter(({ image }) => image.startsWith('data:'))
+          if (localSavedImages.length > 0) {
+            const currentTodo = await todosDB.getTodo(params.id as string)
+            if (currentTodo == null) return
 
-          // id 기준으로 res에서 blob 찾아서 formData 구성
-          const formData = new FormData()
-          const uploadBlobs: Blob[] = []
+            // id 기준으로 res에서 blob 찾아서 formData 구성
+            const formData = new FormData()
+            const uploadBlobs: Blob[] = []
 
-          localSavedImages.forEach(({ id }) => {
-            const item = Object.values(res).find((img) => img.id === id)
-            if (item?.image instanceof Blob) uploadBlobs.push(item.image)
-          })
+            localSavedImages.forEach(({ id }) => {
+              const item = Object.values(res).find((img) => img.id === id)
+              if (item?.image instanceof Blob) uploadBlobs.push(item.image)
+            })
 
-          if (uploadBlobs.length > 0) {
-            uploadBlobs.forEach((blob) => formData.append('images', blob))
+            if (uploadBlobs.length > 0) {
+              uploadBlobs.forEach((blob) => formData.append('images', blob))
 
-            // 구글 드라이브로 업로드
-            const uploadRes = await api.postUploadGoogleImage(formData)
-            const uploadResult = await uploadRes.json()
-            const uploadedUrls: string[] = uploadResult.urls ?? []
+              // 구글 드라이브로 업로드
+              const uploadRes = await api.postUploadGoogleImage(formData)
+              const uploadResult = await uploadRes.json()
+              const uploadedUrls: string[] = uploadResult.urls ?? []
 
-            const alreadyRemoteUrls = imageData
-              .filter(({ image }) => !image.startsWith('data:'))
-              .map(({ image }) => image)
+              const alreadyRemoteUrls = imageData
+                .filter(({ image }) => !image.startsWith('data:'))
+                .map(({ image }) => image)
 
-            const nextImages = [...uploadedUrls, ...alreadyRemoteUrls]
+              const nextImages = [...uploadedUrls, ...alreadyRemoteUrls]
 
-            // todosStore에 images 배열을 URL로 업데이트
-            const modified = await todosDB.updateImages(currentTodo.id, nextImages)
+              // todosStore에 images 배열을 URL로 업데이트
+              const modified = await todosDB.updateImages(currentTodo.id, nextImages)
 
-            api
-              .patchSheetGoogleTodo(sheetStore.fileId, {
-                index: currentTodo.index,
-                images: encodeURIComponent(nextImages.join(',')),
-                modified,
-              })
-              .then((res) => {
-                if (res.ok) todosDB.updateDirties([currentTodo.id], false)
-              })
+              api
+                .patchSheetGoogleTodo(fileId, {
+                  index: currentTodo.index,
+                  images: encodeURIComponent(nextImages.join(',')),
+                  modified,
+                })
+                .then((res) => {
+                  if (res.ok) todosDB.updateDirties([currentTodo.id], false)
+                })
 
-            await imagesStore.deleteImages(localSavedImages.map(({ id }) => id))
+              await deleteImages(localSavedImages.map(({ id }) => id))
 
-            setImages(
-              nextImages.map((url) => ({
-                id: 'uploaded',
-                image: url,
-                todoId: currentTodo.id,
-              }))
-            )
+              setImages(
+                nextImages.map((url) => ({
+                  id: 'uploaded',
+                  image: url,
+                  todoId: currentTodo.id,
+                }))
+              )
+            }
           }
         }
       }
-    }
-  }
+    },
+    [deleteImages, fileId, getImages, params.id]
+  )
 
   const addChildren = async (): Promise<void> => {
     const currentTodo = await todosDB.getTodo(params.id as string)
@@ -187,7 +193,7 @@ export default function TodosDetail() {
     })
 
     api
-      .patchSheetGoogleTodo(sheetStore.fileId, {
+      .patchSheetGoogleTodo(fileId, {
         index: currentTodo.index,
         parent: currentTodo.parentId,
         child: newTodo.id,
@@ -197,7 +203,7 @@ export default function TodosDetail() {
         if (res.ok) todosDB.updateDirties([currentTodo.id], false)
       })
     api
-      .postSheetGoogleTodo(sheetStore.fileId, {
+      .postSheetGoogleTodo(fileId, {
         id: newTodo.id,
         created: newTodo.created,
         modified: newTodo.modified,
@@ -221,9 +227,9 @@ export default function TodosDetail() {
 
     const deleteQuery = searchParams.get('deleteModal')
     if (deleteQuery) {
-      if (sheetStore.fileId) {
+      if (fileId) {
         api
-          .patchSheetGoogleTodo(sheetStore.fileId, {
+          .patchSheetGoogleTodo(fileId, {
             index: currentTodo.index,
             deleted: true,
           })
@@ -235,7 +241,7 @@ export default function TodosDetail() {
           const parentTodo = await todosDB.getTodo(currentTodo.parentId as string)
           if (parentTodo == null) return
           api
-            .patchSheetGoogleTodo(sheetStore.fileId, {
+            .patchSheetGoogleTodo(fileId, {
               index: parentTodo.index,
               parent: parentTodo.parentId,
               child: currentTodo.childId,
@@ -251,10 +257,10 @@ export default function TodosDetail() {
         const childTodo = await todosDB.getTodo(currentTodo.childId as string)
         if (childTodo == null) return
 
-        if (sheetStore.fileId) {
+        if (fileId) {
           const now = Date.now()
           api
-            .patchSheetGoogleTodo(sheetStore.fileId, {
+            .patchSheetGoogleTodo(fileId, {
               index: childTodo.index,
               parent: currentTodo.parentId,
               child: childTodo.childId,
@@ -281,7 +287,7 @@ export default function TodosDetail() {
       const modified = await todosDB.updateTag(tagQuery, tag.id)
       if (todo != null)
         api
-          .patchSheetGoogleTodo(sheetStore.fileId, {
+          .patchSheetGoogleTodo(fileId, {
             index: todo.index,
             tag: tag.id,
             modified,
@@ -299,11 +305,9 @@ export default function TodosDetail() {
     const modified = await todosDB.updateStatus(todoId, status)
 
     if (todo != null)
-      api
-        .patchSheetGoogleTodo(sheetStore.fileId, { index: todo?.index, status, modified })
-        .then((res) => {
-          if (res.ok) todosDB.updateDirties([todo.id], false)
-        })
+      api.patchSheetGoogleTodo(fileId, { index: todo?.index, status, modified }).then((res) => {
+        if (res.ok) todosDB.updateDirties([todo.id], false)
+      })
 
     if (todoId === todo?.id) setTodo((prev) => ({ ...prev!, status }))
   }
@@ -314,7 +318,7 @@ export default function TodosDetail() {
   ): Promise<void> => {
     const modified = await todosDB.updateTimes(todo.id, values)
     api
-      .patchSheetGoogleTodo(sheetStore.fileId, {
+      .patchSheetGoogleTodo(fileId, {
         index: todo.index,
         start: values.start,
         end: values.end,
@@ -343,7 +347,7 @@ export default function TodosDetail() {
     const blobs = res.map(([blob]) => blob)
     const base64s = res.map(([_, base64]) => base64)
 
-    if (sheetStore.fileId) {
+    if (fileId) {
       setImages([
         ...base64s.map((item) => ({ id: 'uploading', image: item, todoId: currentTodo.id ?? '' })),
         ...(images ?? []),
@@ -351,14 +355,14 @@ export default function TodosDetail() {
 
       const formData = new FormData()
       blobs.forEach((file) => formData.append('images', file))
-      formData.append('folderId', sheetStore.imageFolderId)
+      formData.append('folderId', imageFolderId)
       const res = await api.postUploadGoogleImage(formData)
       const result = await res.json()
       const newImages = [...result.urls, ...(images?.map(({ image }) => image) ?? [])]
       const now = await todosDB.updateImages(params.id as string, newImages)
 
       api
-        .patchSheetGoogleTodo(sheetStore.fileId, {
+        .patchSheetGoogleTodo(fileId, {
           index: currentTodo.index,
           images: encodeURIComponent(newImages.join(',')),
           modified: now,
@@ -375,7 +379,7 @@ export default function TodosDetail() {
           )
         })
     } else {
-      const ress = await imagesStore.postImages(params.id as string, blobs)
+      const ress = await postImages(params.id as string, blobs)
       setImages((prev) => [
         ...ress.map((item, index) => ({ ...item, image: base64s[index] })),
         ...(prev ?? []),
@@ -393,7 +397,7 @@ export default function TodosDetail() {
     const currentTodo = await todosDB.getTodo(params.id as string)
     if (currentTodo == null) return
 
-    if (sheetStore.fileId) {
+    if (fileId) {
       const remaineds = images.filter((_, i) => i !== index)
       const deleteImages = images.filter((_, i) => i === index).map(({ image }) => image)
       const ids = deleteImages.map((url) => new URL(url).pathname.split('/').at(-1))
@@ -404,7 +408,7 @@ export default function TodosDetail() {
       api.deleteUploadGoogleImage(encodeURIComponent(ids.join(',')))
       const deleteQueris = remaineds.map(({ image }) => image).join(',') || 'undefined'
       api
-        .patchSheetGoogleTodo(sheetStore.fileId, {
+        .patchSheetGoogleTodo(fileId, {
           index: currentTodo.index,
           images: encodeURIComponent(deleteQueris),
           modified: now,
@@ -414,7 +418,7 @@ export default function TodosDetail() {
           setImages((prev) => prev?.filter((_, i) => i !== index))
         })
     } else {
-      await imagesStore.deleteImages([images[index].id])
+      await deleteImages([images[index].id])
       setImages((prev) => prev?.filter((_, i) => i !== index))
     }
     router.back()
@@ -424,7 +428,7 @@ export default function TodosDetail() {
     if (images == null) return
     if (todo == null) return
 
-    if (!sheetStore.fileId) imagesStore.deleteImages(images.map(({ id }) => id))
+    if (!fileId) deleteImages(images.map(({ id }) => id))
     else {
       const deleteImages = images.map(({ image }) => image)
       const ids = deleteImages.map((url) => new URL(url).pathname.split('/').at(-1))
@@ -438,7 +442,7 @@ export default function TodosDetail() {
 
   useEffect(() => {
     loadTodo().then((todo) => loadImages(todo))
-  }, [])
+  }, [loadImages, loadTodo])
 
   useEffect(() => {
     setIsShowDeleteModal(!!searchParams.get('deleteModal'))

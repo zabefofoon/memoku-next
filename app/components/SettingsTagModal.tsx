@@ -17,12 +17,12 @@ interface Props {
 export function SettingsTagModal(props: Props) {
   const searchParams = useSearchParams()
   const [cookies] = useCookies()
-  const tagsStore = useTagsStore()
+  const getTagsById = useTagsStore((s) => s.getTagsById)
 
   const [tagName, setTagName] = useState<string>('')
   const [selectedColor, setSelectedColor] = useState<keyof typeof TAG_COLORS>()
 
-  const tag = tagsStore.getTagsById(searchParams?.get('tag') ?? '')
+  const tag = getTagsById(searchParams?.get('tag') ?? '')
 
   useEffect(() => {
     setTagName(tag?.label ?? '')

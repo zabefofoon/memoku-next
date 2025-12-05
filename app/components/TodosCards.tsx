@@ -28,14 +28,13 @@ export default function TodosCards(props: Props) {
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && !isTodosNextLoading && !isTodosLoading) {
-        setPage(page + 1, props.loadTodos)
-      }
+      const isLoadable = entry.isIntersecting && !isTodosNextLoading && !isTodosLoading
+      if (isLoadable) setPage(page + 1, props.loadTodos)
     })
     if (nextLoaderEl.current) observer.observe(nextLoaderEl.current)
 
     return () => observer.disconnect()
-  }, [])
+  }, [isTodosLoading, isTodosNextLoading, page, props.loadTodos, setPage])
 
   return (
     <>
@@ -88,7 +87,7 @@ function TodoCard(props: { todo: TodoWithChildren; parent?: TodoWithChildren }) 
   const expandRow = useTodosPageStore((state) => state.expandRow)
 
   const searchParams = useSearchParams()
-  const tagsStore = useTagsStore()
+  const getTagsById = useTagsStore((s) => s.getTagsById)
 
   const isFiltered =
     !!searchParams.get('tags') || !!searchParams.get('status') || !!searchParams.get('searchText')
@@ -110,7 +109,7 @@ function TodoCard(props: { todo: TodoWithChildren; parent?: TodoWithChildren }) 
   if (props.todo.status === 'inprogress') text = '진행중'
   if (props.todo.status === 'hold') text = '중지됨'
 
-  const tag = tagsStore.getTagsById(props.todo.tagId)
+  const tag = getTagsById(props.todo.tagId)
 
   return (
     <div

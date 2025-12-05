@@ -14,8 +14,15 @@ import { TodosDeleteModal } from './TodosDeleteModal'
 
 export default function SettingsTags() {
   const router = useRouter()
-  const tagsStore = useTagsStore()
-  const sheetStore = useSheetStore()
+  const initTags = useTagsStore((s) => s.initTags)
+  const allTags = useTagsStore((s) => s.tags)
+  const getTag = useTagsStore((s) => s.getTag)
+  const addTag = useTagsStore((s) => s.addTag)
+  const updateTag = useTagsStore((s) => s.updateTag)
+  const updateIndex = useTagsStore((s) => s.updateIndex)
+  const updateDirties = useTagsStore((s) => s.updateDirties)
+  const deleteTags = useTagsStore((s) => s.deleteTags)
+  const fileId = useSheetStore((s) => s.fileId)
 
   const searchParams = useSearchParams()
 
@@ -26,17 +33,17 @@ export default function SettingsTags() {
   const deleteTag = async (): Promise<void> => {
     const tagId = searchParams.get('delete')
     if (!tagId) return
-    if (sheetStore.fileId) {
-      const currentTag = await tagsStore.getTag(tagId)
+    if (fileId) {
+      const currentTag = await getTag(tagId)
       if (currentTag == null) return
 
       const res = await fetch(
-        `/api/sheet/google/tag?fileId=${sheetStore.fileId}&index=${currentTag?.index}&deleted=${true}&modified=${Date.now()}`,
+        `/api/sheet/google/tag?fileId=${fileId}&index=${currentTag?.index}&deleted=${true}&modified=${Date.now()}`,
         { method: 'PATCH' }
       )
       const result = await res.json()
-      if (result) tagsStore.deleteTags([tagId])
-    } else tagsStore.deleteTags([tagId])
+      if (result) deleteTags([tagId])
+    } else deleteTags([tagId])
     router.back()
   }
 
@@ -47,38 +54,38 @@ export default function SettingsTags() {
     router.back()
 
     const tagQuery = searchParams.get('tag')
-    if (sheetStore.fileId) {
+    if (fileId) {
       if (tagQuery === 'new') {
-        const [id, now] = await tagsStore.addTag(tagInfo)
+        const [id, now] = await addTag(tagInfo)
         const res = await fetch(
-          `/api/sheet/google/tag?fileId=${sheetStore.fileId}&id=${id}&color=${tagInfo.color}&label=${tagInfo.label}&modified=${now}`,
+          `/api/sheet/google/tag?fileId=${fileId}&id=${id}&color=${tagInfo.color}&label=${tagInfo.label}&modified=${now}`,
           { method: 'POST' }
         )
         const result = await res.json()
-        tagsStore.updateIndex(id, result.index)
-        tagsStore.updateDirties([id], false)
+        updateIndex(id, result.index)
+        updateDirties([id], false)
       } else if (!!tagQuery) {
-        const currentTag = await tagsStore.getTag(tagQuery)
+        const currentTag = await getTag(tagQuery)
         if (currentTag == null) return
-        const now = await tagsStore.updateTag(tagQuery, tagInfo)
+        const now = await updateTag(tagQuery, tagInfo)
         const res = await fetch(
-          `/api/sheet/google/tag?fileId=${sheetStore.fileId}&color=${tagInfo.color}&label=${tagInfo.label}&index=${currentTag?.index}&modified=${now}`,
+          `/api/sheet/google/tag?fileId=${fileId}&color=${tagInfo.color}&label=${tagInfo.label}&index=${currentTag?.index}&modified=${now}`,
           { method: 'PATCH' }
         )
         const result = await res.json()
-        if (result.ok) tagsStore.updateDirties([tagQuery], false)
+        if (result.ok) updateDirties([tagQuery], false)
       }
     } else {
-      if (tagQuery === 'new') await tagsStore.addTag(tagInfo)
-      else if (!!tagQuery) await tagsStore.updateTag(tagQuery, tagInfo)
+      if (tagQuery === 'new') await addTag(tagInfo)
+      else if (!!tagQuery) await updateTag(tagQuery, tagInfo)
     }
 
-    tagsStore.initTags()
+    initTags()
   }
 
   useEffect(() => {
-    setTags(tagsStore.tags)
-  }, [tagsStore.tags])
+    setTags(allTags)
+  }, [allTags])
 
   useEffect(() => {
     setIsShowDeleteModal(!!searchParams.get('delete'))

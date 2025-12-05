@@ -20,7 +20,7 @@ export function TodosFilters(props: Props) {
 
   const router = useRouter()
 
-  const tagsStore = useTagsStore()
+  const tags = useTagsStore((s) => s.tags)
   const searchParams = useSearchParams()
 
   const [selectedSort, setSelectedSort] = useState<'recent'>()
@@ -29,7 +29,7 @@ export function TodosFilters(props: Props) {
 
   const sort = searchParams.get('sort') as 'recent' | undefined
   const status = searchParams.get('status')
-  const tags = searchParams.get('tags')
+  const tagsQuery = searchParams.get('tags')
 
   const sorts = [
     { label: '등록 순', value: undefined },
@@ -50,8 +50,8 @@ export function TodosFilters(props: Props) {
   useEffect(() => {
     setSelectedSort(sort || undefined)
     setSelectedStatus((status?.split(',') ?? []) as Todo['status'][])
-    setSelectedTags(tags?.split(',') ?? [])
-  }, [sort, status, tags])
+    setSelectedTags(tagsQuery?.split(',') ?? [])
+  }, [sort, status, tagsQuery])
 
   return (
     <UIBottomSheet
@@ -145,7 +145,7 @@ export function TodosFilters(props: Props) {
               <span>상태</span>
             </p>
             <div className='flex flex-wrap gap-[6px]'>
-              {tagsStore.tags.map((tag) => (
+              {tags.map((tag) => (
                 <div
                   key={tag.id}
                   className='relative'>

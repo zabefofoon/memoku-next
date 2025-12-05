@@ -11,15 +11,13 @@ import HomeToday from '../components/HomeToday'
 import { useAuthStore } from '../stores/auth.store'
 
 export default function Home() {
-  const authStore = useAuthStore((s) => s)
+  const memberInfo = useAuthStore((s) => s.memberInfo)
 
   return (
     <div className='flex-1 | flex flex-col'>
       <div className='mb-[24px]'>
         <h1 className='text-[20px] capitalize | opacity-80'>
-          {authStore.memberInfo?.email
-            ? `Hello! ${authStore.memberInfo.email.split('@')[0]}`
-            : 'Welcome to MEMOKU!'}
+          {memberInfo?.email ? `Hello! ${memberInfo.email.split('@')[0]}` : 'Welcome to MEMOKU!'}
         </h1>
         <p className='text-[16px] opacity-50'>Enjoy Memo and enforce your life!</p>
       </div>

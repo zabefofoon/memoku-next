@@ -9,6 +9,7 @@ import TodosTable from '@/app/components/TodosTable'
 import { TodosTagModal } from '@/app/components/TodosTagModal'
 import TodosTimeModal from '@/app/components/TodosTimeModal'
 import { GetTodosParams, Tag, Todo } from '@/app/models/Todo'
+import { useThemeStore } from '@/app/stores/theme.store'
 import { useTodosPageStore } from '@/app/stores/todosPage.store'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -17,8 +18,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 export default function Todos() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const screenSize = useThemeStore((state) => state.screenSize)
 
   const todos = useTodosPageStore((state) => state.todos)
+  const setTodos = useTodosPageStore((state) => state.setTodos)
   const loadTodosInStore = useTodosPageStore((state) => state.loadTodos)
   const createTodoInStore = useTodosPageStore((state) => state.createTodo)
   const changeTagInStore = useTodosPageStore((state) => state.changeTag)
@@ -41,7 +44,7 @@ export default function Todos() {
       parentQuery
         ? todos?.find(({ id }) => id === parentQuery)?.children?.find(({ id }) => id === timeQuery)
         : todos?.find(({ id }) => id === timeQuery),
-    [parentQuery, timeQuery]
+    [parentQuery, timeQuery, todos]
   )
 
   const loadTodos = useCallback(
@@ -54,7 +57,7 @@ export default function Todos() {
         page,
       })
     },
-    [searchQuery, sortQuery, statusQuery, tagsQuery]
+    [loadTodosInStore, searchQuery, sortQuery, statusQuery, tagsQuery]
   )
 
   const createTodo = async (): Promise<void> => {
@@ -85,12 +88,13 @@ export default function Todos() {
 
     return () => {
       el?.removeEventListener('scroll', handleScroll)
+      setTodos(() => undefined)
     }
-  }, [])
+  }, [setTodos])
 
   useEffect(() => {
     setPage(0, loadTodos)
-  }, [searchQuery, statusQuery, tagsQuery, sortQuery])
+  }, [searchQuery, statusQuery, tagsQuery, sortQuery, setPage, loadTodos])
 
   return (
     <div className='flex flex-col | sm:max-h-full'>
@@ -148,8 +152,8 @@ export default function Todos() {
         </div>
         <TodosSelectedFilters />
       </div>
-      <TodosTable loadTodos={loadTodos} />
-      <TodosCards loadTodos={loadTodos} />
+      {screenSize === 'desktop' && <TodosTable loadTodos={loadTodos} />}
+      {screenSize === 'mobile' && <TodosCards loadTodos={loadTodos} />}
     </div>
   )
 }

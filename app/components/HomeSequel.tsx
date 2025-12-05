@@ -1,6 +1,6 @@
 import { CreatedSeriesPoint, todosDB } from '@/app/lib/todos.db'
 import dayjs from 'dayjs'
-import { ReactElement, useEffect, useState } from 'react'
+import { ReactElement, useCallback, useEffect, useState } from 'react'
 import { CartesianGrid, ComposedChart, Line, ResponsiveContainer, XAxis } from 'recharts'
 import { ActiveDotProps } from 'recharts/types/util/types'
 
@@ -25,15 +25,15 @@ export default function HomeSequel() {
     return out
   }
 
-  const loadData = async (): Promise<void> => {
+  const loadData = useCallback(async (): Promise<void> => {
     const base = await todosDB.getCreatedSeries30d()
     const withMA = withMovingAverage(base, 7)
     setData(withMA)
-  }
+  }, [])
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [loadData])
 
   return (
     <div className='gap-[8px] flex flex-col | shadow-md rounded-xl bg-indigo-500 dark:bg-indigo-600 | p-[16px]'>

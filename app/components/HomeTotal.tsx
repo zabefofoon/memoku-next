@@ -1,7 +1,7 @@
 'use client'
 
 import { todosDB } from '@/app/lib/todos.db'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
 import { PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer } from 'recharts'
 import { useThemeStore } from '../stores/theme.store'
@@ -9,13 +9,13 @@ import { useThemeStore } from '../stores/theme.store'
 export default function HomeTotal() {
   const [cookies] = useCookies()
 
-  const themeStore = useThemeStore()
+  const isDarkMode = useThemeStore((state) => state.isDarkMode)
 
   const [total, setTotal] = useState<number>(0)
 
   const [data, setData] = useState<{ name: string; value: number; fill: string }[]>([])
 
-  const loadTodos = async () => {
+  const loadTodos = useCallback(async () => {
     const res = await todosDB.getAllTodos()
     setTotal(res.length)
 
@@ -52,11 +52,11 @@ export default function HomeTotal() {
         .slice()
         .sort((a, b) => b.value - a.value)
     )
-  }
+  }, [cookies])
 
   useEffect(() => {
     loadTodos()
-  }, [])
+  }, [loadTodos])
 
   return (
     <div className='relative | flex-1 min-w-[300px] shrink-0 | flex flex-col | bg-white dark:bg-zinc-800 shadow-md rounded-xl | p-[16px]'>
@@ -85,7 +85,7 @@ export default function HomeTotal() {
             isAnimationActive={false}
             style={{
               outline: '0',
-              filter: themeStore.isDarkMode
+              filter: isDarkMode
                 ? `drop-shadow(0px 2px 5px var(--color-gray-800))`
                 : `drop-shadow(0px 2px 3px var(--color-gray-400))`,
             }}

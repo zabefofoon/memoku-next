@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function TodosTagModal(props: Props) {
-  const tagsStore = useTagsStore()
+  const tags = useTagsStore((s) => s.tags)
   const [selectedTag, setSelectedTag] = useState<Tag>()
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export function TodosTagModal(props: Props) {
       close={() => props.close()}
       content={() => (
         <div className='flex gap-[6px] flex-wrap | max-w-[320px] | pb-[2px] px-[2px]'>
-          {tagsStore.tags.map((tag) => (
+          {tags.map((tag) => (
             <div
               key={tag.id}
               className='relative | rounded-full'>

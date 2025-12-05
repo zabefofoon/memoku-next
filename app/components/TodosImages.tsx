@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ChangeEvent, useEffect, useRef, useState } from 'react'
 import { Todo } from '../models/Todo'
-import { useSheetStore } from '../stores/sheet.store'
 import { Icon } from './Icon'
 import { TodosDeleteModal } from './TodosDeleteModal'
 import UISpinner from './UISpinner'
@@ -20,8 +19,6 @@ export function TodosImages(props: Props) {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
-
-  const sheetStore = useSheetStore()
 
   const fileInputEl = useRef<HTMLInputElement>(null)
 
@@ -40,7 +37,7 @@ export function TodosImages(props: Props) {
     if (pathname.endsWith(`${props.todo?.id}`)) {
       setIsShowDeleteModal(!!searchParams.get('image'))
     }
-  }, [searchParams])
+  }, [pathname, props.todo?.id, searchParams])
 
   return (
     <div className='sm:h-full overflow-y-hidden sm:overflow-y-auto sm:overflow-x-hidden | flex sm:flex-col gap-[12px]'>

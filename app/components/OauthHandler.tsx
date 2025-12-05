@@ -9,13 +9,13 @@ interface Props {
   memberInfo: MemberInfo
 }
 export default function OauthHandler(props: Props) {
-  const authStore = useAuthStore((s) => s)
+  const setMemberInfo = useAuthStore((s) => s.setMemberInfo)
   const router = useRouter()
 
   useEffect(() => {
-    authStore.setMemberInfo(props.memberInfo)
+    setMemberInfo(props.memberInfo)
     router.replace('/')
-  }, [router, props.memberInfo])
+  }, [router, props.memberInfo, setMemberInfo])
 
   return null
 }

@@ -12,9 +12,9 @@ interface Props {
 
 export default function TagBadge(props: Props) {
   const [cookies] = useCookies()
-  const tagsStore = useTagsStore()
+  const getTagsById = useTagsStore((s) => s.getTagsById)
 
-  const tag = tagsStore.getTagsById(props.id)
+  const tag = getTagsById(props.id)
 
   return (
     <button

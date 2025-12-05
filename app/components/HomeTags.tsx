@@ -14,7 +14,8 @@ interface Group {
 }
 
 export default function HomeTags() {
-  const tagsStore = useTagsStore()
+  const tagsMap = useTagsStore((state) => state.tagsMap)
+  const getTagsById = useTagsStore((state) => state.getTagsById)
 
   const [todos, setTodos] = useState<Todo[]>()
 
@@ -22,7 +23,7 @@ export default function HomeTags() {
     const map =
       todos?.reduce<Record<string, Group>>((acc, current) => {
         const currentTagId = current.tagId ?? 'undefined'
-        const id = tagsStore.tagsMap[currentTagId] ? currentTagId : 'undefined' // 태그 없으면 그룹핑용 기본값
+        const id = tagsMap[currentTagId] ? currentTagId : 'undefined' // 태그 없으면 그룹핑용 기본값
         if (!acc[id]) acc[id] = { id, totalCount: 0, undoneCount: 0 }
         acc[id].totalCount += 1
 
@@ -31,7 +32,7 @@ export default function HomeTags() {
         return acc
       }, {}) ?? []
     return Object.values(map)
-  }, [todos])
+  }, [tagsMap, todos])
 
   const loadTodos = async () => {
     const res = await todosDB.getTodos()
@@ -53,9 +54,7 @@ export default function HomeTags() {
             <TagBadge id={item.id} />
 
             <div className='w-full | flex items-center justify-between'>
-              <p className='font-[700] text-[15px]'>
-                {tagsStore.getTagsById(item.id)?.label ?? 'Memo'}
-              </p>
+              <p className='font-[700] text-[15px]'>{getTagsById(item.id)?.label ?? 'Memo'}</p>
               <p className='text-[14px] font-[700]'>
                 <span>{item.undoneCount}개</span>/
                 <span className='opacity-50'>{item.totalCount}개</span>

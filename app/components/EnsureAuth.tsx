@@ -1,6 +1,6 @@
 'use client'
 
-import { PropsWithChildren, useEffect, useState } from 'react'
+import { PropsWithChildren, useCallback, useEffect, useState } from 'react'
 import { todosDB } from '../lib/todos.db'
 import { Tag, Todo } from '../models/Todo'
 import { useAuthStore } from '../stores/auth.store'
@@ -14,31 +14,38 @@ interface Props {
 }
 
 export default function EnsureAuth(props: PropsWithChildren<Props>) {
-  const authStore = useAuthStore()
-  const sheetStore = useSheetStore()
-  const tagsStore = useTagsStore()
+  const setMemberInfo = useAuthStore((state) => state.setMemberInfo)
+  const setImageFolderId = useSheetStore((state) => state.setImageFolderId)
+  const setFileId = useSheetStore((state) => state.setFileId)
+  const getAllDirtyTags = useTagsStore((state) => state.getAllDirtyTags)
+  const updateIndex = useTagsStore((state) => state.updateIndex)
+  const updateDirties = useTagsStore((state) => state.updateDirties)
+  const getMetas = useTagsStore((state) => state.getMetas)
+  const deleteTags = useTagsStore((state) => state.deleteTags)
+  const addNewTagBulk = useTagsStore((state) => state.addNewTagBulk)
+  const initTags = useTagsStore((state) => state.initTags)
 
   const [isAuthed, setIsAuthed] = useState<boolean>(false)
 
-  const loadGoogleMe = async (): Promise<void> => {
+  const loadGoogleMe = useCallback(async (): Promise<void> => {
     const res = await fetch(`/api/auth/google/me`, {
       method: 'GET',
       credentials: 'include',
     })
     const result = await res.json()
-    if (result.ok) authStore.setMemberInfo(result)
-  }
+    if (result.ok) setMemberInfo(result)
+  }, [setMemberInfo])
 
-  const loadSheetId = async (): Promise<string> => {
+  const loadSheetId = useCallback(async (): Promise<string> => {
     const res = await fetch(`/api/sheet/google/sheetId`, {
       method: 'GET',
       credentials: 'include',
     })
     const result = await res.json()
-    if (result.ok) sheetStore.setFileId(result.fileId)
+    if (result.ok) setFileId(result.fileId)
 
     return result.fileId
-  }
+  }, [setFileId])
 
   const pushDirties = async (fileId: string): Promise<void> => {
     const todos = await todosDB.getAllDirtyTodos()
@@ -131,23 +138,26 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
     return result.folderId
   }
 
-  const pushDirtyTags = async (fileId: string) => {
-    const tags = await tagsStore.getAllDirtyTags()
-    if (tags.length === 0) return
+  const pushDirtyTags = useCallback(
+    async (fileId: string) => {
+      const tags = await getAllDirtyTags()
+      if (tags.length === 0) return
 
-    const res = await fetch('/api/sheet/google/bulk/tags', {
-      method: 'POST',
-      body: JSON.stringify({ fileId, tags }),
-    })
-    const result = await res.json()
-    if (res.ok) {
-      const ids = tags.map(({ id }) => id).filter((id): id is string => Boolean(id))
-      ids.forEach(
-        (id, index) => result.indexes?.[index] && tagsStore.updateIndex(id, result.indexes[index])
-      )
-      tagsStore.updateDirties(ids, false)
-    }
-  }
+      const res = await fetch('/api/sheet/google/bulk/tags', {
+        method: 'POST',
+        body: JSON.stringify({ fileId, tags }),
+      })
+      const result = await res.json()
+      if (res.ok) {
+        const ids = tags.map(({ id }) => id).filter((id): id is string => Boolean(id))
+        ids.forEach(
+          (id, index) => result.indexes?.[index] && updateIndex(id, result.indexes[index])
+        )
+        updateDirties(ids, false)
+      }
+    },
+    [getAllDirtyTags, updateDirties, updateIndex]
+  )
 
   const loadRemoteMetaTagRows = async (
     fileId: string
@@ -159,9 +169,11 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
     return result.metas
   }
 
-  const loadLocalMetaTagRows = async (): Promise<{ id: string; modified?: number }[]> => {
-    return await tagsStore.getMetas()
-  }
+  const loadLocalMetaTagRows = useCallback(async (): Promise<
+    { id: string; modified?: number }[]
+  > => {
+    return await getMetas()
+  }, [getMetas])
 
   const loadNewOrUpdatedTags = async (
     fileId: string,
@@ -185,14 +197,14 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
       loadGoogleMe().then(() =>
         loadSheetId().then((fileId) => {
           if (fileId) {
-            loadImageFoderId().then((folderId) => sheetStore.setImageFolderId(folderId) ?? '')
+            loadImageFoderId().then((folderId) => setImageFolderId(folderId) ?? '')
 
             pushDirtyTags(fileId).then(() => {
               loadRemoteMetaTagRows(fileId).then((remoteMeta) => {
                 loadLocalMetaTagRows().then((localMeta) => {
                   const localMap = new Map(localMeta.map((l) => [l.id, l.modified]))
                   const deletedRows = remoteMeta.filter((row) => row.deleted).map(({ id }) => id)
-                  tagsStore.deleteTags(deletedRows)
+                  deleteTags(deletedRows)
                   const remoteNewOrUpdated = remoteMeta
                     .filter(
                       (row) =>
@@ -201,8 +213,8 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
                     )
                     .map(({ id, index }) => ({ id, index }))
                   loadNewOrUpdatedTags(fileId, remoteNewOrUpdated).then((tags) => {
-                    tagsStore.addNewTagBulk(tags)
-                    tagsStore.initTags()
+                    addNewTagBulk(tags)
+                    initTags()
                   })
                 })
               })
@@ -234,7 +246,17 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
         })
       )
     }
-  }, [])
+  }, [
+    addNewTagBulk,
+    deleteTags,
+    initTags,
+    loadGoogleMe,
+    loadLocalMetaTagRows,
+    loadSheetId,
+    props.refreshToken,
+    pushDirtyTags,
+    setImageFolderId,
+  ])
 
   if (!isAuthed)
     return (

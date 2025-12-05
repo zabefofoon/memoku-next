@@ -10,7 +10,9 @@ export default function TodosSearch() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const [value, setValue] = useState<string>(() => searchParams.get('searchText') ?? '')
+  const searchTextQuery = searchParams.get('searchText') ?? ''
+
+  const [value, setValue] = useState<string>(() => searchTextQuery)
 
   const updateQuery = debounce((next: string) => {
     const urlParams = new URLSearchParams(searchParams.toString())
@@ -24,9 +26,9 @@ export default function TodosSearch() {
   }, 250)
 
   useEffect(() => {
-    const urlValue = searchParams.get('searchText') ?? ''
+    const urlValue = searchTextQuery
     setValue(urlValue)
-  }, [])
+  }, [searchTextQuery])
 
   return (
     <label className='search | w-full sm:w-fit flex items-center | border-b border-gray-300 dark:border-zinc-600 has-focus:border-indigo-500 | pr-[8px]'>

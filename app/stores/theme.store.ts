@@ -1,23 +1,21 @@
 import { create } from 'zustand'
 
 interface TagsStore {
+  screenSize: 'mobile' | 'desktop'
   isDarkMode: boolean
   setIsDarkMode: (value: boolean) => void
-  initDarkMode: () => void
+  setScreenSize: (screenSize: 'mobile' | 'desktop') => void
 }
 
 export const useThemeStore = create<TagsStore>((set) => {
-  const isDarkMode = false
-
-  const setIsDarkMode = (value: boolean): void => {
-    set({ isDarkMode: value })
-  }
-
-  const initDarkMode = (): void => {}
-
   return {
-    isDarkMode,
-    setIsDarkMode,
-    initDarkMode,
+    screenSize: 'mobile',
+    isDarkMode: false,
+    setIsDarkMode: (isDarkMode: boolean): void => {
+      set({ isDarkMode })
+    },
+    setScreenSize: (screenSize: TagsStore['screenSize']): void => {
+      set({ screenSize })
+    },
   }
 })

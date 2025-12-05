@@ -14,10 +14,11 @@ export function AppTopAppBar() {
   const [_, setCookie, removeCookie] = useCookies([COOKIE_THEME])
   const pathname = usePathname()
 
-  const themeStore = useThemeStore()
+  const isDarkMode = useThemeStore((state) => state.isDarkMode)
+  const setIsDarkMode = useThemeStore((state) => state.setIsDarkMode)
 
   const toggleDarkMode = (value: boolean): void => {
-    themeStore.setIsDarkMode(value)
+    setIsDarkMode(value)
     if (value) {
       document.documentElement.classList.add('dark')
       setCookie(COOKIE_THEME, 'dark', { maxAge: AGE_1_YEAR, path: '/', sameSite: 'lax' })
@@ -46,7 +47,7 @@ export function AppTopAppBar() {
             onIcon='moon'
             offIcon='sun'
             trackClass='dark:!bg-zinc-700'
-            checked={themeStore.isDarkMode}
+            checked={isDarkMode}
             toggle={toggleDarkMode}
           />
           <Link

@@ -4,7 +4,7 @@ import { WEEK_DAYS, WEEK_DAYS_NAME } from '@/const'
 import dayjs from 'dayjs'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { useDateUtil } from '../hooks/useDateUtil'
 import { Todo, WeekDay } from '../models/Todo'
 import etcUtil from '../utils/etc.util'
@@ -58,7 +58,7 @@ export default function TodosTimeModal(props: Props): ReactNode {
   })
   const [days, setDays] = useState<WeekDay[]>([])
 
-  const initStates = (): void => {
+  const initStates = useCallback((): void => {
     if (props.todo == null) return
 
     let step: 'select' | 'plan' | 'iterate' = 'select'
@@ -79,7 +79,7 @@ export default function TodosTimeModal(props: Props): ReactNode {
     setStart({ date: startDate, hour: startHour, minute: startMinute })
     setEnd({ date: endtDate, hour: endtHour, minute: endinute })
     setDays(props.todo.days ?? [])
-  }
+  }, [props.todo])
 
   const setDate = (value: Date): void => {
     if (mode === 'start') {
@@ -135,7 +135,7 @@ export default function TodosTimeModal(props: Props): ReactNode {
 
   useEffect(() => {
     if (props.isShow) initStates()
-  }, [props.isShow])
+  }, [initStates, props.isShow])
 
   return (
     <>

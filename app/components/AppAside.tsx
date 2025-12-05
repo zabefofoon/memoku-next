@@ -29,17 +29,19 @@ const menus = [
 ]
 
 export function AppAside(props: Props) {
-  const sheetStore = useSheetStore()
-  const themeStore = useThemeStore()
+  const setFileId = useSheetStore((state) => state.setFileId)
+  const isDarkMode = useThemeStore((state) => state.isDarkMode)
+  const setIsDarkMode = useThemeStore((state) => state.setIsDarkMode)
   const pathname = usePathname()
   const [_, setCookie, removeCookie] = useCookies([COOKIE_THEME, COOKIE_EXPAND])
 
   const [isExpand, setIsExpand] = useState<boolean>(props.isExpand)
 
-  const authStore = useAuthStore((s) => s)
+  const memberInfo = useAuthStore((s) => s.memberInfo)
+  const setMemberInfo = useAuthStore((s) => s.setMemberInfo)
 
   const toggleDarkMode = (value: boolean): void => {
-    themeStore.setIsDarkMode(value)
+    setIsDarkMode(value)
     if (value) {
       document.documentElement.classList.add('dark')
       setCookie(COOKIE_THEME, 'dark', { maxAge: AGE_1_YEAR, path: '/', sameSite: 'lax' })
@@ -57,8 +59,8 @@ export function AppAside(props: Props) {
 
   const logout = async (): Promise<void> => {
     await fetch('/api/auth/google/logout', { method: 'POST' })
-    authStore.setMemberInfo()
-    sheetStore.setFileId('')
+    setMemberInfo()
+    setFileId('')
   }
 
   return (
@@ -116,15 +118,15 @@ export function AppAside(props: Props) {
         ))}
       </nav>
       <div className='mt-auto'>
-        {authStore.memberInfo && (
+        {memberInfo && (
           <div className='border border-gray-100 dark:border-zinc-700 rounded-xl shadow-sm | flex items-center gap-[8px] | py-[12px] px-[12px] mx-[4px]'>
             <img
               className='rounded-full | w-[32px] aspect-square'
-              src={authStore.memberInfo.picture ?? ''}
-              alt={authStore.memberInfo.email}
+              src={memberInfo.picture ?? ''}
+              alt={memberInfo.email}
             />
             <div className='flex flex-col gap-[2px] | overflow-hidden | leading-[100%]'>
-              <p className='text-[13px] truncate'>{authStore.memberInfo?.email}</p>
+              <p className='text-[13px] truncate'>{memberInfo?.email}</p>
               <div className='flex'>
                 <Icon name='logout' />
                 <button
@@ -142,7 +144,7 @@ export function AppAside(props: Props) {
             { 'flex-col': !isExpand },
           ])}>
           <div className='flex items-center gap-[6px]'>
-            {!authStore.memberInfo && (
+            {!memberInfo && (
               <Link
                 href='/api/auth/google'
                 prefetch={false}
@@ -154,7 +156,7 @@ export function AppAside(props: Props) {
               id='다크모드'
               onIcon='moon'
               offIcon='sun'
-              checked={themeStore.isDarkMode}
+              checked={isDarkMode}
               toggle={toggleDarkMode}
             />
           </div>

@@ -21,8 +21,8 @@ import { useThemeStore } from '../stores/theme.store'
 export default function HomeCalendar() {
   const [cookies] = useCookies()
 
-  const themeStore = useThemeStore()
-  const tagsStore = useTagsStore()
+  const isDarkMode = useThemeStore((state) => state.isDarkMode)
+  const getTagsById = useTagsStore((s) => s.getTagsById)
   const router = useRouter()
 
   const calendarRef = useRef<FullCalendar>(null)
@@ -42,7 +42,7 @@ export default function HomeCalendar() {
   const handleDatesSet = async (arg: DatesSetArg) => {
     const res = await todosDB.getTodosDateRange(arg.start, arg.end)
     const mapped = res.map((todo) => {
-      const tagColor = tagsStore.getTagsById(todo.tagId)?.color
+      const tagColor = getTagsById(todo.tagId)?.color
 
       return {
         id: todo.id,
@@ -68,7 +68,7 @@ export default function HomeCalendar() {
   return (
     <div className='calendar | hidden sm:block | flex-1 min-w-[500px] min-h-[420px] h-full | bg-white dark:bg-zinc-800 shadow-md rounded-xl | py-[16px]'>
       <FullCalendar
-        key={`${themeStore.isDarkMode}`}
+        key={`${isDarkMode}`}
         ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin]}
         initialView='dayGridMonth'

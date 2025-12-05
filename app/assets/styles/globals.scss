@@ -72,7 +72,7 @@ button {
   .bottom-sheet-card {
     transform: translateY(100%);
 
-    @media (min-width: 64px) {
+    @media (min-width: 640px) {
       transform: translateY(10px);
     }
   }
@@ -118,7 +118,7 @@ button {
     transform: translateY(100%);
     transition: transform 240ms ease;
 
-    @media (min-width: 64px) {
+    @media (min-width: 640px) {
       transform: translateY(10px);
     }
   }

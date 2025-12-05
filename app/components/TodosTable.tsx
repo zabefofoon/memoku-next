@@ -27,14 +27,13 @@ export default function TodosTable(props: Props) {
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && !isTodosNextLoading && !isTodosLoading) {
-        setPage(page + 1, props.loadTodos)
-      }
+      const isLoadable = entry.isIntersecting && !isTodosNextLoading && !isTodosLoading
+      if (isLoadable) setPage(page + 1, props.loadTodos)
     })
     if (nextLoaderEl.current) observer.observe(nextLoaderEl.current)
 
     return () => observer.disconnect()
-  }, [isTodosLoading, isTodosNextLoading, page, setPage])
+  }, [isTodosLoading, isTodosNextLoading, page, props.loadTodos, setPage])
 
   return (
     <div className='hidden sm:block flex-1 w-full h-full overflow-auto | bg-white dark:bg-zinc-800 shadow-md rounded-xl'>

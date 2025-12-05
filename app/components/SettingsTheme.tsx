@@ -7,10 +7,11 @@ import UIToggle from './UIToggle'
 
 export default function SettingsTags() {
   const [_, setCookie, removeCookie] = useCookies([COOKIE_THEME, COOKIE_EXPAND])
-  const themeStore = useThemeStore()
+  const isDarkMode = useThemeStore((state) => state.isDarkMode)
+  const setIsDarkMode = useThemeStore((state) => state.setIsDarkMode)
 
   const toggleDarkMode = (value: boolean): void => {
-    themeStore.setIsDarkMode(value)
+    setIsDarkMode(value)
     if (value) {
       document.documentElement.classList.add('dark')
       setCookie(COOKIE_THEME, 'dark', { maxAge: AGE_1_YEAR, path: '/', sameSite: 'lax' })
@@ -29,7 +30,7 @@ export default function SettingsTags() {
             id='다크모드'
             onIcon='moon'
             offIcon='sun'
-            checked={themeStore.isDarkMode}
+            checked={isDarkMode}
             toggle={toggleDarkMode}
           />
         </div>

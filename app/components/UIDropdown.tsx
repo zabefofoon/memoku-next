@@ -63,41 +63,40 @@ export function UIDropdown({
   const referenceRef = useRef<HTMLDivElement | null>(null)
   const floatingRef = useRef<HTMLDivElement | null>(null)
 
-  const defaultPlacements: Placement[] = [
-    'top',
-    'top-start',
-    'top-end',
-    'bottom',
-    'bottom-start',
-    'bottom-end',
-  ]
+  const defaultPlacements: Placement[] = useMemo(
+    () => ['top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end'],
+    []
+  )
 
   const placementTable: Record<
     NonNullable<Position['x']> | 'undefined',
     Record<NonNullable<Position['y']> | 'undefined', Placement[]>
-  > = {
-    undefined: {
-      undefined: defaultPlacements,
-      TOP: ['top'],
-      BOTTOM: ['bottom'],
-    },
-    LEFT: {
-      undefined: ['top-start', 'bottom-start'],
-      TOP: ['top-start'],
-      BOTTOM: ['bottom-start'],
-    },
-    RIGHT: {
-      undefined: ['top-end', 'bottom-end'],
-      TOP: ['top-end'],
-      BOTTOM: ['bottom-end'],
-    },
-  }
+  > = useMemo(
+    () => ({
+      undefined: {
+        undefined: defaultPlacements,
+        TOP: ['top'],
+        BOTTOM: ['bottom'],
+      },
+      LEFT: {
+        undefined: ['top-start', 'bottom-start'],
+        TOP: ['top-start'],
+        BOTTOM: ['bottom-start'],
+      },
+      RIGHT: {
+        undefined: ['top-end', 'bottom-end'],
+        TOP: ['top-end'],
+        BOTTOM: ['bottom-end'],
+      },
+    }),
+    [defaultPlacements]
+  )
 
   const allowedPlacements = useMemo<Placement[]>(() => {
     const x = (position?.x ?? 'undefined') as keyof typeof placementTable
     const y = (position?.y ?? 'undefined') as keyof (typeof placementTable)[typeof x]
     return placementTable[x]?.[y] ?? defaultPlacements
-  }, [position])
+  }, [defaultPlacements, placementTable, position?.x, position?.y])
 
   const { refs, floatingStyles, placement, context } = useFloating({
     elements: {
