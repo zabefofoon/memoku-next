@@ -1,16 +1,13 @@
-import { TAG_COLORS } from '@/const'
+import { TAG_COLORS, WEEK_DAYS_NAME } from '@/const'
+import dayjs from 'dayjs'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import { Fragment, useEffect, useRef } from 'react'
-import { useCookies } from 'react-cookie'
-import { Else, If, Then } from 'react-if'
+import { Case, Default, Else, If, Switch, Then } from 'react-if'
 import { TodoWithChildren } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
 import { useTodosPageStore } from '../stores/todosPage.store'
 import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
-import { TodosDropdown } from './TodosDropdown'
-import TodosPeriodText from './TodosPeriodText'
 import UISpinner from './UISpinner'
 
 interface Props {
@@ -38,184 +35,261 @@ export default function TodosCards(props: Props) {
   }, [isTodosLoading, isTodosNextLoading, page, props.loadTodos, setPage])
 
   return (
-    <>
-      <If condition={isTodosLoading}>
-        <Then>
-          {() => (
+    <If condition={isTodosLoading}>
+      <Then>
+        {() => (
+          <div className='sm:hidden | flex-1 h-full | py-[80px] px-[16px] | text-center'>
+            <UISpinner />
+          </div>
+        )}
+      </Then>
+      <Else>
+        <If condition={!todos?.length}>
+          <Then>
             <div className='sm:hidden | flex-1 h-full | py-[80px] px-[16px] | text-center'>
-              <UISpinner />
+              <p className='text-[13px] opacity-70'>데이터가 없습니다.</p>
             </div>
-          )}
-        </Then>
-        <Else>
-          <If condition={!todos?.length}>
-            <Then>
-              <div className='sm:hidden | flex-1 h-full | py-[80px] px-[16px] | text-center'>
-                <p className='text-[13px] opacity-70'>데이터가 없습니다.</p>
-              </div>
-            </Then>
-            <Else>
-              <div className='flex flex-col gap-[12px] sm:hidden px-[16px]'>
-                {todos?.map((todo) => (
-                  <Fragment key={todo.id}>
-                    <TodoCard todo={todo} />
-                    <If condition={todo.isExpanded}>
-                      <Then>
-                        {todo.children?.map((child) => (
-                          <div
-                            key={child.id}
-                            className='flex items-center gap-[4px]'>
-                            <Icon
-                              name='reply'
-                              className='text-[16px]'
-                            />
-                            <TodoCard
-                              todo={child}
-                              parent={todo}
-                            />
-                          </div>
-                        ))}
-                      </Then>
-                    </If>
-                  </Fragment>
-                ))}
-                <If condition={!isTodosLoading && todos && (total ?? 0) > todos.length}>
-                  <div
-                    ref={nextLoaderEl}
-                    className='text-center | py-[6px]'>
-                    <UISpinner />
-                  </div>
-                </If>
-              </div>
-            </Else>
-          </If>
-        </Else>
-      </If>
-    </>
+          </Then>
+          <Else>
+            <div className='flex flex-col gap-[12px] sm:hidden px-[16px]'>
+              {todos?.map((todo) => (
+                <Fragment key={todo.id}>
+                  <TodoCard todo={todo} />
+                  <If condition={todo.isExpanded}>
+                    <Then>
+                      {todo.children?.map((child) => (
+                        <div
+                          key={child.id}
+                          className='flex items-center gap-[4px]'>
+                          <Icon
+                            name='reply'
+                            className='text-[16px]'
+                          />
+                          <TodoCard
+                            todo={child}
+                            parent={todo}
+                          />
+                        </div>
+                      ))}
+                    </Then>
+                  </If>
+                </Fragment>
+              ))}
+              <If condition={!isTodosLoading && todos && (total ?? 0) > todos.length}>
+                <div
+                  ref={nextLoaderEl}
+                  className='text-center | py-[6px]'>
+                  <UISpinner />
+                </div>
+              </If>
+            </div>
+          </Else>
+        </If>
+      </Else>
+    </If>
   )
 }
 
-function TodoCard(props: { todo: TodoWithChildren; parent?: TodoWithChildren }) {
-  const [cookies] = useCookies()
-  const searchParams = useSearchParams()
-
-  const expandRow = useTodosPageStore((state) => state.expandRow)
+function TodoCard({ todo }: { todo: TodoWithChildren; parent?: TodoWithChildren }) {
   const getTagsById = useTagsStore((s) => s.getTagsById)
 
-  const isFiltered =
-    !!searchParams.get('tags') || !!searchParams.get('status') || !!searchParams.get('searchText')
+  const now = Date.now()
+  const start = todo.start ?? 0
+  const end = todo.end ?? 0
 
-  const isShowBadge = isFiltered || !props.todo.parentId
+  const hasRemainedTime = todo.start && todo.end
+  const hasDays = todo.days?.length
+  const isBeforeRemainedTime = now < start
+  const isInprogressRemainedTime = now >= start && now < end
+  const isAfterRemainedTime = now > end
 
-  let bgColor = 'shadow-slate-200'
-  if (props.todo.status === 'done') bgColor = 'shadow-green-200'
-  if (props.todo.status === 'inprogress') bgColor = 'shadow-indigo-200'
-  if (props.todo.status === 'hold') bgColor = 'shadow-orange-200'
+  let bgColor = 'bg-slate-200'
+  if (todo.status === 'done') bgColor = 'bg-green-200'
+  if (todo.status === 'inprogress') bgColor = 'bg-indigo-200'
+  if (todo.status === 'hold') bgColor = 'bg-orange-200'
 
   let textColor = 'text-slate-500'
-  if (props.todo.status === 'done') textColor = 'text-green-500'
-  if (props.todo.status === 'inprogress') textColor = 'text-indigo-500'
-  if (props.todo.status === 'hold') textColor = 'text-orange-600'
+  if (todo.status === 'done') textColor = 'text-green-500'
+  if (todo.status === 'inprogress') textColor = 'text-indigo-500'
+  if (todo.status === 'hold') textColor = 'text-orange-600'
 
   let text = '생성됨'
-  if (props.todo.status === 'done') text = '완료됨'
-  if (props.todo.status === 'inprogress') text = '진행중'
-  if (props.todo.status === 'hold') text = '중지됨'
+  if (todo.status === 'done') text = '완료됨'
+  if (todo.status === 'inprogress') text = '진행중'
+  if (todo.status === 'hold') text = '중지됨'
 
-  const tag = getTagsById(props.todo.tagId)
+  const tag = getTagsById(todo.tagId)
 
   return (
-    <div
-      className={etcUtil.classNames([
-        'w-full overflow-hidden | flex flex-col gap-[12px] | bg-white dark:bg-zinc-800 shadow-md rounded-xl | py-[12px] px-[8px]',
-        bgColor,
-      ])}>
-      <div className='flex items-center gap-[12px] items-start'>
-        <If condition={isShowBadge}>
+    <Link
+      href={`/todos/${todo.id}`}
+      className='block | bg-[rgb(248,248,251)] | rounded-xl | p-[12px]'
+      style={{
+        boxShadow: '2px 2px 0 var(--color-gray-200), -2px -2px 0 white',
+      }}>
+      {/* 태그 */}
+      <div className='flex items-center gap-[4px]'>
+        <div
+          className='w-[8px] aspect-square | rounded-full | bg-red-500'
+          style={{
+            background: tag ? TAG_COLORS[tag.color].white : 'var(--color-slate-800)',
+          }}></div>
+        <p className='text-[11px] text-gray-600 leading-[100%]'>{tag?.label ?? 'MEMO'}</p>
+      </div>
+      {/* 태그 */}
+
+      {/* 제목, 상태 */}
+      <div className='mt-[6px] | flex items-start gap-[6px] justify-between'>
+        {/* 제목 */}
+        <p className='line-2 | text-[15px] font-[600] leading-[130%]'>
+          {todo.description?.slice(0, 40)?.split(/\n/)[0]}
+        </p>
+        {/* 제목 */}
+
+        {/* 상태 */}
+        <div
+          className={etcUtil.classNames(
+            'shrink-0 | leading-[100%] | flex items-center | py-[3px] px-[4px] pr-[8px] | rounded-full',
+            [textColor, bgColor]
+          )}>
+          <p className='text-[14px]'>
+            <Switch>
+              <Case condition={todo.status === 'inprogress'}>
+                <Icon name='run' />
+              </Case>
+              <Case condition={todo.status === 'hold'}>
+                <Icon name='pause' />
+              </Case>
+              <Case condition={todo.status === 'done'}>
+                <Icon name='check' />
+              </Case>
+              <Default>
+                <Icon name='plus' />
+              </Default>
+            </Switch>
+          </p>
+          <p className='text-[11px]'>{text}</p>
+        </div>
+        {/* 상태 */}
+      </div>
+      {/* 제목, 상태 */}
+
+      {/* 남은시간, 반복 날짜 */}
+      <div className='flex items-center gap-[4px] | mt-[6px] | leading-[100%] tracking-tight'>
+        <If condition={todo.status === 'done'}>
           <Then>
-            <Link
-              className='relative  | flex justify-center items-center | shrink-0 w-[36px] aspect-square | rounded-full | font-[600] text-[14px] | shadow-sm'
-              href={{
-                pathname: '/todos',
-                query: {
-                  ...Object.fromEntries(searchParams),
-                  todoTag: props.todo.id,
-                },
-              }}
-              style={{
-                background:
-                  cookies['x-theme'] === 'dark'
-                    ? `${tag?.color ? (TAG_COLORS[tag.color]?.dark ?? '#000000') : '#000000'}`
-                    : `${tag?.color ? `${TAG_COLORS[tag.color]?.white ?? '#000000'}24` : '#00000024'}`,
-                color:
-                  cookies['x-theme'] === 'dark'
-                    ? 'white'
-                    : tag?.color
-                      ? (TAG_COLORS[tag?.color]?.white ?? '#000000')
-                      : '#000000',
-              }}>
-              {tag?.label?.slice(0, 1) ?? 'M'}
-            </Link>
+            <div className='flex items-center gap-[3px] '>
+              <div className='w-[3px] aspect-square bg-gray-300 rounded-full'></div>
+              <p className='text-[11px] text-gray-400'>
+                {dayjs(todo.created).format('YY/MM/DD')} 생성
+              </p>
+            </div>
           </Then>
-        </If>
+          <Else>
+            <If condition={hasDays}>
+              <Then>
+                <div className='flex items-center gap-[3px]'>
+                  <p className='text-[11px]'>⏰</p>
+                  <p className='text-[11px]'>
+                    {todo.days && todo.days.length === 7
+                      ? '매일'
+                      : todo.days?.map((day) => WEEK_DAYS_NAME[day]).join(',')}
+                  </p>
+                </div>
 
-        <Link
-          href={{ pathname: `/todos/${props.todo.id}` }}
-          className='flex flex-col gap-[0px] | overflow-hidden | w-full'>
-          <p className='text-[14px] truncate font-[600] text-gray-600'>
-            {props.todo.description?.split(/\n/)[0]}
-          </p>
-          <p className='text-[13px] line-2 text-gray-400'>
-            {props.todo.description?.replace(props.todo.description?.split(/\n/)[0], '')}
-          </p>
-        </Link>
-        <div className='flex items-center gap-[6px]'>
-          <If condition={props.todo.id}>
-            <Then>
-              <TodosDropdown
-                hideDelete
-                todo={props.todo}
-                parent={props.parent}
-                position={{ x: 'RIGHT' }}
-              />
-            </Then>
-          </If>
-        </div>
-      </div>
-
-      <div className='w-full | flex items-center gap-[4px]'>
-        <div className='flex items-center gap-[12px]'>
-          <p className='w-[36px] | text-[10px] text-center leading-none | text-gray-400'>상태</p>
-          <p className={etcUtil.classNames(['text-[12px] leading-none font-[600]', textColor])}>
-            {text}
-          </p>
-        </div>
-        <div className='flex items-center gap-[6px] | ml-auto'>
-          <TodosPeriodText todo={props.todo} />
-          <If condition={!isFiltered && !props.todo.parentId && props.todo.childId}>
-            <Then>
-              <button
-                type='button'
-                onClick={() => expandRow(props.todo)}>
-                <If condition={props.todo.isExpanded}>
+                {/* 시간 */}
+                <div className='flex items-center gap-[3px] '>
+                  <div className='w-[3px] aspect-square bg-gray-300 rounded-full'></div>
+                  <p className='text-[11px] text-gray-400'>
+                    {`${dayjs(start).hour()}`.padStart(2, '0')}:
+                    {`${dayjs(start).minute()}`.padStart(2, '0')} ~{' '}
+                    {`${dayjs(end).hour()}`.padStart(2, '0')}:
+                    {`${dayjs(end).minute()}`.padStart(2, '0')}
+                  </p>
+                </div>
+                {/* 시간 */}
+              </Then>
+              <Else>
+                {/* 남은 시간 */}
+                <If condition={hasRemainedTime}>
                   <Then>
-                    <Icon
-                      name='chevron-up'
-                      className='text-[20px]'
-                    />
+                    <div className='flex items-center gap-[3px]'>
+                      <p className='text-[11px]'>⏰</p>
+                      <p className='text-[11px]'>
+                        <Switch>
+                          <Case condition={isBeforeRemainedTime}>
+                            <span className='text-gray-600 font-[600]'>
+                              {etcUtil.formatDuration(start - now, 'until')} 후 시작
+                            </span>
+                          </Case>
+                          <Case condition={isInprogressRemainedTime}>
+                            <span className='text-indigo-500 font-[600]'>
+                              {etcUtil.formatDuration(end - now, 'left')} 남음
+                            </span>
+                          </Case>
+                          <Case condition={isAfterRemainedTime}>
+                            <span className='text-red-500 font-[600]'>
+                              {etcUtil.formatDuration(now - end, 'passed')} 초과
+                            </span>
+                          </Case>
+                        </Switch>
+                      </p>
+                    </div>
                   </Then>
-                  <Else>
-                    <Icon
-                      name='chevron-down'
-                      className='text-[20px]'
-                    />
-                  </Else>
                 </If>
-              </button>
-            </Then>
-          </If>
-        </div>
+                {/* 남은 시간 */}
+
+                {/* 생성일 */}
+                <div className='flex items-center gap-[3px] '>
+                  <div className='w-[3px] aspect-square bg-gray-300 rounded-full'></div>
+                  <p className='text-[11px] text-gray-400'>
+                    {dayjs(todo.created).format('YY/MM/DD')} 생성
+                  </p>
+                </div>
+                {/* 생성일 */}
+              </Else>
+            </If>
+          </Else>
+        </If>
       </div>
-    </div>
+      {/* 남은시간, 반복 날짜 */}
+
+      <div className='flex items-center'>
+        {/* 하위 일 더 보기 */}
+        <If condition={todo.childId}>
+          <Then>
+            <div className='flex items-center | mt-[6px]'>
+              <Icon
+                name='chevron-down'
+                className='text-[16px]'
+              />
+              <p className='text-[11px]'>하위 일 더 보기</p>
+            </div>
+          </Then>
+          <Else>
+            <div className='flex items-center | mt-[6px] | text-gray-400'>
+              <Icon
+                name='plus'
+                className='text-[16px]'
+              />
+              <p className='text-[11px]'>하위 일 추가</p>
+            </div>
+          </Else>
+        </If>
+        {/* 하위 일 더 보기 */}
+
+        <button
+          className='rounded-full | ml-auto p-[2px] | border border-gray-100'
+          type='button'
+          style={{
+            boxShadow: '1px 1px 0 var(--color-gray-300), -1px -1px 0 white',
+          }}>
+          <Icon
+            name='overflow'
+            className='text-[14px]'
+          />
+        </button>
+      </div>
+    </Link>
   )
 }

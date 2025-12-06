@@ -36,7 +36,7 @@ interface StepCard {
   value: 'plan' | 'iterate' | 'reset'
 }
 
-export default function TodosTimeModal(props: Props): ReactNode {
+export default function TodosTimeModal({ isShow, todo, updateTime, close }: Props): ReactNode {
   const searchParams = useSearchParams()
 
   const [isShowDateModal, setIsShowDateModal] = useState<boolean>(false)
@@ -59,27 +59,27 @@ export default function TodosTimeModal(props: Props): ReactNode {
   const [days, setDays] = useState<WeekDay[]>([])
 
   const initStates = useCallback((): void => {
-    if (props.todo == null) return
+    if (todo == null) return
 
     let step: 'select' | 'plan' | 'iterate' = 'select'
-    if (props.todo.start && props.todo.days) step = 'iterate'
-    else if (props.todo.start) step = 'plan'
+    if (todo.start && todo.days) step = 'iterate'
+    else if (todo.start) step = 'plan'
 
-    const startDate = dayjs(props.todo.start).toDate()
-    const startHour = props.todo.start ? dayjs(props.todo.start).get('hour').valueOf() : 0
-    const startMinute = props.todo.start ? dayjs(props.todo.start).get('minute').valueOf() : 0
+    const startDate = dayjs(todo.start).toDate()
+    const startHour = todo.start ? dayjs(todo.start).get('hour').valueOf() : 0
+    const startMinute = todo.start ? dayjs(todo.start).get('minute').valueOf() : 0
 
-    const endtDate = dayjs(props.todo.end).toDate()
-    const endtHour = props.todo.end ? dayjs(props.todo.end).get('hour').valueOf() : 23
-    const endinute = props.todo.end ? dayjs(props.todo.end).get('minute').valueOf() : 55
+    const endtDate = dayjs(todo.end).toDate()
+    const endtHour = todo.end ? dayjs(todo.end).get('hour').valueOf() : 23
+    const endinute = todo.end ? dayjs(todo.end).get('minute').valueOf() : 55
 
     setStep(step)
     setMode('start')
-    setSelectedMode(props.todo.days ? 'iterate' : 'plan')
+    setSelectedMode(todo.days ? 'iterate' : 'plan')
     setStart({ date: startDate, hour: startHour, minute: startMinute })
     setEnd({ date: endtDate, hour: endtHour, minute: endinute })
-    setDays(props.todo.days ?? [])
-  }, [props.todo])
+    setDays(todo.days ?? [])
+  }, [])
 
   const setDate = (value: Date): void => {
     if (mode === 'start') {
@@ -92,7 +92,7 @@ export default function TodosTimeModal(props: Props): ReactNode {
       setEnd((prev) => ({ ...prev, date }))
     }
 
-    props.close()
+    close()
   }
 
   const toggleWeekDays = (value: WeekDay) => {
@@ -103,11 +103,11 @@ export default function TodosTimeModal(props: Props): ReactNode {
   }
 
   const handleSelect = (): void => {
-    if (props.todo == null) return
+    if (todo == null) return
 
     if (selectedMode === 'reset') {
-      props.updateTime(props.todo, { start: undefined, end: undefined, days: undefined })
-      props.close()
+      updateTime(todo, { start: undefined, end: undefined, days: undefined })
+      close()
     } else if (step === 'select') setStep(selectedMode)
     else {
       const startValue = dayjs(start.date)
@@ -124,8 +124,8 @@ export default function TodosTimeModal(props: Props): ReactNode {
         .valueOf()
       const daysValue = selectedMode === 'iterate' && days.length ? days : undefined
 
-      props.updateTime(props.todo, { start: startValue, end: endValue, days: daysValue })
-      props.close()
+      updateTime(todo, { start: startValue, end: endValue, days: daysValue })
+      close()
     }
   }
 
@@ -134,14 +134,14 @@ export default function TodosTimeModal(props: Props): ReactNode {
   }, [searchParams])
 
   useEffect(() => {
-    if (props.isShow) initStates()
-  }, [initStates, props.isShow])
+    if (isShow) initStates()
+  }, [initStates, isShow])
 
   return (
     <>
       <UIModal
-        open={props.isShow ?? false}
-        close={() => props.close()}
+        open={isShow ?? false}
+        close={() => close()}
         header={() => <span>시간 설정</span>}
         content={() => (
           <div className='select-none'>
@@ -221,7 +221,7 @@ export default function TodosTimeModal(props: Props): ReactNode {
           <button
             className='rounded-md bg-gray-200 dark:bg-zinc-700 text-[15px] py-[12px]'
             onClick={() => {
-              if (step === 'select') props.close()
+              if (step === 'select') close()
               else setStep('select')
             }}>
             <p className='text-[15px]'>취소하기</p>
@@ -232,7 +232,7 @@ export default function TodosTimeModal(props: Props): ReactNode {
         key={`date-${mode}`}
         isShow={isShowDateModal}
         selectedDate={mode === 'start' ? start.date : end.date}
-        close={props.close}
+        close={close}
         validRange={{ start: mode === 'start' ? undefined : start.date }}
         select={setDate}
       />
@@ -240,7 +240,10 @@ export default function TodosTimeModal(props: Props): ReactNode {
   )
 }
 
-function Tabs(props: {
+function Tabs({
+  mode,
+  setMode,
+}: {
   mode?: 'start' | 'end'
   setMode: (value: 'start' | 'end') => void
 }): ReactNode {
@@ -256,9 +259,9 @@ function Tabs(props: {
           key={item.value}
           type='button'
           className={etcUtil.classNames('font-[700] | py-[3px] px-[12px] | rounded-lg', {
-            'bg-indigo-500 shadow-lg | text-white': props.mode === item.value,
+            'bg-indigo-500 shadow-lg | text-white': mode === item.value,
           })}
-          onClick={() => props.setMode(item.value)}>
+          onClick={() => setMode(item.value)}>
           {item.name}
         </button>
       ))}
@@ -266,7 +269,10 @@ function Tabs(props: {
   )
 }
 
-function SelectContent(props: {
+function SelectContent({
+  selectedMode,
+  setSelectedMode,
+}: {
   selectedMode: 'plan' | 'iterate' | 'reset'
   setSelectedMode: (value: 'plan' | 'iterate' | 'reset') => void
 }): ReactNode {
@@ -299,9 +305,9 @@ function SelectContent(props: {
             key={card.value}
             className={etcUtil.classNames([
               'leading-[140%] | border border-slate-200 dark:border-zinc-600 rounded-lg | py-[8px]',
-              { 'bg-slate-100 dark:bg-zinc-700': props.selectedMode === card.value },
+              { 'bg-slate-100 dark:bg-zinc-700': selectedMode === card.value },
             ])}
-            onClick={() => props.setSelectedMode(card.value)}>
+            onClick={() => setSelectedMode(card.value)}>
             <p className='text-[16px] font-[700]'>{card.title}</p>
             <p className='text-[13px]'>{card.desc}</p>
             <p className='text-[12px] opacity-50'>{card.caption}</p>
@@ -312,13 +318,13 @@ function SelectContent(props: {
   )
 }
 
-function PlanContent(props: { date?: Date }): ReactNode {
+function PlanContent({ date }: { date?: Date }): ReactNode {
   const dateUtil = useDateUtil()
   return (
     <div className='flex items-center justify-between'>
       <p>날짜</p>
       <div className='flex items-center gap-[8px]'>
-        {props.date && <p>{dateUtil.parseOnlyDate(props.date?.getTime())}</p>}
+        {date && <p>{dateUtil.parseOnlyDate(date?.getTime())}</p>}
         <Link
           href='?time=true&date=true'
           type='button'>
@@ -332,7 +338,11 @@ function PlanContent(props: { date?: Date }): ReactNode {
   )
 }
 
-function IterateContent(props: {
+function IterateContent({
+  mode,
+  days,
+  toggleWeekDays,
+}: {
   mode: 'start' | 'end'
   start: TimeState
   end: TimeState
@@ -346,15 +356,13 @@ function IterateContent(props: {
           className='w-full | text-[15px]'
           key={item.value}
           type='button'
-          onClick={() => props.toggleWeekDays(item.value)}>
+          onClick={() => toggleWeekDays(item.value)}>
           <span
             className={etcUtil.classNames([
               'w-[30px] aspect-square | mx-auto | rounded-full | flex items-center justify-center',
               {
                 'bg-indigo-500 text-white':
-                  props.mode === 'start'
-                    ? props.days?.includes(item.value)
-                    : props.days?.includes(item.value),
+                  mode === 'start' ? days?.includes(item.value) : days?.includes(item.value),
               },
             ])}>
             {item.name}
@@ -365,7 +373,12 @@ function IterateContent(props: {
   )
 }
 
-function ResultTexts(props: {
+function ResultTexts({
+  selectedMode,
+  start,
+  end,
+  days,
+}: {
   selectedMode: 'plan' | 'iterate'
   start: TimeState
   end: TimeState
@@ -373,26 +386,25 @@ function ResultTexts(props: {
 }): ReactNode {
   const dateUtil = useDateUtil()
 
-  const startHour = `${props.start.hour}`.padStart(2, '0')
-  const startMinute = `${props.start.minute}`.padStart(2, '0')
-  const endHour = `${props.end.hour}`.padStart(2, '0')
-  const endMinute = `${props.end.minute}`.padStart(2, '0')
+  const startHour = `${start.hour}`.padStart(2, '0')
+  const startMinute = `${start.minute}`.padStart(2, '0')
+  const endHour = `${end.hour}`.padStart(2, '0')
+  const endMinute = `${end.minute}`.padStart(2, '0')
 
-  const days =
-    props.days.length === 7 ? '매일' : props.days.map((day) => WEEK_DAYS_NAME[day]).join(',')
+  const daysValue = days.length === 7 ? '매일' : days.map((day) => WEEK_DAYS_NAME[day]).join(',')
 
   const startDate = dateUtil.parseDate(
-    dayjs(props.start.date)
-      .hour(props.start.hour ?? 0)
-      .minute(props.start.minute ?? 0)
+    dayjs(start.date)
+      .hour(start.hour ?? 0)
+      .minute(start.minute ?? 0)
       .second(0)
       .millisecond(0)
       .valueOf()
   )
   const endDate = dateUtil.parseDate(
-    dayjs(props.end.date)
-      .hour(props.end.hour ?? 0)
-      .minute(props.end.minute ?? 0)
+    dayjs(end.date)
+      .hour(end.hour ?? 0)
+      .minute(end.minute ?? 0)
       .second(0)
       .millisecond(0)
       .valueOf()
@@ -400,15 +412,15 @@ function ResultTexts(props: {
 
   return (
     <div className='bg-slate-100 dark:bg-zinc-600 rounded-lg | py-[8px]'>
-      {props.selectedMode === 'plan' ? (
+      {selectedMode === 'plan' ? (
         <p className='text-[12px] text-center font-[700]'>
-          {props.end.date ? `${startDate} ~ ${endDate}` : '종료일을 선택하세요.'}
+          {end.date ? `${startDate} ~ ${endDate}` : '종료일을 선택하세요.'}
         </p>
       ) : (
         <p className='text-[12px] text-center font-[700]'>
-          {props.days.length ? (
+          {days.length ? (
             <span>
-              {props.days.length < 7 && '매주'} {days} / {startHour}:{startMinute}~{endHour}:
+              {days.length < 7 && '매주'} {daysValue} / {startHour}:{startMinute}~{endHour}:
               {endMinute}
             </span>
           ) : (
