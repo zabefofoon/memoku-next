@@ -29,7 +29,7 @@ export const todosDB = {
   },
   getTodos: async (params?: GetTodosParams): Promise<{ total: number; todos: Todo[] }> => {
     const tags = params?.tags?.filter(Boolean)
-    const status = params?.status?.filter(Boolean)
+    const statuses = params?.status?.filter(Boolean)
     const query = params?.searchText?.trim().toLowerCase()
     const page = params?.page ?? 0
     const pageSize = 20
@@ -41,15 +41,15 @@ export const todosDB = {
         ? db.todos.orderBy('modified').reverse()
         : db.todos.orderBy('created').reverse()
 
-    if (!tags && !status && !query) {
+    if (!tags && !statuses && !query) {
       coll = coll.and(isRoot)
     } else {
       if (tags?.length) coll = coll.and((t) => tags.includes(t.tagId ?? ''))
-      if (status)
+      if (statuses)
         coll = coll.and(({ status }) =>
-          status.includes('created')
-            ? !status || status === 'created' || status.includes(status)
-            : status.includes(status)
+          status?.includes('created')
+            ? !status || status === 'created' || statuses.includes(status)
+            : statuses.includes(status)
         )
       if (query) coll = coll.and((t) => (t.description ?? '').toLowerCase().includes(query))
     }

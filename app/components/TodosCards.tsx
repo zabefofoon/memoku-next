@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Fragment, useEffect, useRef } from 'react'
 import { useCookies } from 'react-cookie'
+import { Else, If, Then } from 'react-if'
 import { TodoWithChildren } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
 import { useTodosPageStore } from '../stores/todosPage.store'
@@ -38,61 +39,73 @@ export default function TodosCards(props: Props) {
 
   return (
     <>
-      {(isTodosLoading || !todos?.length) && (
-        <div className='sm:hidden | flex-1 h-full | py-[80px] px-[16px] | text-center'>
-          {isTodosLoading && <UISpinner />}
-          {!isTodosLoading && !todos?.length && (
-            <p className='text-[13px] opacity-70'>데이터가 없습니다.</p>
-          )}
-        </div>
-      )}
-      {!isTodosLoading && !!todos?.length && (
-        <div className='flex flex-col gap-[12px] sm:hidden px-[16px]'>
-          {todos?.map((todo) => (
-            <Fragment key={todo.id}>
-              <TodoCard todo={todo} />
-              {todo.isExpanded &&
-                todo.children?.map((child) => (
-                  <div
-                    key={child.id}
-                    className='flex items-center gap-[4px]'>
-                    <Icon
-                      name='reply'
-                      className='text-[16px]'
-                    />
-                    <TodoCard
-                      todo={child}
-                      parent={todo}
-                    />
-                  </div>
-                ))}
-            </Fragment>
-          ))}
-
-          {!isTodosLoading && todos && (total ?? 0) > todos.length && (
-            <div
-              ref={nextLoaderEl}
-              className='text-center | py-[6px]'>
+      <If condition={isTodosLoading}>
+        <Then>
+          {() => (
+            <div className='sm:hidden | flex-1 h-full | py-[80px] px-[16px] | text-center'>
               <UISpinner />
             </div>
           )}
-        </div>
-      )}
+        </Then>
+        <Else>
+          <If condition={!todos?.length}>
+            <Then>
+              <div className='sm:hidden | flex-1 h-full | py-[80px] px-[16px] | text-center'>
+                <p className='text-[13px] opacity-70'>데이터가 없습니다.</p>
+              </div>
+            </Then>
+            <Else>
+              <div className='flex flex-col gap-[12px] sm:hidden px-[16px]'>
+                {todos?.map((todo) => (
+                  <Fragment key={todo.id}>
+                    <TodoCard todo={todo} />
+                    <If condition={todo.isExpanded}>
+                      <Then>
+                        {todo.children?.map((child) => (
+                          <div
+                            key={child.id}
+                            className='flex items-center gap-[4px]'>
+                            <Icon
+                              name='reply'
+                              className='text-[16px]'
+                            />
+                            <TodoCard
+                              todo={child}
+                              parent={todo}
+                            />
+                          </div>
+                        ))}
+                      </Then>
+                    </If>
+                  </Fragment>
+                ))}
+                <If condition={!isTodosLoading && todos && (total ?? 0) > todos.length}>
+                  <div
+                    ref={nextLoaderEl}
+                    className='text-center | py-[6px]'>
+                    <UISpinner />
+                  </div>
+                </If>
+              </div>
+            </Else>
+          </If>
+        </Else>
+      </If>
     </>
   )
 }
 
 function TodoCard(props: { todo: TodoWithChildren; parent?: TodoWithChildren }) {
   const [cookies] = useCookies()
-  const expandRow = useTodosPageStore((state) => state.expandRow)
-
   const searchParams = useSearchParams()
+
+  const expandRow = useTodosPageStore((state) => state.expandRow)
   const getTagsById = useTagsStore((s) => s.getTagsById)
 
   const isFiltered =
     !!searchParams.get('tags') || !!searchParams.get('status') || !!searchParams.get('searchText')
 
-  const isShowBadge = isFiltered ? true : !props.todo.parentId
+  const isShowBadge = isFiltered || !props.todo.parentId
 
   let bgColor = 'shadow-slate-200'
   if (props.todo.status === 'done') bgColor = 'shadow-green-200'
@@ -118,31 +131,34 @@ function TodoCard(props: { todo: TodoWithChildren; parent?: TodoWithChildren }) 
         bgColor,
       ])}>
       <div className='flex items-center gap-[12px] items-start'>
-        {isShowBadge && (
-          <Link
-            className='relative  | flex justify-center items-center | shrink-0 w-[36px] aspect-square | rounded-full | font-[600] text-[14px] | shadow-sm'
-            href={{
-              pathname: '/todos',
-              query: {
-                ...Object.fromEntries(searchParams),
-                todoTag: props.todo.id,
-              },
-            }}
-            style={{
-              background:
-                cookies['x-theme'] === 'dark'
-                  ? `${tag?.color ? (TAG_COLORS[tag.color]?.dark ?? '#000000') : '#000000'}`
-                  : `${tag?.color ? `${TAG_COLORS[tag.color]?.white ?? '#000000'}24` : '#00000024'}`,
-              color:
-                cookies['x-theme'] === 'dark'
-                  ? 'white'
-                  : tag?.color
-                    ? (TAG_COLORS[tag?.color]?.white ?? '#000000')
-                    : '#000000',
-            }}>
-            {tag?.label?.slice(0, 1) ?? 'M'}
-          </Link>
-        )}
+        <If condition={isShowBadge}>
+          <Then>
+            <Link
+              className='relative  | flex justify-center items-center | shrink-0 w-[36px] aspect-square | rounded-full | font-[600] text-[14px] | shadow-sm'
+              href={{
+                pathname: '/todos',
+                query: {
+                  ...Object.fromEntries(searchParams),
+                  todoTag: props.todo.id,
+                },
+              }}
+              style={{
+                background:
+                  cookies['x-theme'] === 'dark'
+                    ? `${tag?.color ? (TAG_COLORS[tag.color]?.dark ?? '#000000') : '#000000'}`
+                    : `${tag?.color ? `${TAG_COLORS[tag.color]?.white ?? '#000000'}24` : '#00000024'}`,
+                color:
+                  cookies['x-theme'] === 'dark'
+                    ? 'white'
+                    : tag?.color
+                      ? (TAG_COLORS[tag?.color]?.white ?? '#000000')
+                      : '#000000',
+              }}>
+              {tag?.label?.slice(0, 1) ?? 'M'}
+            </Link>
+          </Then>
+        </If>
+
         <Link
           href={{ pathname: `/todos/${props.todo.id}` }}
           className='flex flex-col gap-[0px] | overflow-hidden | w-full'>
@@ -154,14 +170,16 @@ function TodoCard(props: { todo: TodoWithChildren; parent?: TodoWithChildren }) 
           </p>
         </Link>
         <div className='flex items-center gap-[6px]'>
-          {props.todo.id && (
-            <TodosDropdown
-              hideDelete
-              todo={props.todo}
-              parent={props.parent}
-              position={{ x: 'RIGHT' }}
-            />
-          )}
+          <If condition={props.todo.id}>
+            <Then>
+              <TodosDropdown
+                hideDelete
+                todo={props.todo}
+                parent={props.parent}
+                position={{ x: 'RIGHT' }}
+              />
+            </Then>
+          </If>
         </div>
       </div>
 
@@ -174,23 +192,28 @@ function TodoCard(props: { todo: TodoWithChildren; parent?: TodoWithChildren }) 
         </div>
         <div className='flex items-center gap-[6px] | ml-auto'>
           <TodosPeriodText todo={props.todo} />
-          {!isFiltered && !props.todo.parentId && props.todo.childId && (
-            <button
-              type='button'
-              onClick={() => expandRow(props.todo)}>
-              {props.todo.isExpanded ? (
-                <Icon
-                  name='chevron-up'
-                  className='text-[20px]'
-                />
-              ) : (
-                <Icon
-                  name='chevron-down'
-                  className='text-[20px]'
-                />
-              )}
-            </button>
-          )}
+          <If condition={!isFiltered && !props.todo.parentId && props.todo.childId}>
+            <Then>
+              <button
+                type='button'
+                onClick={() => expandRow(props.todo)}>
+                <If condition={props.todo.isExpanded}>
+                  <Then>
+                    <Icon
+                      name='chevron-up'
+                      className='text-[20px]'
+                    />
+                  </Then>
+                  <Else>
+                    <Icon
+                      name='chevron-down'
+                      className='text-[20px]'
+                    />
+                  </Else>
+                </If>
+              </button>
+            </Then>
+          </If>
         </div>
       </div>
     </div>

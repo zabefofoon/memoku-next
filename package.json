@@ -29,6 +29,7 @@
     "react": "19.1.0",
     "react-cookie": "^8.0.1",
     "react-dom": "19.1.0",
+    "react-if": "^4.1.6",
     "react-transition-group": "^4.4.5",
     "recharts": "^3.2.1",
     "short-unique-id": "^5.3.2",
