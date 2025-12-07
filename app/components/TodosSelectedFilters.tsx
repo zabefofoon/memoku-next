@@ -1,7 +1,6 @@
 'use client'
 
 import { FILTER_STATUS, STATUS_COLORS, TAG_COLORS } from '@/const'
-import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCookies } from 'react-cookie'
 import { Todo } from '../models/Todo'
@@ -16,10 +15,8 @@ export default function TodosTagsFilter() {
 
   const tags = useTagsStore((s) => s.tags)
 
-  const sorts = [
-    { value: undefined, label: '등록순' },
-    { value: 'recent', label: '최근 수정 순' },
-  ]
+  const statusQuery = searchParams.get('status')
+  const tagsQuery = searchParams.get('tags')
 
   const excludeStatus = (item: Todo['status']): void => {
     const urlParams = new URLSearchParams(searchParams.toString())
@@ -52,65 +49,40 @@ export default function TodosTagsFilter() {
   return (
     <div className='px-[12px] sm:p-0 | w-full overflow-auto scroll-hidden'>
       <div className='text-[12px] font-[700] | px-[2px] | flex items-center flex-nowrap sm:flex-wrap gap-[6px] sm:gap-[6px] | mb-[8px] sm:mb-[24px]'>
-        {sorts
-          .filter((sort) => (sort.value ?? '') === (searchParams.get('sort') ?? ''))
-          .map((sort) => (
-            <Link
-              key={sort.label}
-              href={`?${decodeURIComponent(searchParams.toString())}&filter=true`}
+        {FILTER_STATUS.filter(({ value }) => statusQuery?.split(',').includes(value)).map(
+          (status) => (
+            <button
+              key={status.value}
               className='rounded-full | bg-white | shadow-md'
-              scroll={false}>
+              onClick={() => excludeStatus(status.value)}>
               <span
-                className='px-[12px] | h-[32px] aspect-square | flex items-center justify-center gap-[4px] | rounded-full |  whitespace-nowrap'
+                className='px-[12px] | h-[32px] aspect-square | flex items-center justify-center gap-[4px] | rounded-full | whitespace-nowrap'
                 style={{
                   background:
                     cookies['x-theme'] === 'dark'
-                      ? STATUS_COLORS['created']?.dark
-                      : `${STATUS_COLORS['created'].white}24`,
+                      ? STATUS_COLORS[status.value]?.dark
+                      : `${STATUS_COLORS[status.value].white}24`,
                   color:
-                    cookies['x-theme'] === 'dark' ? 'white' : `${STATUS_COLORS['created'].white}`,
+                    cookies['x-theme'] === 'dark'
+                      ? 'white'
+                      : `${STATUS_COLORS[status.value].white}`,
                 }}>
                 <Icon
-                  name='sort'
+                  name={status.icon}
                   className='text-[16px]'
                 />
-                {sort.label}
+                {status.label}
+                <Icon
+                  name='close'
+                  className='text-[16px]'
+                />
               </span>
-            </Link>
-          ))}
-
-        {FILTER_STATUS.filter((status) =>
-          searchParams.get('status')?.split(',').includes(status.value)
-        ).map((status) => (
-          <button
-            key={status.value}
-            className='rounded-full | bg-white | shadow-md'
-            onClick={() => excludeStatus(status.value)}>
-            <span
-              className='px-[12px] | h-[32px] aspect-square | flex items-center justify-center gap-[4px] | rounded-full | whitespace-nowrap'
-              style={{
-                background:
-                  cookies['x-theme'] === 'dark'
-                    ? STATUS_COLORS[status.value]?.dark
-                    : `${STATUS_COLORS[status.value].white}24`,
-                color:
-                  cookies['x-theme'] === 'dark' ? 'white' : `${STATUS_COLORS[status.value].white}`,
-              }}>
-              <Icon
-                name={status.icon}
-                className='text-[16px]'
-              />
-              {status.label}
-              <Icon
-                name='close'
-                className='text-[16px]'
-              />
-            </span>
-          </button>
-        ))}
+            </button>
+          )
+        )}
 
         {tags
-          .filter((tag) => searchParams.get('tags')?.includes(tag.id))
+          .filter((tag) => tagsQuery?.includes(tag.id))
           .map((tag) => (
             <button
               key={tag.id}

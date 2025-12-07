@@ -5,7 +5,6 @@ import TodosCards from '@/app/components/TodosCards'
 import { TodosFilters } from '@/app/components/TodosFilters'
 import TodosSearch from '@/app/components/TodosSearch'
 import TodosSelectedFilters from '@/app/components/TodosSelectedFilters'
-import TodosTable from '@/app/components/TodosTable'
 import { TodosTagModal } from '@/app/components/TodosTagModal'
 import TodosTimeModal from '@/app/components/TodosTimeModal'
 import { GetTodosParams, Tag, Todo } from '@/app/models/Todo'
@@ -152,8 +151,7 @@ export default function Todos() {
         </div>
         <TodosSelectedFilters />
       </div>
-      {screenSize === 'desktop' && <TodosTable loadTodos={loadTodos} />}
-      {screenSize === 'mobile' && <TodosCards loadTodos={loadTodos} />}
+      <TodosCards loadTodos={loadTodos} />
     </div>
   )
 }

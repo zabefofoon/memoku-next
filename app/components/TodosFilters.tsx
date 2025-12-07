@@ -23,23 +23,15 @@ export function TodosFilters(props: Props) {
   const tags = useTagsStore((s) => s.tags)
   const searchParams = useSearchParams()
 
-  const [selectedSort, setSelectedSort] = useState<'recent'>()
   const [selectedStatus, setSelectedStatus] = useState<Todo['status'][]>([])
   const [selectedTags, setSelectedTags] = useState<Tag['id'][]>([])
 
-  const sort = searchParams.get('sort') as 'recent' | undefined
   const status = searchParams.get('status')
   const tagsQuery = searchParams.get('tags')
-
-  const sorts = [
-    { label: '등록 순', value: undefined },
-    { label: '최근 수정 순', value: 'recent' },
-  ] as const
 
   const apply = (): void => {
     const base: Record<string, string> = {}
     if (searchParams.get('searchText')) base.searchText = searchParams.get('searchText') as string
-    if (selectedSort) base.sort = selectedSort
     if (selectedStatus.length) base.status = selectedStatus.join(',')
     if (selectedTags.length) base.tags = selectedTags.join(',')
     const params = new URLSearchParams(base)
@@ -48,10 +40,9 @@ export function TodosFilters(props: Props) {
   }
 
   useEffect(() => {
-    setSelectedSort(sort || undefined)
     setSelectedStatus((status?.split(',') ?? []) as Todo['status'][])
     setSelectedTags(tagsQuery?.split(',') ?? [])
-  }, [sort, status, tagsQuery])
+  }, [status, tagsQuery])
 
   return (
     <UIBottomSheet
@@ -60,37 +51,6 @@ export function TodosFilters(props: Props) {
       close={() => props.close()}
       content={() => (
         <div className='flex flex-col gap-[24px] | py-[12px]'>
-          <div className='flex flex-col gap-[4px]'>
-            <p className='flex items-center gap-[2px] | text-gray-500 text-[13px]'>
-              <Icon name='sort' />
-              <span>정렬</span>
-            </p>
-            <div className='flex items-center gap-[8px] | text-[13px]'>
-              {sorts.map((sort) => (
-                <label
-                  key={sort.value ?? ''}
-                  className={etcUtil.classNames([
-                    'cursor-pointer | flex items-center gap-[8px] | py-[4px] px-[12px] | rounded-full | whitespace-nowrap',
-                    selectedSort === sort.value ? 'bg-indigo-500 | inset-shadow-sm' : 'shadow-md',
-                  ])}>
-                  <input
-                    type='radio'
-                    className={etcUtil.classNames([
-                      'checked:border-[2px] checked:border-white checked:bg-indigo-600 | w-[10px] h-[10px] | border border-gray-300 | cursor-pointer appearance-none rounded-full',
-                    ])}
-                    checked={sort.value === selectedSort}
-                    onChange={() => setSelectedSort(sort.value)}
-                  />
-                  <p
-                    className={etcUtil.classNames([
-                      selectedSort === sort.value ? 'text-white' : 'text-gray-400',
-                    ])}>
-                    {sort.label}
-                  </p>
-                </label>
-              ))}
-            </div>
-          </div>
           <div className='flex flex-col gap-[4px]'>
             <p className='flex items-center gap-[2px] | text-gray-500 text-[13px]'>
               <Icon name='run' />

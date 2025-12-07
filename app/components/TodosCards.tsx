@@ -38,7 +38,7 @@ export default function TodosCards(props: Props) {
     <If condition={isTodosLoading}>
       <Then>
         {() => (
-          <div className='sm:hidden | flex-1 h-full | py-[80px] px-[16px] | text-center'>
+          <div className='flex-1 h-full | py-[80px] px-[16px] | text-center'>
             <UISpinner />
           </div>
         )}
@@ -46,12 +46,12 @@ export default function TodosCards(props: Props) {
       <Else>
         <If condition={!todos?.length}>
           <Then>
-            <div className='sm:hidden | flex-1 h-full | py-[80px] px-[16px] | text-center'>
+            <div className='flex-1 h-full | py-[80px] px-[16px] | text-center'>
               <p className='text-[13px] opacity-70'>데이터가 없습니다.</p>
             </div>
           </Then>
           <Else>
-            <div className='flex flex-col gap-[12px] sm:hidden px-[16px]'>
+            <div className='grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-[12px] | px-[16px]'>
               {todos?.map((todo) => (
                 <Fragment key={todo.id}>
                   <TodoCard todo={todo} />
@@ -76,11 +76,13 @@ export default function TodosCards(props: Props) {
                 </Fragment>
               ))}
               <If condition={!isTodosLoading && todos && (total ?? 0) > todos.length}>
-                <div
-                  ref={nextLoaderEl}
-                  className='text-center | py-[6px]'>
-                  <UISpinner />
-                </div>
+                <Then>
+                  <div
+                    ref={nextLoaderEl}
+                    className='text-center | py-[6px]'>
+                    <UISpinner />
+                  </div>
+                </Then>
               </If>
             </div>
           </Else>
