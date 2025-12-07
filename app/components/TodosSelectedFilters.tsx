@@ -48,7 +48,7 @@ export default function TodosTagsFilter() {
 
   return (
     <div className='px-[12px] sm:p-0 | w-full overflow-auto scroll-hidden'>
-      <div className='text-[12px] font-[700] | px-[2px] | flex items-center flex-nowrap sm:flex-wrap gap-[6px] sm:gap-[6px] | mb-[8px] sm:mb-[24px]'>
+      <div className='empty:m-0 | text-[12px] font-[700] | px-[2px] | flex items-center flex-nowrap sm:flex-wrap gap-[6px] sm:gap-[6px] | mb-[8px] sm:mb-[24px]'>
         {FILTER_STATUS.filter(({ value }) => statusQuery?.split(',').includes(value)).map(
           (status) => (
             <button

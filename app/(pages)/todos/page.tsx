@@ -2,6 +2,9 @@
 
 import { Icon } from '@/app/components/Icon'
 import TodosCards from '@/app/components/TodosCards'
+import TodosCardsNextWeek from '@/app/components/TodosCardsNextWeek'
+import TodosCardsThisWeek from '@/app/components/TodosCardsThisWeek'
+import TodosCardsToday from '@/app/components/TodosCardsToday'
 import { TodosFilters } from '@/app/components/TodosFilters'
 import TodosSearch from '@/app/components/TodosSearch'
 import TodosSelectedFilters from '@/app/components/TodosSelectedFilters'
@@ -17,11 +20,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 export default function Todos() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const screenSize = useThemeStore((state) => state.screenSize)
 
+  const screenSize = useThemeStore((state) => state.screenSize)
   const todos = useTodosPageStore((state) => state.todos)
   const setTodos = useTodosPageStore((state) => state.setTodos)
   const loadTodosInStore = useTodosPageStore((state) => state.loadTodos)
+  const loadTodayTodosInStore = useTodosPageStore((state) => state.loadTodayTodos)
+  const loadThisWeekTodosInStore = useTodosPageStore((state) => state.loadThisWeekTodos)
+  const loadNextWeekTodosInStore = useTodosPageStore((state) => state.loadNextWeekTodos)
   const createTodoInStore = useTodosPageStore((state) => state.createTodo)
   const changeTagInStore = useTodosPageStore((state) => state.changeTag)
   const setPage = useTodosPageStore((state) => state.setPage)
@@ -48,6 +54,27 @@ export default function Todos() {
 
   const loadTodos = useCallback(
     (page = 0): void => {
+      loadTodayTodosInStore({
+        tags: tagsQuery?.split(','),
+        status: statusQuery ? (statusQuery?.split(',') as Todo['status'][]) : undefined,
+        searchText: searchQuery ?? '',
+        sort: (sortQuery ?? 'created') as GetTodosParams['sort'],
+        page,
+      })
+      loadThisWeekTodosInStore({
+        tags: tagsQuery?.split(','),
+        status: statusQuery ? (statusQuery?.split(',') as Todo['status'][]) : undefined,
+        searchText: searchQuery ?? '',
+        sort: (sortQuery ?? 'created') as GetTodosParams['sort'],
+        page,
+      })
+      loadNextWeekTodosInStore({
+        tags: tagsQuery?.split(','),
+        status: statusQuery ? (statusQuery?.split(',') as Todo['status'][]) : undefined,
+        searchText: searchQuery ?? '',
+        sort: (sortQuery ?? 'created') as GetTodosParams['sort'],
+        page,
+      })
       loadTodosInStore({
         tags: tagsQuery?.split(','),
         status: statusQuery ? (statusQuery?.split(',') as Todo['status'][]) : undefined,
@@ -56,7 +83,16 @@ export default function Todos() {
         page,
       })
     },
-    [loadTodosInStore, searchQuery, sortQuery, statusQuery, tagsQuery]
+    [
+      loadNextWeekTodosInStore,
+      loadThisWeekTodosInStore,
+      loadTodayTodosInStore,
+      loadTodosInStore,
+      searchQuery,
+      sortQuery,
+      statusQuery,
+      tagsQuery,
+    ]
   )
 
   const createTodo = async (): Promise<void> => {
@@ -74,6 +110,8 @@ export default function Todos() {
     let prevScrollTop = 0
 
     const handleScroll = (): void => {
+      if (screenSize === 'desktop') return
+
       const scrollEl = document.getElementById('scroll-el')
       const current = scrollEl?.scrollTop ?? 0
 
@@ -96,7 +134,7 @@ export default function Todos() {
   }, [searchQuery, statusQuery, tagsQuery, sortQuery, setPage, loadTodos])
 
   return (
-    <div className='flex flex-col | sm:max-h-full'>
+    <div className='flex flex-col'>
       <TodosFilters
         isShow={!!filterQuery}
         close={router.back}
@@ -151,7 +189,12 @@ export default function Todos() {
         </div>
         <TodosSelectedFilters />
       </div>
-      <TodosCards loadTodos={loadTodos} />
+      <div className='flex flex-col gap-[32px]'>
+        <TodosCardsToday />
+        <TodosCardsThisWeek />
+        <TodosCardsNextWeek />
+        <TodosCards loadTodos={loadTodos} />
+      </div>
     </div>
   )
 }

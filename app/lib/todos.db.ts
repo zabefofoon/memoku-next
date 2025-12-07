@@ -36,22 +36,119 @@ export const todosDB = {
 
     const isRoot = (t: Todo) => !t.parentId
 
+    const now = dayjs()
+
+    const todayStart = now.startOf('day').valueOf()
+    const todayEnd = now.endOf('day').valueOf()
+
+    const tomorrowStart = dayjs(todayStart).add(1, 'day').valueOf()
+    const weekEnd = now.endOf('week').valueOf()
+
+    const nextWeekStart = now.add(1, 'week').startOf('week')
+    const nextWeekEnd = nextWeekStart.endOf('week')
+    const nextWeekStartMs = nextWeekStart.valueOf()
+    const nextWeekEndMs = nextWeekEnd.valueOf()
+
+    const weekdayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as WeekDay[]
+
+    const isTodayTodo = (todo: Todo): boolean => {
+      const createdAt = todo.created ?? 0
+      const start = todo.start ?? null
+      const end = todo.end ?? null
+      const days = todo.days as WeekDay[] | undefined
+
+      // getTodayTodos와 동일한 로직 복사
+      if (days && days.length > 0) {
+        const todayWeekday = now.day()
+        const daysIndex = weekdayKeys[todayWeekday]
+        return days.includes(daysIndex)
+      }
+
+      if (end != null && end < todayStart && todo.status !== 'done') return true
+
+      if (start != null || end != null) {
+        const s = start ?? createdAt
+        const e = end ?? todayEnd
+        if (s <= todayEnd && e >= todayStart) return true
+      }
+
+      if (createdAt >= todayStart && createdAt <= todayEnd) return true
+
+      return false
+    }
+
+    const isThisWeekExceptToday = (todo: Todo): boolean => {
+      const createdAt = todo.created ?? 0
+      const start = todo.start ?? null
+      const end = todo.end ?? null
+      const days = todo.days as WeekDay[] | undefined
+
+      // getThisWeekTodosWithoutToday 와 동일한 로직 복사
+      if (days && days.length > 0) {
+        const todayWeekday = now.day()
+        const daysIndex = weekdayKeys[todayWeekday]
+        return !days.includes(daysIndex)
+      }
+
+      if (start != null || end != null) {
+        const s = start ?? createdAt
+        const e = end ?? weekEnd
+        if (s <= weekEnd && e >= tomorrowStart) return true
+      }
+
+      if (createdAt >= tomorrowStart && createdAt <= weekEnd) return true
+
+      return false
+    }
+
+    const isNextWeekTodo = (todo: Todo): boolean => {
+      const createdAt = todo.created ?? 0
+      const start = todo.start ?? null
+      const end = todo.end ?? null
+      const days = todo.days as WeekDay[] | undefined
+
+      // getNextWeekTodos 와 동일한 로직 복사
+      if (days?.length) return false
+
+      if (start != null || end != null) {
+        const s = start ?? createdAt
+        const e = end ?? nextWeekEndMs
+        if (s <= nextWeekEndMs && e >= nextWeekStartMs) return true
+      }
+
+      if (createdAt >= nextWeekStartMs && createdAt <= nextWeekEndMs) return true
+
+      return false
+    }
+
+    // 오늘 / 이번주 / 다음주를 모두 제외하는 필터
+    const excludeDateRanges = (t: Todo) =>
+      !isTodayTodo(t) && !isThisWeekExceptToday(t) && !isNextWeekTodo(t)
+
+    // ▼ 기존 정렬 로직 유지
     let coll =
       params?.sort === 'recent'
         ? db.todos.orderBy('modified').reverse()
         : db.todos.orderBy('created').reverse()
 
+    // 기존처럼: 아무 필터도 없으면 root만 보여주기 + 날짜 범위 제외
     if (!tags && !statuses && !query) {
-      coll = coll.and(isRoot)
+      coll = coll.and((t) => isRoot(t) && excludeDateRanges(t))
     } else {
       if (tags?.length) coll = coll.and((t) => tags.includes(t.tagId ?? ''))
-      if (statuses)
+
+      if (statuses) {
         coll = coll.and(({ status }) =>
-          status?.includes('created')
+          statuses?.includes('created')
             ? !status || status === 'created' || statuses.includes(status)
             : statuses.includes(status)
         )
+      }
+
       if (query) coll = coll.and((t) => (t.description ?? '').toLowerCase().includes(query))
+
+      // 여기서도 날짜 범위 제외
+      coll = coll.and(excludeDateRanges)
     }
 
     const total = await coll.count()
@@ -63,12 +160,172 @@ export const todosDB = {
 
     return { todos, total }
   },
-  getTodayTodos: async (): Promise<Todo[]> => {
-    const start = dayjs().startOf('day').valueOf()
-    const end = dayjs().endOf('day').valueOf()
 
-    return db.todos.where('modified').between(start, end, true, true).limit(5).reverse().toArray()
+  getTodayTodos: async (params?: GetTodosParams): Promise<{ total: number; todos: Todo[] }> => {
+    const now = dayjs()
+    const todayStart = now.startOf('day').valueOf()
+    const todayEnd = now.endOf('day').valueOf()
+
+    const tags = params?.tags?.filter(Boolean)
+    const statuses = params?.status?.filter(Boolean)
+    const searchText = params?.searchText?.trim().toLowerCase()
+
+    const isTodayTodo = (todo: Todo): boolean => {
+      const createdAt = todo.created ?? 0
+      const start = todo.start ?? null
+      const end = todo.end ?? null
+      const days = todo.days as WeekDay[] | undefined
+
+      if (days && days.length > 0) {
+        const todayWeekday = now.day()
+
+        const daysIndex = (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as WeekDay[])[
+          todayWeekday
+        ]
+
+        return days.includes(daysIndex)
+      }
+
+      if (end != null && end < todayStart && todo.status !== 'done') return true
+
+      if (start != null || end != null) {
+        const s = start ?? createdAt
+        const e = end ?? todayEnd
+        if (s <= todayEnd && e >= todayStart) return true
+      }
+
+      if (createdAt >= todayStart && createdAt <= todayEnd) return true
+
+      return false
+    }
+
+    const collection = db.todos.filter((todo: Todo) => {
+      if (todo.parentId) return false
+      if (tags?.length && !tags.includes(todo.tagId ?? '')) return false
+      if (statuses?.length && !statuses.includes(todo.status || 'created')) return false
+      if (searchText) {
+        const description = (todo.description ?? '').toLowerCase()
+        if (!description.includes(searchText)) return false
+      }
+
+      return isTodayTodo(todo)
+    })
+
+    const [todos, total] = await Promise.all([collection.toArray(), collection.count()])
+
+    return { todos, total }
   },
+
+  getThisWeekTodosWithoutToday: async (
+    params?: GetTodosParams
+  ): Promise<{ total: number; todos: Todo[] }> => {
+    const now = dayjs()
+
+    const todayStart = now.startOf('day').valueOf()
+
+    const tomorrowStart = dayjs(todayStart).add(1, 'day').valueOf()
+    const weekEnd = now.endOf('week').valueOf()
+
+    const tags = params?.tags?.filter(Boolean)
+    const statuses = params?.status?.filter(Boolean)
+    const searchText = params?.searchText?.trim().toLowerCase()
+
+    const isThisWeekExceptToday = (todo: Todo): boolean => {
+      const createdAt = todo.created ?? 0
+      const start = todo.start ?? null
+      const end = todo.end ?? null
+      const days = todo.days as WeekDay[] | undefined
+
+      if (days && days.length > 0) {
+        const todayWeekday = now.day()
+        const daysIndex = (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as WeekDay[])[
+          todayWeekday
+        ]
+
+        return !days.includes(daysIndex)
+      }
+
+      if (start != null || end != null) {
+        const s = start ?? createdAt
+        const e = end ?? weekEnd
+        if (s <= weekEnd && e >= tomorrowStart) return true
+      }
+
+      if (createdAt >= tomorrowStart && createdAt <= weekEnd) return true
+
+      return false
+    }
+
+    const collection = db.todos.filter((todo: Todo) => {
+      if (todo.parentId) return false
+      if (tags?.length && !tags.includes(todo.tagId ?? '')) return false
+
+      if (statuses?.length && !statuses.includes(todo.status || 'created')) return false
+
+      if (searchText) {
+        const description = (todo.description ?? '').toLowerCase()
+        if (!description.includes(searchText)) return false
+      }
+
+      return isThisWeekExceptToday(todo)
+    })
+
+    const [todos, total] = await Promise.all([collection.toArray(), collection.count()])
+
+    return { todos, total }
+  },
+
+  getNextWeekTodos: async (params?: GetTodosParams): Promise<{ total: number; todos: Todo[] }> => {
+    const now = dayjs()
+
+    const nextWeekStart = now.add(1, 'week').startOf('week')
+    const nextWeekEnd = nextWeekStart.endOf('week')
+
+    const nextWeekStartMs = nextWeekStart.valueOf()
+    const nextWeekEndMs = nextWeekEnd.valueOf()
+
+    const tags = params?.tags?.filter(Boolean)
+    const statuses = params?.status?.filter(Boolean)
+    const searchText = params?.searchText?.trim().toLowerCase()
+
+    const isNextWeekTodo = (todo: Todo): boolean => {
+      const createdAt = todo.created ?? 0
+      const start = todo.start ?? null
+      const end = todo.end ?? null
+      const days = todo.days as WeekDay[] | undefined
+
+      if (days?.length) return false
+
+      if (start != null || end != null) {
+        const s = start ?? createdAt
+        const e = end ?? nextWeekEndMs
+        if (s <= nextWeekEndMs && e >= nextWeekStartMs) return true
+      }
+
+      if (createdAt >= nextWeekStartMs && createdAt <= nextWeekEndMs) return true
+
+      return false
+    }
+
+    const collection = db.todos.filter((todo: Todo) => {
+      if (todo.parentId) return false
+      if (tags?.length && !tags?.includes(todo.tagId ?? '')) return false
+
+      if (statuses?.length && !statuses.includes(todo.status || 'created')) return false
+
+      if (searchText) {
+        const description = (todo.description ?? '').toLowerCase()
+        if (!description.includes(searchText)) return false
+      }
+
+      return isNextWeekTodo(todo)
+    })
+
+    const [todos, total] = await Promise.all([collection.toArray(), collection.count()])
+
+    return { todos, total }
+  },
+
   getRecentTodos: (): Promise<Todo[]> => {
     return db.todos.orderBy('modified').limit(5).reverse().toArray()
   },

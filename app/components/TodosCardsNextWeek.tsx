@@ -1,37 +1,19 @@
-import { Fragment, useEffect, useRef } from 'react'
+import { Fragment } from 'react'
 import { Else, If, Then } from 'react-if'
 import { useTodosPageStore } from '../stores/todosPage.store'
 import { Icon } from './Icon'
 import { TodoCard } from './TodosCard'
 import UISpinner from './UISpinner'
 
-interface Props {
-  loadTodos: (page: number) => void
-}
+export default function TodosCardsNextWeek() {
+  const isTodosLoading = useTodosPageStore((state) => state.isNextWeekTodosLoading)
+  const todos = useTodosPageStore((state) => state.nextWeekTodos)
 
-export default function TodosCards(props: Props) {
-  const isTodosNextLoading = useTodosPageStore((state) => state.isTodosNextLoading)
-  const isTodosLoading = useTodosPageStore((state) => state.isTodosLoading)
-  const page = useTodosPageStore((state) => state.page)
-  const setPage = useTodosPageStore((state) => state.setPage)
-  const todos = useTodosPageStore((state) => state.todos)
-  const total = useTodosPageStore((state) => state.total)
-
-  const nextLoaderEl = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      const isLoadable = entry.isIntersecting && !isTodosNextLoading && !isTodosLoading
-      if (isLoadable) setPage(page + 1, props.loadTodos)
-    })
-    if (nextLoaderEl.current) observer.observe(nextLoaderEl.current)
-
-    return () => observer.disconnect()
-  }, [isTodosLoading, isTodosNextLoading, page, props.loadTodos, setPage])
+  if (!todos?.length) return null
 
   return (
     <div>
-      <p className='px-[16px] mb-[16px] | text-[15px] text-gray-600'>전체</p>
+      <p className='px-[16px] mb-[16px] | text-[15px] text-gray-600'>다음주 할 일</p>
       <If condition={isTodosLoading}>
         <Then>
           {() => (
@@ -72,15 +54,6 @@ export default function TodosCards(props: Props) {
                     </If>
                   </Fragment>
                 ))}
-                <If condition={!isTodosLoading && todos && (total ?? 0) > todos.length}>
-                  <Then>
-                    <div
-                      ref={nextLoaderEl}
-                      className='text-center | py-[6px]'>
-                      <UISpinner />
-                    </div>
-                  </Then>
-                </If>
               </div>
             </Else>
           </If>

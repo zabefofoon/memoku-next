@@ -7,19 +7,36 @@ import { useSheetStore } from './sheet.store'
 
 interface TodosPageStore {
   page: number
+  isTodosLoading: boolean
+  isTodosNextLoading: boolean
+  isTodayTodosLoading: boolean
+  isThisWeekTodosLoading: boolean
+  isNextWeekTodosLoading: boolean
+  total: number
+  todos: TodoWithChildren[] | undefined
+  todayTodos: TodoWithChildren[] | undefined
+  thisWeekTodos: TodoWithChildren[] | undefined
+  nextWeekTodos: TodoWithChildren[] | undefined
+
   setPage: (page: number, cb?: (page: number) => void) => void
 
-  isTodosLoading: boolean
   setIsTodosLoading: (isTodosLoading: boolean) => void
-
-  isTodosNextLoading: boolean
   setIsTodosNextLoading: (isTodosNextLoading: boolean) => void
+  setIsTodayTodosLoading: (isTodosLoading: boolean) => void
+  setIsWeekTodosLoading: (isTodosLoading: boolean) => void
 
-  total: number
   setTotal: (total: number) => void
 
-  todos: TodoWithChildren[] | undefined
   setTodos: (
+    updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+  ) => void
+  setTodayTodos: (
+    updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+  ) => void
+  setThisWeekTodos: (
+    updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+  ) => void
+  setNextWeekTodos: (
     updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
   ) => void
 
@@ -29,7 +46,6 @@ interface TodosPageStore {
     status: TodoWithChildren['status'],
     parentId?: string
   ) => Promise<void>
-
   changeTag: (todo: TodoWithChildren, tag: Tag) => Promise<void>
   updateTime: (
     todo: TodoWithChildren,
@@ -42,14 +58,23 @@ interface TodosPageStore {
   ) => Promise<void>
   createTodo: () => Promise<TodoWithChildren>
   loadTodos: (params: GetTodosParams) => Promise<void>
+  loadTodayTodos: (params: GetTodosParams) => Promise<void>
+  loadThisWeekTodos: (params: GetTodosParams) => Promise<void>
+  loadNextWeekTodos: (params: GetTodosParams) => Promise<void>
 }
 
 export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
   page: 0,
   isTodosLoading: false,
   isTodosNextLoading: false,
+  isTodayTodosLoading: false,
+  isThisWeekTodosLoading: false,
+  isNextWeekTodosLoading: false,
   total: 0,
   todos: undefined,
+  todayTodos: undefined,
+  thisWeekTodos: undefined,
+  nextWeekTodos: undefined,
 
   setPage: (page: number, cb?: (page: number) => void): void => {
     set({ page })
@@ -58,6 +83,14 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
 
   setIsTodosLoading: (isTodosLoading: boolean): void => {
     set({ isTodosLoading })
+  },
+
+  setIsTodayTodosLoading: (isTodayTodosLoading: boolean): void => {
+    set({ isTodayTodosLoading })
+  },
+
+  setIsWeekTodosLoading: (isThisWeekTodosLoading: boolean): void => {
+    set({ isThisWeekTodosLoading })
   },
 
   setIsTodosNextLoading: (isTodosNextLoading: boolean): void => {
@@ -75,6 +108,27 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
       todos: typeof updater === 'function' ? updater(state.todos) : updater,
     })),
 
+  setTodayTodos: (
+    updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+  ) =>
+    set((state) => ({
+      todayTodos: typeof updater === 'function' ? updater(state.todayTodos) : updater,
+    })),
+
+  setThisWeekTodos: (
+    updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+  ) =>
+    set((state) => ({
+      thisWeekTodos: typeof updater === 'function' ? updater(state.thisWeekTodos) : updater,
+    })),
+
+  setNextWeekTodos: (
+    updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+  ) =>
+    set((state) => ({
+      nextWeekTodos: typeof updater === 'function' ? updater(state.nextWeekTodos) : updater,
+    })),
+
   expandRow: async (todo: TodoWithChildren): Promise<void> => {
     let children = todo.children
     if (!todo.isExpanded && todo.childId && !todo.children) {
@@ -87,6 +141,7 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
       )
     )
   },
+
   updateStatus: async (
     todo: TodoWithChildren,
     status: TodoWithChildren['status'],
@@ -114,6 +169,7 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
       })
     )
   },
+
   changeTag: async (todo: TodoWithChildren, tag: Tag): Promise<void> => {
     const modified = await todosDB.updateTag(todo.id, tag.id)
 
@@ -135,6 +191,7 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
       })
     )
   },
+
   updateTime: async (
     todo: TodoWithChildren,
     values: {
@@ -168,6 +225,7 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
       })
     )
   },
+
   createTodo: async (): Promise<TodoWithChildren> => {
     const todo = await todosDB.postDescription('')
     todosDB.updateDirties([todo.id], true)
@@ -189,6 +247,7 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
     }
     return todo
   },
+
   loadTodos: async (params: GetTodosParams): Promise<void> => {
     if (get().isTodosLoading) return
     if (get().isTodosNextLoading) return
@@ -204,5 +263,32 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
 
     get().setIsTodosLoading(false)
     get().setIsTodosNextLoading(false)
+  },
+
+  async loadTodayTodos(params: GetTodosParams): Promise<void> {
+    const { setTodayTodos, setIsTodayTodosLoading } = get()
+
+    setIsTodayTodosLoading(true)
+    const res = await todosDB.getTodayTodos(params)
+    setTodayTodos(res.todos)
+    setIsTodayTodosLoading(false)
+  },
+
+  async loadThisWeekTodos(params: GetTodosParams): Promise<void> {
+    const { setThisWeekTodos, setIsWeekTodosLoading } = get()
+
+    setIsWeekTodosLoading(true)
+    const res = await todosDB.getThisWeekTodosWithoutToday(params)
+    setThisWeekTodos(res.todos)
+    setIsWeekTodosLoading(false)
+  },
+
+  async loadNextWeekTodos(params: GetTodosParams): Promise<void> {
+    const { setNextWeekTodos, setIsWeekTodosLoading } = get()
+
+    setIsWeekTodosLoading(true)
+    const res = await todosDB.getNextWeekTodos(params)
+    setNextWeekTodos(res.todos)
+    setIsWeekTodosLoading(false)
   },
 }))
