@@ -1,10 +1,11 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { If, Then } from 'react-if'
 import { todosDB } from '../lib/todos.db'
 import { Todo } from '../models/Todo'
+import { useTodosPageStore } from '../stores/todosPage.store'
 import etcUtil from '../utils/etc.util'
 import { TodoCard } from './TodosCard'
 import UIBottomSheet from './UIBottomSheet'
@@ -15,6 +16,8 @@ interface Props {
 }
 
 export function TodosChildren({ isShow, close }: Props) {
+  const router = useRouter()
+  const createTodo = useTodosPageStore((s) => s.createTodo)
   const searchParams = useSearchParams()
   const rootQuery = searchParams.get('children')
 
@@ -62,6 +65,17 @@ export function TodosChildren({ isShow, close }: Props) {
             </Then>
           </If>
         </div>
+      )}
+      ok={() => (
+        <button
+          className='rounded-md bg-indigo-500 py-[12px]'
+          onClick={() =>
+            createTodo(children?.at(-1)?.id || todo?.id).then(({ id }) =>
+              router.push(`/todos/${id}`)
+            )
+          }>
+          <p className='text-white text-[15px] font-[700]'>하위 일 추가하기</p>
+        </button>
       )}
     />
   )

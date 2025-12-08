@@ -2,7 +2,6 @@ import { CreatedSeriesPoint, todosDB } from '@/app/lib/todos.db'
 import dayjs from 'dayjs'
 import { ReactElement, useCallback, useEffect, useState } from 'react'
 import { CartesianGrid, ComposedChart, Line, ResponsiveContainer, XAxis } from 'recharts'
-import { ActiveDotProps } from 'recharts/types/util/types'
 
 export default function HomeSequel() {
   const [data, setData] = useState<
@@ -85,8 +84,7 @@ export default function HomeSequel() {
             dataKey='createdMA'
             name='Created (7d MA)'
             isAnimationActive={false}
-            dot={(props: ActiveDotProps): ReactElement<SVGElement> => {
-              const { cx, cy, index } = props
+            dot={({ cx, cy, index }): ReactElement<SVGElement> => {
               return (
                 <circle
                   cx={cx}

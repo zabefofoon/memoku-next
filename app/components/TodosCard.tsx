@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { Case, Default, Else, If, Switch, Then } from 'react-if'
 import { TodoWithChildren } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
+import { useTodosPageStore } from '../stores/todosPage.store'
 import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
 import UIDropdown from './UIDropdown'
@@ -20,6 +21,7 @@ export function TodoCard({
   const getTagsById = useTagsStore((s) => s.getTagsById)
   const router = useRouter()
   const searchParams = useSearchParams()
+  const createTodo = useTodosPageStore((s) => s.createTodo)
 
   const [isOpen, setOpen] = useState(false)
 
@@ -56,6 +58,15 @@ export function TodoCard({
       className='block | bg-[rgb(248,248,251)] | rounded-xl | p-[12px]'
       style={{
         boxShadow: '2px 2px 0 var(--color-gray-200), -2px -2px 0 white',
+      }}
+      onClick={(event) => {
+        if (todo.childId && !hideChildren) {
+          event.preventDefault()
+          const urlParams = new URLSearchParams(searchParams.toString())
+          router.push(`?${decodeURIComponent(urlParams.toString())}&children=${todo.id}`, {
+            scroll: false,
+          })
+        }
       }}>
       {/* 태그 */}
       <div className='flex items-center gap-[4px]'>
@@ -220,13 +231,15 @@ export function TodoCard({
                 </button>
               </Then>
               <Else>
-                <div className='flex items-center | text-gray-400'>
+                <button
+                  className='flex items-center | text-gray-400'
+                  onClick={() => createTodo(todo.id).then(({ id }) => router.push(`/todos/${id}`))}>
                   <Icon
                     name='plus'
                     className='text-[16px]'
                   />
                   <p className='text-[11px]'>하위 일 추가</p>
-                </div>
+                </button>
               </Else>
             </If>
             {/* 하위 일 더 보기 */}
@@ -260,7 +273,15 @@ export function TodoCard({
                     className='px-[6px] py-[4px] | flex items-center justify-start gap-[6px] | hover:bg-slate-50 hover:dark:bg-zinc-600'
                     onClick={(event) => {
                       event.preventDefault()
-                      toggle(false, () => router.push(`/todos/${todo.id}`, { scroll: false }))
+                      toggle(false, () => {
+                        const urlParams = new URLSearchParams(searchParams.toString())
+                        router.push(
+                          `?${decodeURIComponent(urlParams.toString())}&todoStatus=${todo.id}`,
+                          {
+                            scroll: false,
+                          }
+                        )
+                      })
                     }}>
                     <Icon
                       name='run'
@@ -273,7 +294,15 @@ export function TodoCard({
                     className='px-[6px] py-[4px] | flex items-center justify-start gap-[6px] | hover:bg-slate-50 hover:dark:bg-zinc-600'
                     onClick={(event) => {
                       event.preventDefault()
-                      toggle(false, () => router.push(`/todos/${todo.id}`, { scroll: false }))
+                      toggle(false, () => {
+                        const urlParams = new URLSearchParams(searchParams.toString())
+                        router.push(
+                          `?${decodeURIComponent(urlParams.toString())}&todoTag=${todo.id}`,
+                          {
+                            scroll: false,
+                          }
+                        )
+                      })
                     }}>
                     <Icon
                       name='tag'

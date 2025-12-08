@@ -9,6 +9,7 @@ import { TodosChildren } from '@/app/components/TodosChildren'
 import { TodosFilters } from '@/app/components/TodosFilters'
 import TodosSearch from '@/app/components/TodosSearch'
 import TodosSelectedFilters from '@/app/components/TodosSelectedFilters'
+import { TodosStatusModal } from '@/app/components/TodosStatusModal'
 import { TodosTagModal } from '@/app/components/TodosTagModal'
 import TodosTimeModal from '@/app/components/TodosTimeModal'
 import { GetTodosParams, Tag, Todo } from '@/app/models/Todo'
@@ -43,6 +44,7 @@ export default function Todos() {
   const parentQuery = searchParams.get('parent')
   const timeQuery = searchParams.get('time')
   const todoTagQuery = searchParams.get('todoTag')
+  const todoStatusQuery = searchParams.get('todoStatus')
   const filterQuery = searchParams.get('filter')
   const childrenQuery = searchParams.get('children')
 
@@ -137,6 +139,10 @@ export default function Todos() {
 
   return (
     <div className='flex flex-col'>
+      <TodosStatusModal
+        isShow={!!todoStatusQuery}
+        close={router.back}
+      />
       <TodosChildren
         isShow={!!childrenQuery}
         close={router.back}

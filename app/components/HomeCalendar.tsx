@@ -10,13 +10,20 @@ import {
   MoreLinkAction,
 } from '@fullcalendar/core/index.js'
 import dayGridPlugin from '@fullcalendar/daygrid'
-import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { useCookies } from 'react-cookie'
 import { useThemeStore } from '../stores/theme.store'
+
+import type FullCalendarComponent from '@fullcalendar/react'
+import dynamic from 'next/dynamic'
+
+const FullCalendar = dynamic(() => import('@fullcalendar/react'), {
+  ssr: false,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+}) as any
 
 export default function HomeCalendar() {
   const [cookies] = useCookies()
@@ -25,7 +32,7 @@ export default function HomeCalendar() {
   const getTagsById = useTagsStore((s) => s.getTagsById)
   const router = useRouter()
 
-  const calendarRef = useRef<FullCalendar>(null)
+  const calendarRef = useRef<FullCalendarComponent>(null)
 
   const [events, setEvents] = useState<EventSourceInput>([])
 

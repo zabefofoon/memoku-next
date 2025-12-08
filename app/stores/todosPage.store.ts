@@ -56,7 +56,7 @@ interface TodosPageStore {
     },
     parentId?: string
   ) => Promise<void>
-  createTodo: () => Promise<TodoWithChildren>
+  createTodo: (parentId?: string) => Promise<TodoWithChildren>
   loadTodos: (params: GetTodosParams) => Promise<void>
   loadTodayTodos: (params: GetTodosParams) => Promise<void>
   loadThisWeekTodos: (params: GetTodosParams) => Promise<void>
@@ -226,8 +226,8 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
     )
   },
 
-  createTodo: async (): Promise<TodoWithChildren> => {
-    const todo = await todosDB.postDescription('')
+  createTodo: async (parentId?: string): Promise<TodoWithChildren> => {
+    const todo = await todosDB.postDescription('', parentId)
     todosDB.updateDirties([todo.id], true)
 
     const fileId = useSheetStore.getState().fileId
@@ -237,6 +237,7 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
           id: todo.id,
           created: todo.created,
           modified: todo.modified,
+          parent: parentId,
         })
         .then((res) => {
           if (res.ok) {

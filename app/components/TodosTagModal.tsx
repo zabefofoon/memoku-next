@@ -23,7 +23,7 @@ export function TodosTagModal(props: Props) {
 
   return (
     <UIModal
-      header={() => <span>태그선택</span>}
+      header={() => <span>태그변경</span>}
       open={props.isShow ?? false}
       close={() => props.close()}
       content={() => (

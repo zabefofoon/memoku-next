@@ -8,7 +8,6 @@ const nextConfig: NextConfig = {
   /* config options here */
   experimental: {
     viewTransition: true,
-    reactCompiler: true,
   },
 }
 
