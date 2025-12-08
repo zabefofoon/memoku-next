@@ -79,7 +79,7 @@ export default function TodosTimeModal({ isShow, todo, updateTime, close }: Prop
     setStart({ date: startDate, hour: startHour, minute: startMinute })
     setEnd({ date: endtDate, hour: endtHour, minute: endinute })
     setDays(todo.days ?? [])
-  }, [])
+  }, [todo])
 
   const setDate = (value: Date): void => {
     if (mode === 'start') {

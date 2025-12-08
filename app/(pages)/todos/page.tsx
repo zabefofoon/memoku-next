@@ -5,6 +5,7 @@ import TodosCards from '@/app/components/TodosCards'
 import TodosCardsNextWeek from '@/app/components/TodosCardsNextWeek'
 import TodosCardsThisWeek from '@/app/components/TodosCardsThisWeek'
 import TodosCardsToday from '@/app/components/TodosCardsToday'
+import { TodosChildren } from '@/app/components/TodosChildren'
 import { TodosFilters } from '@/app/components/TodosFilters'
 import TodosSearch from '@/app/components/TodosSearch'
 import TodosSelectedFilters from '@/app/components/TodosSelectedFilters'
@@ -43,6 +44,7 @@ export default function Todos() {
   const timeQuery = searchParams.get('time')
   const todoTagQuery = searchParams.get('todoTag')
   const filterQuery = searchParams.get('filter')
+  const childrenQuery = searchParams.get('children')
 
   const timeTargetTodo = useMemo(
     () =>
@@ -127,7 +129,7 @@ export default function Todos() {
       el?.removeEventListener('scroll', handleScroll)
       setTodos(() => undefined)
     }
-  }, [setTodos])
+  }, [setTodos, screenSize])
 
   useEffect(() => {
     setPage(0, loadTodos)
@@ -135,6 +137,10 @@ export default function Todos() {
 
   return (
     <div className='flex flex-col'>
+      <TodosChildren
+        isShow={!!childrenQuery}
+        close={router.back}
+      />
       <TodosFilters
         isShow={!!filterQuery}
         close={router.back}

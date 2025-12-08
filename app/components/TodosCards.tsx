@@ -62,10 +62,7 @@ export default function TodosCards(props: Props) {
                               name='reply'
                               className='text-[16px]'
                             />
-                            <TodoCard
-                              todo={child}
-                              parent={todo}
-                            />
+                            <TodoCard todo={child} />
                           </div>
                         ))}
                       </Then>

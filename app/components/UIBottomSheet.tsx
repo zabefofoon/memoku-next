@@ -46,7 +46,7 @@ export default function UIBottomSheet({ open, close, header, content, cancel, ok
           onClick={close}
           className='fixed inset-0 bg-black/50 | w-full h-full'
         />
-        <div className='flex justify-center | sm:py-[32px] | w-full max-h-full sm:max-w-[320px] overflow-auto | scroll-hidden'>
+        <div className='flex justify-center | sm:py-[32px] | w-full max-h-[90%] sm:max-w-[320px] overflow-auto | scroll-hidden'>
           <div
             className={etcUtil.classNames([
               'bottom-sheet-card | flex flex-col gap-[12px] | relative z-10 | w-full | p-[16px] | rounded-t-4xl sm:rounded-xl bg-white dark:bg-zinc-800 shadow-xl',
@@ -63,7 +63,7 @@ export default function UIBottomSheet({ open, close, header, content, cancel, ok
             <div className='mb-[12px] | flex-1 h-full overflow-auto | scroll-hidden'>
               {content?.()}
             </div>
-            <div className='flex flex-col gap-[4px]'>
+            <div className='flex flex-col gap-[4px] | empty:hidden'>
               {ok?.()}
               {cancel?.()}
             </div>

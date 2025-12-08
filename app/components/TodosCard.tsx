@@ -1,14 +1,27 @@
 import { TAG_COLORS, WEEK_DAYS_NAME } from '@/const'
 import dayjs from 'dayjs'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
 import { Case, Default, Else, If, Switch, Then } from 'react-if'
 import { TodoWithChildren } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
 import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
+import UIDropdown from './UIDropdown'
 
-export function TodoCard({ todo }: { todo: TodoWithChildren; parent?: TodoWithChildren }) {
+export function TodoCard({
+  todo,
+  hideChildren,
+}: {
+  todo: TodoWithChildren
+  hideChildren?: boolean
+}) {
   const getTagsById = useTagsStore((s) => s.getTagsById)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const [isOpen, setOpen] = useState(false)
 
   const now = Date.now()
   const start = todo.start ?? 0
@@ -180,42 +193,134 @@ export function TodoCard({ todo }: { todo: TodoWithChildren; parent?: TodoWithCh
       </div>
       {/* 남은시간, 반복 날짜 */}
 
-      <div className='flex items-center'>
-        {/* 하위 일 더 보기 */}
-        <If condition={todo.childId}>
-          <Then>
-            <div className='flex items-center | mt-[6px]'>
-              <Icon
-                name='chevron-down'
-                className='text-[16px]'
-              />
-              <p className='text-[11px]'>하위 일 더 보기</p>
-            </div>
-          </Then>
-          <Else>
-            <div className='flex items-center | mt-[6px] | text-gray-400'>
-              <Icon
-                name='plus'
-                className='text-[16px]'
-              />
-              <p className='text-[11px]'>하위 일 추가</p>
-            </div>
-          </Else>
-        </If>
-        {/* 하위 일 더 보기 */}
-
-        <button
-          className='rounded-full | ml-auto p-[2px] | border border-gray-100'
-          type='button'
-          style={{
-            boxShadow: '1px 1px 0 var(--color-gray-300), -1px -1px 0 white',
-          }}>
-          <Icon
-            name='overflow'
-            className='text-[14px]'
-          />
-        </button>
-      </div>
+      <If condition={!hideChildren}>
+        <Then>
+          <div className='flex items-center | mt-[6px]'>
+            {/* 하위 일 더 보기 */}
+            <If condition={todo.childId}>
+              <Then>
+                <button
+                  type='button'
+                  className='flex items-center | mt-[6px]'
+                  onClick={(event) => {
+                    event.preventDefault()
+                    const urlParams = new URLSearchParams(searchParams.toString())
+                    router.push(
+                      `?${decodeURIComponent(urlParams.toString())}&children=${todo.id}`,
+                      {
+                        scroll: false,
+                      }
+                    )
+                  }}>
+                  <Icon
+                    name='chevron-down'
+                    className='text-[16px]'
+                  />
+                  <p className='text-[11px]'>하위 일 더 보기</p>
+                </button>
+              </Then>
+              <Else>
+                <div className='flex items-center | text-gray-400'>
+                  <Icon
+                    name='plus'
+                    className='text-[16px]'
+                  />
+                  <p className='text-[11px]'>하위 일 추가</p>
+                </div>
+              </Else>
+            </If>
+            {/* 하위 일 더 보기 */}
+            <UIDropdown
+              className='ml-auto'
+              isOpen={isOpen}
+              position={{ x: 'RIGHT' }}
+              fitOptionsParent={false}
+              onOpenChange={setOpen}
+              renderButton={({ toggle }) => (
+                <button
+                  className='rounded-full | p-[2px] | border border-gray-100'
+                  type='button'
+                  style={{
+                    boxShadow: '1px 1px 0 var(--color-gray-300), -1px -1px 0 white',
+                  }}
+                  onClick={(event) => {
+                    event.preventDefault()
+                    toggle()
+                  }}>
+                  <Icon
+                    name='overflow'
+                    className='text-[14px]'
+                  />
+                </button>
+              )}
+              renderOptions={({ toggle }) => (
+                <div className='py-[3px] | flex flex-col'>
+                  <button
+                    type='button'
+                    className='px-[6px] py-[4px] | flex items-center justify-start gap-[6px] | hover:bg-slate-50 hover:dark:bg-zinc-600'
+                    onClick={(event) => {
+                      event.preventDefault()
+                      toggle(false, () => router.push(`/todos/${todo.id}`, { scroll: false }))
+                    }}>
+                    <Icon
+                      name='run'
+                      className='text-[16px]'
+                    />
+                    <p className='text-[13px]'>상태변경</p>
+                  </button>
+                  <button
+                    type='button'
+                    className='px-[6px] py-[4px] | flex items-center justify-start gap-[6px] | hover:bg-slate-50 hover:dark:bg-zinc-600'
+                    onClick={(event) => {
+                      event.preventDefault()
+                      toggle(false, () => router.push(`/todos/${todo.id}`, { scroll: false }))
+                    }}>
+                    <Icon
+                      name='tag'
+                      className='text-[16px]'
+                    />
+                    <p className='text-[13px]'>태그변경</p>
+                  </button>
+                  <button
+                    type='button'
+                    className='px-[6px] py-[4px] | flex items-center justify-start gap-[6px] | hover:bg-slate-50 hover:dark:bg-zinc-600'
+                    onClick={(event) => {
+                      event.preventDefault()
+                      toggle(false, () => {
+                        const urlParams = new URLSearchParams(searchParams.toString())
+                        router.push(
+                          `?${decodeURIComponent(urlParams.toString())}&time=${todo.id}`,
+                          {
+                            scroll: false,
+                          }
+                        )
+                      })
+                    }}>
+                    <Icon
+                      name='alarm'
+                      className='text-[16px]'
+                    />
+                    <p className='text-[13px]'>일정설정</p>
+                  </button>
+                  <button
+                    type='button'
+                    className='px-[6px] py-[4px] | flex items-center justify-start gap-[6px] | hover:bg-slate-50 hover:dark:bg-zinc-600'
+                    onClick={(event) => {
+                      event.preventDefault()
+                      toggle(false, () => router.push(`/todos/${todo.id}`, { scroll: false }))
+                    }}>
+                    <Icon
+                      name='edit'
+                      className='text-[16px]'
+                    />
+                    <p className='text-[13px]'>내용수정</p>
+                  </button>
+                </div>
+              )}
+            />
+          </div>
+        </Then>
+      </If>
     </Link>
   )
 }
