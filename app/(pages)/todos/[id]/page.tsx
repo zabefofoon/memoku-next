@@ -459,7 +459,7 @@ export default function TodosDetail() {
     )
   else if (todo != null)
     return (
-      <div className='flex-1 | flex flex-col | max-h-full'>
+      <div className='flex-1 | flex flex-col | max-h-full | px-[16px] sm:px-0 mt-[12px] mb-[24px] sm:mt-0'>
         <TodosTimeModal
           isShow={isShowTimeModal}
           todo={todo}
@@ -485,24 +485,24 @@ export default function TodosDetail() {
           />
         )}
 
-        {
-          <div className='mb-[24px] hidden sm:block'>
-            <button
-              type='button'
-              className='opacity-80 | flex items-center | max-w-[300px]'
-              onClick={() => history.back()}>
-              <Icon
-                name='chevron-left'
-                className='text-[24px]'
-              />
+        <div className='mb-[24px]'>
+          <button
+            type='button'
+            className='opacity-80 | flex items-center | max-w-[300px]'
+            onClick={() => history.back()}>
+            <Icon
+              name='chevron-left'
+              className='text-[20px] sm:text-[24px]'
+            />
 
-              <p className='text-[20px] truncate'>
-                {textValue.split(/\n/)[0] || '내용을 입력하세요.'}
-              </p>
-            </button>
-            <p className='text-[16px] opacity-50'>모든 글은 자동으로 저장 됩니다.</p>
-          </div>
-        }
+            <p className='text-[18px] sm:text-[20px] truncate'>
+              {textValue.split(/\n/)[0] || '내용을 입력하세요.'}
+            </p>
+          </button>
+          <p className='text-[13px] sm:text-[15px] opacity-50 | hidden sm:block'>
+            모든 글은 자동으로 저장 됩니다.
+          </p>
+        </div>
         {todo?.parentId && (
           <Link
             href={`/todos/${todo?.parentId}`}

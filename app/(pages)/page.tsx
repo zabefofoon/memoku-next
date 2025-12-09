@@ -14,7 +14,7 @@ export default function Home() {
   const memberInfo = useAuthStore((s) => s.memberInfo)
 
   return (
-    <div className='flex-1 | flex flex-col'>
+    <div className='flex-1 | flex flex-col | px-[16px] sm:px-0 my-[24px] sm:mt-0'>
       <div className='mb-[24px]'>
         <h1 className='text-[20px] capitalize | opacity-80'>
           {memberInfo?.email ? `Hello! ${memberInfo.email.split('@')[0]}` : 'Welcome to MEMOKU!'}
