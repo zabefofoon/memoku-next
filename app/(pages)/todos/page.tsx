@@ -201,7 +201,7 @@ export default function Todos() {
         </div>
         <TodosSelectedFilters />
       </div>
-      <div className='flex flex-col gap-[32px]'>
+      <div className='flex flex-col gap-[32px] mb-[88px]'>
         <TodosCardsToday />
         <TodosCardsThisWeek />
         <TodosCardsNextWeek />
