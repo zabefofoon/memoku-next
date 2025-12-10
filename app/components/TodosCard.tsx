@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
-import { Case, Default, Else, If, Switch, Then } from 'react-if'
+import { Case, Else, If, Switch, Then } from 'react-if'
 import { TodoWithChildren } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
 import { useTodosPageStore } from '../stores/todosPage.store'
@@ -50,6 +50,29 @@ export function TodoCard({
   if (todo.status === 'inprogress') text = '진행중'
   if (todo.status === 'hold') text = '중지됨'
 
+  const statusMap = {
+    done: {
+      label: '완료됨',
+      icon: 'check',
+      color: 'var(--color-green-500)',
+    },
+    inprogress: {
+      label: '진행중',
+      icon: 'run',
+      color: 'var(--color-indigo-500)',
+    },
+    hold: {
+      label: '중지됨',
+      icon: 'pause',
+      color: 'var(--color-orange-600)',
+    },
+    created: {
+      label: '생성됨',
+      icon: 'plus',
+      color: 'var(--color-slate-600)',
+    },
+  }
+
   const tag = getTagsById(todo.tagId)
 
   return (
@@ -68,18 +91,29 @@ export function TodoCard({
       <div className='inner'>
         <div className='p-[12px]'>
           {/* 태그 */}
-          <div className='flex items-center gap-[4px]'>
+          <button
+            type='button'
+            className='expand-hitbox | flex items-center gap-[4px]'
+            onClick={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+
+              const urlParams = new URLSearchParams(searchParams.toString())
+              router.push(`?${decodeURIComponent(urlParams.toString())}&todoTag=${todo.id}`, {
+                scroll: false,
+              })
+            }}>
             <div
               className='w-[8px] aspect-square | rounded-full | bg-red-500'
               style={{
                 background: tag ? TAG_COLORS[tag.color].white : 'var(--color-slate-800)',
               }}></div>
             <p className='text-[11px] text-gray-600 leading-[100%]'>{tag?.label ?? 'MEMO'}</p>
-          </div>
+          </button>
           {/* 태그 */}
 
           {/* 제목, 상태 */}
-          <div className='mt-[6px] | flex items-start gap-[6px] justify-between'>
+          <div className='mt-[6px] | flex items-center gap-[6px] justify-between'>
             {/* 제목 */}
             <p className='truncate | text-[15px] font-[600] leading-[130%]'>
               {todo.description?.slice(0, 40)?.split(/\n/)[0]}
@@ -87,28 +121,31 @@ export function TodoCard({
             {/* 제목 */}
 
             {/* 상태 */}
-            <div
-              className={etcUtil.classNames(
-                'shrink-0 | leading-[100%] | flex items-center | py-[3px] px-[4px] pr-[8px] | rounded-full',
-                [textColor, bgColor]
-              )}>
-              <p className='text-[14px]'>
-                <Switch>
-                  <Case condition={todo.status === 'inprogress'}>
-                    <Icon name='run' />
-                  </Case>
-                  <Case condition={todo.status === 'hold'}>
-                    <Icon name='pause' />
-                  </Case>
-                  <Case condition={todo.status === 'done'}>
-                    <Icon name='check' />
-                  </Case>
-                  <Default>
-                    <Icon name='plus' />
-                  </Default>
-                </Switch>
-              </p>
-              <p className='text-[11px]'>{text}</p>
+            <div className='neu-button | relative | rounded-full '>
+              <button
+                type='button'
+                className='button'
+                style={{
+                  color: statusMap[todo.status ?? 'created']?.color,
+                }}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  event.preventDefault()
+                  const urlParams = new URLSearchParams(searchParams.toString())
+                  router.push(
+                    `?${decodeURIComponent(urlParams.toString())}&todoStatus=${todo.id}`,
+                    {
+                      scroll: false,
+                    }
+                  )
+                }}>
+                <div className='button-inner | flex items-center'>
+                  <Icon name={statusMap[todo.status ?? 'created']?.icon} />
+                  <p className='text-[11px] leading-[100%] whitespace-nowrap'>
+                    {statusMap[todo.status ?? 'created']?.label}
+                  </p>
+                </div>
+              </button>
             </div>
             {/* 상태 */}
           </div>
@@ -259,12 +296,13 @@ export function TodoCard({
                         boxShadow: '1px 1px 0 var(--color-gray-300), -1px -1px 0 white',
                       }}
                       onClick={(event) => {
+                        event.stopPropagation()
                         event.preventDefault()
                         toggle()
                       }}>
                       <Icon
                         name='overflow'
-                        className='text-[14px]'
+                        className='expand-hitbox | text-[14px]'
                       />
                     </button>
                   )}
@@ -275,6 +313,8 @@ export function TodoCard({
                         className='px-[6px] py-[4px] | flex items-center justify-start gap-[6px] | hover:bg-slate-50 hover:dark:bg-zinc-600'
                         onClick={(event) => {
                           event.preventDefault()
+                          event.stopPropagation()
+
                           toggle(false, () => {
                             const urlParams = new URLSearchParams(searchParams.toString())
                             router.push(
@@ -296,6 +336,8 @@ export function TodoCard({
                         className='px-[6px] py-[4px] | flex items-center justify-start gap-[6px] | hover:bg-slate-50 hover:dark:bg-zinc-600'
                         onClick={(event) => {
                           event.preventDefault()
+                          event.stopPropagation()
+
                           toggle(false, () => {
                             const urlParams = new URLSearchParams(searchParams.toString())
                             router.push(
@@ -316,7 +358,9 @@ export function TodoCard({
                         type='button'
                         className='px-[6px] py-[4px] | flex items-center justify-start gap-[6px] | hover:bg-slate-50 hover:dark:bg-zinc-600'
                         onClick={(event) => {
+                          event.stopPropagation()
                           event.preventDefault()
+
                           toggle(false, () => {
                             const urlParams = new URLSearchParams(searchParams.toString())
                             router.push(
@@ -337,7 +381,9 @@ export function TodoCard({
                         type='button'
                         className='px-[6px] py-[4px] | flex items-center justify-start gap-[6px] | hover:bg-slate-50 hover:dark:bg-zinc-600'
                         onClick={(event) => {
+                          event.stopPropagation()
                           event.preventDefault()
+
                           toggle(false, () => router.push(`/todos/${todo.id}`, { scroll: false }))
                         }}>
                         <Icon

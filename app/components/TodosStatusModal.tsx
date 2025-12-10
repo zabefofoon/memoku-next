@@ -1,71 +1,87 @@
 'use client'
 
-import { COOKIE_THEME, FILTER_STATUS, STATUS_COLORS } from '@/const'
+import { FILTER_STATUS } from '@/const'
 import { useEffect, useState } from 'react'
-import { useCookies } from 'react-cookie'
-import { Tag } from '../models/Todo'
+import { Todo } from '../models/Todo'
+import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
-import UIModal from './UIModal'
+import UIBottomSheet from './UIBottomSheet'
 
 interface Props {
   isShow?: boolean
-  select?: (tag: Tag) => void
+  select?: (status: Todo['status']) => void
   close: () => void
 }
 
-export function TodosStatusModal(props: Props) {
-  const [cookies] = useCookies([COOKIE_THEME])
-  const [selectedTag, setSelectedTag] = useState<Tag>()
+export function TodosStatusModal({ isShow, select, close }: Props) {
+  const [selectedStatus, setSelectedStatus] = useState<Todo['status']>()
+
+  const statusMap = {
+    done: {
+      color: 'var(--color-green-500)',
+    },
+    inprogress: {
+      color: 'var(--color-indigo-500)',
+    },
+    hold: {
+      color: 'var(--color-orange-600)',
+    },
+    created: {
+      color: 'var(--color-slate-600)',
+    },
+  }
 
   useEffect(() => {
-    setSelectedTag(undefined)
-  }, [props.isShow])
+    setSelectedStatus(undefined)
+  }, [isShow])
 
   return (
-    <UIModal
+    <UIBottomSheet
       header={() => <span>상태변경</span>}
-      open={props.isShow ?? false}
-      close={() => props.close()}
+      open={isShow ?? false}
+      close={() => close()}
       content={() => (
         <div className='flex gap-[8px] flex-wrap | max-w-[320px] | pb-[2px] px-[2px]'>
           {FILTER_STATUS.map((status) => (
-            <button
+            <div
               key={status.value}
-              className='rounded-full | bg-white | shadow-md'>
-              <span
-                className='text-[14px] | px-[12px] | h-[28px] aspect-square | flex items-center justify-center gap-[4px] | rounded-full | whitespace-nowrap'
+              className='neu-button | relative | rounded-full '>
+              <button
+                type='button'
+                className='button'
                 style={{
-                  background:
-                    cookies['x-theme'] === 'dark'
-                      ? STATUS_COLORS[status.value]?.dark
-                      : `${STATUS_COLORS[status.value].white}24`,
-                  color:
-                    cookies['x-theme'] === 'dark'
-                      ? 'white'
-                      : `${STATUS_COLORS[status.value].white}`,
-                }}>
-                <Icon
-                  name={status.icon}
-                  className='text-[15px]'
-                />
-                {status.label}
-              </span>
-            </button>
+                  color: statusMap[status.value].color,
+                }}
+                onClick={() => setSelectedStatus(status.value)}>
+                <div
+                  className={etcUtil.classNames([
+                    'button-inner | flex items-center gap-[4px]',
+                    { 'bg-indigo-600/10': status.value === selectedStatus },
+                  ])}>
+                  <Icon name={status.icon} />
+                  <p className='text-[13px] leading-[100%]'>{status.label}</p>
+                </div>
+              </button>
+              {selectedStatus === status.value && (
+                <div className='flex items-center justify-center  | absolute top-0 left-0 z-[1] | w-full h-full rounded-full'>
+                  <Icon
+                    name='check'
+                    className='text-white text-[24px]'
+                    style={{
+                      filter: 'drop-shadow(1px 1px 1px var(--color-gray-400))',
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           ))}
         </div>
       )}
       ok={() => (
         <button
           className='rounded-md bg-indigo-500 py-[12px]'
-          onClick={() => selectedTag && props.select?.(selectedTag)}>
+          onClick={() => selectedStatus && select?.(selectedStatus)}>
           <p className='text-white text-[15px] font-[700]'>선택하기</p>
-        </button>
-      )}
-      cancel={() => (
-        <button
-          className='rounded-md bg-gray-200 dark:bg-zinc-700 text-[15px] py-[12px]'
-          onClick={() => props.close()}>
-          <p className='text-[15px]'>취소하기</p>
         </button>
       )}
     />

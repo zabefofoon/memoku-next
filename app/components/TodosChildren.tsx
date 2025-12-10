@@ -1,10 +1,9 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect } from 'react'
 import { If, Then } from 'react-if'
 import { todosDB } from '../lib/todos.db'
-import { Todo } from '../models/Todo'
 import { useTodosPageStore } from '../stores/todosPage.store'
 import etcUtil from '../utils/etc.util'
 import { TodoCard } from './TodosCard'
@@ -17,30 +16,29 @@ interface Props {
 
 export function TodosChildren({ isShow, close }: Props) {
   const router = useRouter()
-  const createTodo = useTodosPageStore((s) => s.createTodo)
+  const addChildren = useTodosPageStore((s) => s.addChildren)
+  const childrenRoot = useTodosPageStore((s) => s.childrenRoot)
+  const setChildrenRoot = useTodosPageStore((s) => s.setChildrenRoot)
+  const children = useTodosPageStore((s) => s.children)
+  const setChildren = useTodosPageStore((s) => s.setChildren)
   const searchParams = useSearchParams()
   const rootQuery = searchParams.get('children')
-
-  const [todo, setTodo] = useState<Todo | undefined>()
-  const [children, setChildren] = useState<Todo[] | undefined>()
 
   const loadTodo = useCallback(async (): Promise<void> => {
     if (!rootQuery) return
 
-    todosDB.getTodo(rootQuery).then(setTodo)
+    todosDB.getTodo(rootQuery).then(setChildrenRoot)
     todosDB.getDescendantsFlat(rootQuery).then(setChildren)
-  }, [rootQuery])
+  }, [rootQuery, setChildren, setChildrenRoot])
 
   useEffect(() => {
-    if (isShow) {
-      loadTodo()
-    } else {
+    if (isShow) loadTodo()
+    else
       etcUtil.sleep(300).then(() => {
-        setTodo(undefined)
+        setChildrenRoot(undefined)
         setChildren(undefined)
       })
-    }
-  }, [isShow, loadTodo])
+  }, [isShow, loadTodo, setChildren, setChildrenRoot])
 
   return (
     <UIBottomSheet
@@ -49,10 +47,10 @@ export function TodosChildren({ isShow, close }: Props) {
       close={() => close()}
       content={() => (
         <div className='flex flex-col gap-[12px] | py-[12px]'>
-          <If condition={todo != null}>
+          <If condition={childrenRoot != null}>
             <Then>
               <TodoCard
-                todo={todo!}
+                todo={childrenRoot!}
                 hideChildren
               />
               {children?.map((todo) => (
@@ -69,11 +67,10 @@ export function TodosChildren({ isShow, close }: Props) {
       ok={() => (
         <button
           className='rounded-md bg-indigo-500 py-[12px]'
-          onClick={() =>
-            createTodo(children?.at(-1)?.id || todo?.id).then(({ id }) =>
-              router.push(`/todos/${id}`)
-            )
-          }>
+          onClick={() => {
+            const target = children?.at(-1) || childrenRoot
+            if (target) addChildren(target).then(({ id }) => router.push(`/todos/${id}`))
+          }}>
           <p className='text-white text-[15px] font-[700]'>하위 일 추가하기</p>
         </button>
       )}

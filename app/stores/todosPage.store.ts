@@ -3,6 +3,7 @@ import { create } from 'zustand'
 import { api } from '../lib/api'
 import { todosDB } from '../lib/todos.db'
 import { GetTodosParams, Tag, TodoWithChildren } from '../models/Todo'
+import etcUtil from '../utils/etc.util'
 import { useSheetStore } from './sheet.store'
 
 interface TodosPageStore {
@@ -17,6 +18,8 @@ interface TodosPageStore {
   todayTodos: TodoWithChildren[] | undefined
   thisWeekTodos: TodoWithChildren[] | undefined
   nextWeekTodos: TodoWithChildren[] | undefined
+  children: TodoWithChildren[] | undefined
+  childrenRoot: TodoWithChildren | undefined
 
   setPage: (page: number, cb?: (page: number) => void) => void
 
@@ -39,6 +42,12 @@ interface TodosPageStore {
   setNextWeekTodos: (
     updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
   ) => void
+  setChildren: (
+    updater?: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+  ) => void
+  setChildrenRoot: (
+    updater?: TodoWithChildren | ((prev?: TodoWithChildren) => TodoWithChildren | undefined)
+  ) => void
 
   expandRow: (todo: TodoWithChildren) => Promise<void>
   updateStatus: (
@@ -57,6 +66,7 @@ interface TodosPageStore {
     parentId?: string
   ) => Promise<void>
   createTodo: (parentId?: string) => Promise<TodoWithChildren>
+  addChildren: (parent: TodoWithChildren) => Promise<TodoWithChildren>
   loadTodos: (params: GetTodosParams) => Promise<void>
   loadTodayTodos: (params: GetTodosParams) => Promise<void>
   loadThisWeekTodos: (params: GetTodosParams) => Promise<void>
@@ -75,6 +85,8 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
   todayTodos: undefined,
   thisWeekTodos: undefined,
   nextWeekTodos: undefined,
+  children: undefined,
+  childrenRoot: undefined,
 
   setPage: (page: number, cb?: (page: number) => void): void => {
     set({ page })
@@ -106,6 +118,20 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
   ) =>
     set((state) => ({
       todos: typeof updater === 'function' ? updater(state.todos) : updater,
+    })),
+
+  setChildren: (
+    updater?: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+  ) =>
+    set((state) => ({
+      children: typeof updater === 'function' ? updater(state.children) : updater,
+    })),
+
+  setChildrenRoot: (
+    updater?: TodoWithChildren | ((prev?: TodoWithChildren) => TodoWithChildren | undefined)
+  ) =>
+    set((state) => ({
+      childrenRoot: typeof updater === 'function' ? updater(state.childrenRoot) : updater,
     })),
 
   setTodayTodos: (
@@ -144,50 +170,123 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
 
   updateStatus: async (
     todo: TodoWithChildren,
-    status: TodoWithChildren['status'],
-    parentId?: string
+    status: TodoWithChildren['status']
   ): Promise<void> => {
-    if (get().todos == null) return
+    const {
+      setTodos,
+      setTodayTodos,
+      setThisWeekTodos,
+      setNextWeekTodos,
+      setChildren,
+      setChildrenRoot,
+    } = get()
 
     const modified = await todosDB.updateStatus(todo.id, status)
-    api
-      .patchSheetGoogleTodo(useSheetStore.getState().fileId, {
-        index: todo?.index,
-        status,
-        modified,
-      })
-      .then((res) => {
+
+    const fileId = useSheetStore.getState().fileId
+    if (fileId)
+      api.patchSheetGoogleTodo(fileId, { index: todo?.index, status, modified }).then((res) => {
         if (res.ok) todosDB.updateDirties([todo.id], false)
       })
 
-    get().setTodos((prev) =>
+    setChildrenRoot((prev) =>
       produce(prev, (draft) => {
-        if (!draft) return
-        const list = parentId ? draft.find(({ id }) => id === parentId)?.children : draft
-        const target = list?.find(({ id }) => id === todo.id)
+        if (draft?.id === todo.id) draft.status = status
+      })
+    )
+
+    setChildren((prev) =>
+      produce(prev, (draft) => {
+        const target = draft?.find(({ id }) => id === todo.id)
+        if (target) target.status = status
+      })
+    )
+
+    setTodos((prev) =>
+      produce(prev, (draft) => {
+        const target = draft?.find(({ id }) => id === todo.id)
+        if (target) target.status = status
+      })
+    )
+
+    setTodayTodos((prev) =>
+      produce(prev, (draft) => {
+        const target = draft?.find(({ id }) => id === todo.id)
+        if (target) target.status = status
+      })
+    )
+
+    setThisWeekTodos((prev) =>
+      produce(prev, (draft) => {
+        const target = draft?.find(({ id }) => id === todo.id)
+        if (target) target.status = status
+      })
+    )
+
+    setNextWeekTodos((prev) =>
+      produce(prev, (draft) => {
+        const target = draft?.find(({ id }) => id === todo.id)
         if (target) target.status = status
       })
     )
   },
 
   changeTag: async (todo: TodoWithChildren, tag: Tag): Promise<void> => {
+    const {
+      setTodos,
+      setTodayTodos,
+      setThisWeekTodos,
+      setNextWeekTodos,
+      setChildren,
+      setChildrenRoot,
+    } = get()
+
     const modified = await todosDB.updateTag(todo.id, tag.id)
 
-    api
-      .patchSheetGoogleTodo(useSheetStore.getState().fileId, {
-        index: todo.index,
-        tag: tag.id,
-        modified,
-      })
-      .then((res) => {
+    const fileId = useSheetStore.getState().fileId
+    if (fileId)
+      api.patchSheetGoogleTodo(fileId, { index: todo.index, tag: tag.id, modified }).then((res) => {
         if (res.ok) todosDB.updateDirties([todo.id], false)
       })
 
-    get().setTodos((prev) =>
+    setChildrenRoot((prev) =>
       produce(prev, (draft) => {
-        if (!draft) return
-        const found = draft.find(({ id }) => id === todo.id)
-        if (found) found.tagId = tag.id
+        if (draft?.id === todo.id) draft.tagId = tag.id
+      })
+    )
+
+    setChildren((prev) =>
+      produce(prev, (draft) => {
+        const target = draft?.find(({ id }) => id === todo.id)
+        if (target) target.tagId = tag.id
+      })
+    )
+
+    setTodos((prev) =>
+      produce(prev, (draft) => {
+        const target = draft?.find(({ id }) => id === todo.id)
+        if (target) target.tagId = tag.id
+      })
+    )
+
+    setTodayTodos((prev) =>
+      produce(prev, (draft) => {
+        const target = draft?.find(({ id }) => id === todo.id)
+        if (target) target.tagId = tag.id
+      })
+    )
+
+    setThisWeekTodos((prev) =>
+      produce(prev, (draft) => {
+        const target = draft?.find(({ id }) => id === todo.id)
+        if (target) target.tagId = tag.id
+      })
+    )
+
+    setNextWeekTodos((prev) =>
+      produce(prev, (draft) => {
+        const target = draft?.find(({ id }) => id === todo.id)
+        if (target) target.tagId = tag.id
       })
     )
   },
@@ -198,29 +297,54 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
       start: TodoWithChildren['start']
       end: TodoWithChildren['end']
       days?: TodoWithChildren['days']
-    },
-    parentId?: string
+    }
   ): Promise<void> => {
+    const { setTodos, setTodayTodos, setThisWeekTodos, setNextWeekTodos } = get()
+
     const modified = await todosDB.updateTimes(todo.id, values)
 
-    api
-      .patchSheetGoogleTodo(useSheetStore.getState().fileId, {
-        index: todo.index,
-        modified,
-        start: values.start,
-        end: values.end,
-        days: values.days?.join(',') ?? '',
-      })
-      .then((res) => {
-        if (res.ok) todosDB.updateDirties([todo.id], false)
-      })
+    const fileId = useSheetStore.getState().fileId
+    if (fileId)
+      api
+        .patchSheetGoogleTodo(fileId, {
+          index: todo.index,
+          modified,
+          start: values.start,
+          end: values.end,
+          days: values.days?.join(',') ?? '',
+        })
+        .then((res) => {
+          if (res.ok) todosDB.updateDirties([todo.id], false)
+        })
 
-    get().setTodos((prev) =>
+    setTodos((prev) =>
       produce(prev, (draft) => {
         if (!draft) return
+        const target = draft?.find(({ id }) => id === todo.id)
+        if (target) Object.assign(target, values)
+      })
+    )
 
-        const list = parentId ? draft.find(({ id }) => id === parentId)?.children : draft
-        const target = list?.find(({ id }) => id === todo.id)
+    setTodayTodos((prev) =>
+      produce(prev, (draft) => {
+        if (!draft) return
+        const target = draft?.find(({ id }) => id === todo.id)
+        if (target) Object.assign(target, values)
+      })
+    )
+
+    setThisWeekTodos((prev) =>
+      produce(prev, (draft) => {
+        if (!draft) return
+        const target = draft?.find(({ id }) => id === todo.id)
+        if (target) Object.assign(target, values)
+      })
+    )
+
+    setNextWeekTodos((prev) =>
+      produce(prev, (draft) => {
+        if (!draft) return
+        const target = draft?.find(({ id }) => id === todo.id)
         if (target) Object.assign(target, values)
       })
     )
@@ -247,6 +371,46 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
         })
     }
     return todo
+  },
+
+  addChildren: async (parent: TodoWithChildren): Promise<TodoWithChildren> => {
+    await todosDB.updateDirties([parent.id], true)
+
+    const newTodo = await todosDB.addNewTodo({
+      id: etcUtil.generateUniqueId(),
+      description: '',
+      parentId: parent?.id,
+      tagId: parent?.tagId,
+      status: 'created',
+    })
+
+    const fileId = useSheetStore.getState().fileId
+
+    api
+      .patchSheetGoogleTodo(fileId, {
+        index: parent.index,
+        parent: parent.parentId,
+        child: newTodo.id,
+        modified: Date.now(),
+      })
+      .then((res) => {
+        if (res.ok) todosDB.updateDirties([parent.id], false)
+      })
+    api
+      .postSheetGoogleTodo(fileId, {
+        id: newTodo.id,
+        created: newTodo.created,
+        modified: newTodo.modified,
+        parent: parent.id,
+      })
+      .then((res) => {
+        if (res.ok) {
+          todosDB.updateDirties([newTodo.id], false)
+          res.json().then((result) => todosDB.updateIndex(newTodo.id, result.index))
+        }
+      })
+
+    return newTodo
   },
 
   loadTodos: async (params: GetTodosParams): Promise<void> => {

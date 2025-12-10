@@ -1,25 +1,29 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { CSSProperties, useEffect, useState } from 'react'
 
 interface Props {
   name: string
   className?: string
+  style?: CSSProperties
 }
 
-export function Icon(props: Props) {
+export function Icon({ name, className, style }: Props) {
   const [mounted, setMounted] = useState<boolean>()
+
   useEffect(() => {
     setMounted(true)
   }, [])
+
   return (
-    <span className={props.className}>
+    <span className={className}>
       <svg
         width='1em'
-        height='1em'>
+        height='1em'
+        style={style}>
         <use
-          href={`/icons/icons.svg?v=1#icon-${props.name}`}
-          xlinkHref={`/icons/icons.svg?v=1#icon-${props.name}`}
+          href={`/icons/icons.svg?v=1#icon-${name}`}
+          xlinkHref={`/icons/icons.svg?v=1#icon-${name}`}
           key={`${mounted}`}
         />
       </svg>

@@ -44,15 +44,15 @@ export default function UIBottomSheet({ open, close, header, content, cancel, ok
         <button
           aria-label='닫기'
           onClick={close}
-          className='fixed inset-0 bg-black/50 | w-full h-full'
+          className='fixed inset-0 bg-black/50 | w-full h-full | backdrop-blur-[2px]'
         />
         <div className='flex justify-center | sm:py-[32px] | w-full max-h-[90%] sm:max-w-[320px] overflow-auto | scroll-hidden'>
           <div
             className={etcUtil.classNames([
-              'bottom-sheet-card | flex flex-col gap-[12px] | relative z-10 | w-full | p-[16px] | rounded-t-4xl sm:rounded-xl bg-white dark:bg-zinc-800 shadow-xl',
+              'bottom-sheet-card | flex flex-col gap-[12px] | relative z-10 | w-full | p-[16px] | rounded-t-4xl sm:rounded-xl bg-gray-100 dark:bg-zinc-800 shadow-xl',
             ])}>
             <div className='flex justify-between'>
-              {header && <p className='text-[20px] font-[700]'>{header()}</p>}
+              {header && <p className='text-[16px] sm:text-[20px] font-[700]'>{header()}</p>}
               <button
                 type='button'
                 className='ml-auto'

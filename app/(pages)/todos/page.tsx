@@ -25,13 +25,18 @@ export default function Todos() {
 
   const screenSize = useThemeStore((state) => state.screenSize)
   const todos = useTodosPageStore((state) => state.todos)
+  const todayTodos = useTodosPageStore((state) => state.todayTodos)
+  const thisWeekTodos = useTodosPageStore((state) => state.thisWeekTodos)
+  const nextWeekTodos = useTodosPageStore((state) => state.nextWeekTodos)
   const setTodos = useTodosPageStore((state) => state.setTodos)
+  const children = useTodosPageStore((state) => state.children)
   const loadTodosInStore = useTodosPageStore((state) => state.loadTodos)
   const loadTodayTodosInStore = useTodosPageStore((state) => state.loadTodayTodos)
   const loadThisWeekTodosInStore = useTodosPageStore((state) => state.loadThisWeekTodos)
   const loadNextWeekTodosInStore = useTodosPageStore((state) => state.loadNextWeekTodos)
   const createTodoInStore = useTodosPageStore((state) => state.createTodo)
   const changeTagInStore = useTodosPageStore((state) => state.changeTag)
+  const updateStatusInStore = useTodosPageStore((state) => state.updateStatus)
   const setPage = useTodosPageStore((state) => state.setPage)
   const updateTime = useTodosPageStore((state) => state.updateTime)
 
@@ -55,6 +60,35 @@ export default function Todos() {
         : todos?.find(({ id }) => id === timeQuery),
     [parentQuery, timeQuery, todos]
   )
+
+  const createTodo = async (): Promise<void> => {
+    const todo = await createTodoInStore()
+    router.push(`/todos/${todo.id}`)
+  }
+
+  const changeTag = async (tag: Tag): Promise<void> => {
+    const tagTargetTodo =
+      children?.find(({ id }) => id === todoTagQuery) ||
+      todayTodos?.find(({ id }) => id === todoTagQuery) ||
+      thisWeekTodos?.find(({ id }) => id === todoTagQuery) ||
+      nextWeekTodos?.find(({ id }) => id === todoTagQuery) ||
+      todos?.find(({ id }) => id === todoTagQuery)
+
+    if (tagTargetTodo) changeTagInStore(tagTargetTodo, tag)
+    router.back()
+  }
+
+  const changeStatus = async (status: Todo['status']): Promise<void> => {
+    const tagTargetTodo =
+      children?.find(({ id }) => id === todoStatusQuery) ||
+      todayTodos?.find(({ id }) => id === todoStatusQuery) ||
+      thisWeekTodos?.find(({ id }) => id === todoStatusQuery) ||
+      nextWeekTodos?.find(({ id }) => id === todoStatusQuery) ||
+      todos?.find(({ id }) => id === todoStatusQuery)
+
+    if (tagTargetTodo) updateStatusInStore(tagTargetTodo, status)
+    router.back()
+  }
 
   const loadTodos = useCallback(
     (page = 0): void => {
@@ -99,17 +133,6 @@ export default function Todos() {
     ]
   )
 
-  const createTodo = async (): Promise<void> => {
-    const todo = await createTodoInStore()
-    router.push(`/todos/${todo.id}`)
-  }
-
-  const changeTag = async (tag: Tag): Promise<void> => {
-    const tagTargetTodo = todos?.find(({ id }) => id === todoTagQuery)
-    if (tagTargetTodo) changeTagInStore(tagTargetTodo, tag)
-    router.back()
-  }
-
   useEffect(() => {
     let prevScrollTop = 0
 
@@ -141,6 +164,7 @@ export default function Todos() {
     <div className='flex flex-col'>
       <TodosStatusModal
         isShow={!!todoStatusQuery}
+        select={changeStatus}
         close={router.back}
       />
       <TodosChildren

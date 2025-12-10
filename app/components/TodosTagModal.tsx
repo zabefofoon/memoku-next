@@ -1,11 +1,12 @@
 'use client'
 
+import { TAG_COLORS } from '@/const'
 import { useEffect, useState } from 'react'
 import { Tag } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
+import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
-import TagBadge from './TagBadge'
-import UIModal from './UIModal'
+import UIBottomSheet from './UIBottomSheet'
 
 interface Props {
   isShow?: boolean
@@ -13,34 +14,50 @@ interface Props {
   close: () => void
 }
 
-export function TodosTagModal(props: Props) {
+export function TodosTagModal({ isShow, select, close }: Props) {
   const tags = useTagsStore((s) => s.tags)
   const [selectedTag, setSelectedTag] = useState<Tag>()
 
   useEffect(() => {
     setSelectedTag(undefined)
-  }, [props.isShow])
+  }, [isShow])
 
   return (
-    <UIModal
+    <UIBottomSheet
       header={() => <span>태그변경</span>}
-      open={props.isShow ?? false}
-      close={() => props.close()}
+      open={isShow ?? false}
+      close={() => close()}
       content={() => (
-        <div className='flex gap-[6px] flex-wrap | max-w-[320px] | pb-[2px] px-[2px]'>
+        <div className='flex gap-[6px] flex-wrap | max-w-[320px] | py-[6px] px-[4px]'>
           {tags.map((tag) => (
             <div
               key={tag.id}
-              className='relative | rounded-full'>
-              <TagBadge
-                id={tag.id}
-                click={() => setSelectedTag(tag)}
-              />
+              className='neu-button | relative | rounded-full '>
+              <button
+                type='button'
+                className='button'
+                onClick={() => setSelectedTag(tag)}>
+                <div
+                  className={etcUtil.classNames([
+                    'button-inner | flex items-center gap-[4px]',
+                    { 'bg-indigo-600/10': tag.id === selectedTag?.id },
+                  ])}>
+                  <span
+                    className='w-[8px] aspect-square | rounded-full | bg-red-500'
+                    style={{
+                      background: tag ? TAG_COLORS[tag.color].white : 'var(--color-slate-800)',
+                    }}></span>
+                  <p className='text-[13px] text-gray-600 leading-[100%]'>{tag?.label ?? 'MEMO'}</p>
+                </div>
+              </button>
               {selectedTag?.id === tag.id && (
-                <div className='flex items-center justify-center  | absolute top-0 left-0 z-[1] | w-full h-full rounded-full | bg-black/50'>
+                <div className='flex items-center justify-center  | absolute top-0 left-0 z-[1] | w-full h-full rounded-full'>
                   <Icon
                     name='check'
                     className='text-white text-[24px]'
+                    style={{
+                      filter: 'drop-shadow(1px 1px 1px var(--color-gray-400))',
+                    }}
                   />
                 </div>
               )}
@@ -51,15 +68,8 @@ export function TodosTagModal(props: Props) {
       ok={() => (
         <button
           className='rounded-md bg-indigo-500 py-[12px]'
-          onClick={() => selectedTag && props.select(selectedTag)}>
+          onClick={() => selectedTag && select(selectedTag)}>
           <p className='text-white text-[15px] font-[700]'>선택하기</p>
-        </button>
-      )}
-      cancel={() => (
-        <button
-          className='rounded-md bg-gray-200 dark:bg-zinc-700 text-[15px] py-[12px]'
-          onClick={() => props.close()}>
-          <p className='text-[15px]'>취소하기</p>
         </button>
       )}
     />

@@ -44,7 +44,7 @@ export default function UIModal({ open, close, header, content, ok, cancel }: Pr
         <button
           aria-label='닫기'
           onClick={close}
-          className='fixed inset-0 bg-black/50 | w-full h-full'
+          className='fixed inset-0 bg-black/50 | w-full h-full | backdrop-blur-[2px]'
         />
         <div className='flex justify-center | max-h-full py-[32px] overflow-auto | scroll-hidden'>
           <div
@@ -52,7 +52,7 @@ export default function UIModal({ open, close, header, content, ok, cancel }: Pr
               'modal-card | flex flex-col gap-[12px] | relative z-10 | min-w-[320px] max-w-[calc(100%-32px)] max-h-[calc(100dvh-64px)] | p-[16px] | rounded-xl bg-white dark:bg-zinc-800 shadow-xl',
             ])}>
             <div className='flex justify-between'>
-              {header && <p className='text-[20px] font-[700]'>{header()}</p>}
+              {header && <p className='text-[16px] sm:text-[20px] font-[700]'>{header()}</p>}
               <button
                 type='button'
                 className='ml-auto'
