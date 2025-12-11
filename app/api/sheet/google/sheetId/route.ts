@@ -27,7 +27,7 @@ async function transformTodoSheet(auth: any, spreadsheetId: string) {
     spreadsheetId,
     fields: 'sheets.properties(sheetId,title)',
   })
-  const prevTodos = getRes.data.sheets?.find((s) => s.properties?.title === 'todo')
+  const prevTodos = getRes.data.sheets?.find((s) => s.properties?.title === 'todos')
   const currentTodos = getRes.data.sheets?.find((s) => s.properties?.title === 'todo2')
 
   if (!prevTodos) {
@@ -61,7 +61,7 @@ async function transformTodoSheet(auth: any, spreadsheetId: string) {
 
       const getRes = await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: `todo!A1:Z`,
+        range: `todos!A1:Z`,
         majorDimension: 'ROWS',
       })
       const rows = getRes.data.values ?? []
