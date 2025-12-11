@@ -35,21 +35,6 @@ export function TodoCard({
   const isInprogressRemainedTime = now >= start && now < end
   const isAfterRemainedTime = now > end
 
-  let bgColor = 'bg-slate-200'
-  if (todo.status === 'done') bgColor = 'bg-green-200'
-  if (todo.status === 'inprogress') bgColor = 'bg-indigo-200'
-  if (todo.status === 'hold') bgColor = 'bg-orange-200'
-
-  let textColor = 'text-slate-500'
-  if (todo.status === 'done') textColor = 'text-green-500'
-  if (todo.status === 'inprogress') textColor = 'text-indigo-500'
-  if (todo.status === 'hold') textColor = 'text-orange-600'
-
-  let text = '생성됨'
-  if (todo.status === 'done') text = '완료됨'
-  if (todo.status === 'inprogress') text = '진행중'
-  if (todo.status === 'hold') text = '중지됨'
-
   const statusMap = {
     done: {
       label: '완료됨',

@@ -1,9 +1,10 @@
 'use client'
 
-import { FILTER_STATUS, STATUS_COLORS, TAG_COLORS } from '@/const'
+import { FILTER_STATUS, TAG_COLORS } from '@/const'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
+import { If, Then } from 'react-if'
 import { Tag, Todo } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
 import etcUtil from '../utils/etc.util'
@@ -28,6 +29,29 @@ export function TodosFilters(props: Props) {
 
   const status = searchParams.get('status')
   const tagsQuery = searchParams.get('tags')
+
+  const statusMap = {
+    done: {
+      label: '완료됨',
+      icon: 'check',
+      color: 'var(--color-green-500)',
+    },
+    inprogress: {
+      label: '진행중',
+      icon: 'run',
+      color: 'var(--color-indigo-500)',
+    },
+    hold: {
+      label: '중지됨',
+      icon: 'pause',
+      color: 'var(--color-orange-600)',
+    },
+    created: {
+      label: '생성됨',
+      icon: 'plus',
+      color: 'var(--color-slate-600)',
+    },
+  }
 
   const apply = (): void => {
     const base: Record<string, string> = {}
@@ -60,10 +84,13 @@ export function TodosFilters(props: Props) {
               {FILTER_STATUS.map((item) => (
                 <div
                   key={item.value}
-                  className='relative'>
+                  className='neu-button | relative | rounded-full '>
                   <button
                     type='button'
-                    className='rounded-full | bg-white | shadow-md'
+                    className='button'
+                    style={{
+                      color: statusMap[item.value].color,
+                    }}
                     onClick={() =>
                       setSelectedStatus((prev) =>
                         prev.includes(item.value)
@@ -71,30 +98,28 @@ export function TodosFilters(props: Props) {
                           : [...prev, item.value]
                       )
                     }>
-                    <span
-                      className='text-[13px] | py-[4px] px-[12px] | flex items-center justify-center gap-[4px] | rounded-full | whitespace-nowrap'
-                      style={{
-                        background:
-                          cookies['x-theme'] === 'dark'
-                            ? STATUS_COLORS[item.value]?.dark
-                            : `${STATUS_COLORS[item.value].white}24`,
-                        color:
-                          cookies['x-theme'] === 'dark'
-                            ? 'white'
-                            : `${STATUS_COLORS[item.value].white}`,
-                      }}>
+                    <div
+                      className={etcUtil.classNames([
+                        'button-inner | flex items-center gap-[4px]',
+                        { 'bg-indigo-600/10': selectedStatus.includes(item.value) },
+                      ])}>
                       <Icon name={item.icon} />
-                      <span>{item.label}</span>
-                    </span>
-                  </button>
-                  {selectedStatus.includes(item.value) && (
-                    <div className='inset-shadow-sm | pointer-events-none | flex items-center justify-center | absolute top-0 left-0 | w-full h-full | bg-black/20 | rounded-full'>
-                      <Icon
-                        name='check'
-                        className='text-white'
-                      />
+                      <p className='text-[11px] leading-[100%] whitespace-nowrap'>{item.label}</p>
                     </div>
-                  )}
+                  </button>
+                  <If condition={selectedStatus.includes(item.value)}>
+                    <Then>
+                      <div className='pointer-events-none | flex items-center justify-center | absolute top-0 left-0 z-[1] | w-full h-full rounded-full'>
+                        <Icon
+                          name='check'
+                          className='text-white text-[24px]'
+                          style={{
+                            filter: 'drop-shadow(1px 1px 1px var(--color-gray-400))',
+                          }}
+                        />
+                      </div>
+                    </Then>
+                  </If>
                 </div>
               ))}
             </div>
@@ -102,18 +127,16 @@ export function TodosFilters(props: Props) {
           <div className='flex flex-col gap-[4px]'>
             <p className='flex items-center gap-[2px] | text-gray-500 text-[13px]'>
               <Icon name='tag' />
-              <span>상태</span>
+              <span>태그</span>
             </p>
             <div className='flex flex-wrap gap-[6px]'>
               {tags.map((tag) => (
                 <div
                   key={tag.id}
-                  className='relative'>
+                  className='neu-button | relative | rounded-full '>
                   <button
-                    className={etcUtil.classNames([
-                      'rounded-full | bg-white',
-                      selectedTags.includes(tag.id) ? '' : 'shadow-md',
-                    ])}
+                    type='button'
+                    className='button'
                     onClick={() =>
                       setSelectedTags((prev) =>
                         prev.includes(tag.id)
@@ -121,31 +144,34 @@ export function TodosFilters(props: Props) {
                           : [...prev, tag.id]
                       )
                     }>
-                    <span
-                      className='text-[13px] | py-[4px] px-[12px] | flex items-center justify-center gap-[4px] | rounded-full | whitespace-nowrap'
-                      style={{
-                        background:
-                          cookies['x-theme'] === 'dark'
-                            ? `${tag?.color ? (TAG_COLORS[tag.color]?.dark ?? '#000000') : '#000000'}`
-                            : `${tag?.color ? `${TAG_COLORS[tag.color]?.white ?? '#000000'}24` : '#00000024'}`,
-                        color:
-                          cookies['x-theme'] === 'dark'
-                            ? 'white'
-                            : tag?.color
-                              ? (TAG_COLORS[tag?.color]?.white ?? '#000000')
-                              : '#000000',
-                      }}>
-                      {tag?.label ?? 'Memo'}
-                    </span>
-                  </button>
-                  {selectedTags.includes(tag.id) && (
-                    <div className='inset-shadow-sm pointer-events-none | flex items-center justify-center | absolute top-0 left-0 | w-full h-full | bg-black/20 | rounded-full'>
-                      <Icon
-                        name='check'
-                        className='text-white'
-                      />
+                    <div
+                      className={etcUtil.classNames([
+                        'button-inner | flex items-center gap-[4px]',
+                        { 'bg-indigo-600/10': selectedTags.includes(tag.id) },
+                      ])}>
+                      <span
+                        className='w-[8px] aspect-square | rounded-full | bg-red-500'
+                        style={{
+                          background: tag ? TAG_COLORS[tag.color].white : 'var(--color-slate-800)',
+                        }}></span>
+                      <p className='text-[13px] text-gray-600 leading-[100%]'>
+                        {tag?.label ?? 'MEMO'}
+                      </p>
                     </div>
-                  )}
+                  </button>
+                  <If condition={selectedTags.includes(tag.id)}>
+                    <Then>
+                      <div className='pointer-events-none | flex items-center justify-center | absolute top-0 left-0 z-[1] | w-full h-full rounded-full'>
+                        <Icon
+                          name='check'
+                          className='text-white text-[24px]'
+                          style={{
+                            filter: 'drop-shadow(1px 1px 1px var(--color-gray-400))',
+                          }}
+                        />
+                      </div>
+                    </Then>
+                  </If>
                 </div>
               ))}
             </div>

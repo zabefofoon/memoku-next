@@ -2,7 +2,7 @@
 
 import debounce from 'lodash.debounce'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from './Icon'
 
 export default function TodosSearch() {
@@ -14,21 +14,31 @@ export default function TodosSearch() {
 
   const [value, setValue] = useState<string>(() => searchTextQuery)
 
-  const updateQuery = debounce((next: string) => {
-    const urlParams = new URLSearchParams(searchParams.toString())
+  const inputEl = useRef<HTMLInputElement>(null)
 
-    const trimmed = next.trim()
-    if (trimmed) urlParams.set('searchText', trimmed)
-    else urlParams.delete('searchText')
+  const updateQuery = useMemo(
+    () =>
+      debounce((next: string) => {
+        const urlParams = new URLSearchParams(searchParams.toString())
 
-    const queryString = urlParams.toString()
-    router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false })
-  }, 250)
+        const trimmed = next.trim()
+        if (trimmed) urlParams.set('searchText', trimmed)
+        else urlParams.delete('searchText')
+
+        const queryString = urlParams.toString()
+        router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false })
+      }, 300),
+    [router]
+  )
 
   useEffect(() => {
     const urlValue = searchTextQuery
     setValue(urlValue)
   }, [searchTextQuery])
+
+  useEffect(() => {
+    if (inputEl.current) inputEl.current.value = searchTextQuery
+  }, [inputEl, searchTextQuery])
 
   return (
     <label className='search | w-full sm:w-fit flex items-center | border-b border-gray-300 dark:border-zinc-600 has-focus:border-indigo-500 | pr-[8px]'>
@@ -44,10 +54,10 @@ export default function TodosSearch() {
       </button>
 
       <input
+        ref={inputEl}
         type='text'
         placeholder='검색'
         className='min-w-[120px] w-full max-w-[200px] py-[4px] pl-[4px] outline-0'
-        value={value}
         onChange={(event) => {
           setValue(event.target.value)
           updateQuery(event.target.value)

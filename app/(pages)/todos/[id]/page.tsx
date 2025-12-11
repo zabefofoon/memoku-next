@@ -277,7 +277,7 @@ export default function TodosDetail() {
 
       router.back()
       await etcUtil.sleep(250)
-      router.replace('/todos')
+      router.back()
     }
   }
 
