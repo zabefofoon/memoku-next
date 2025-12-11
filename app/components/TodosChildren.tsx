@@ -46,7 +46,7 @@ export function TodosChildren({ isShow, close }: Props) {
       open={isShow ?? false}
       close={() => close()}
       content={() => (
-        <div className='flex flex-col gap-[12px] | py-[12px]'>
+        <div className='flex flex-col gap-[12px] | pt-[12px]'>
           <If condition={childrenRoot != null}>
             <Then>
               <TodoCard
@@ -62,17 +62,16 @@ export function TodosChildren({ isShow, close }: Props) {
               ))}
             </Then>
           </If>
+
+          <button
+            className='rounded-md bg-indigo-500 py-[12px]'
+            onClick={() => {
+              const target = children?.at(-1) || childrenRoot
+              if (target) addChildren(target).then(({ id }) => router.push(`/todos/${id}`))
+            }}>
+            <p className='text-white text-[15px] font-[700]'>하위 일 추가하기</p>
+          </button>
         </div>
-      )}
-      ok={() => (
-        <button
-          className='rounded-md bg-indigo-500 py-[12px]'
-          onClick={() => {
-            const target = children?.at(-1) || childrenRoot
-            if (target) addChildren(target).then(({ id }) => router.push(`/todos/${id}`))
-          }}>
-          <p className='text-white text-[15px] font-[700]'>하위 일 추가하기</p>
-        </button>
       )}
     />
   )
