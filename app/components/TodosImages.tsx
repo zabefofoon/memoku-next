@@ -55,47 +55,55 @@ export function TodosImages(props: Props) {
         onChange={handleFileChange}
       />
       {props.images && props.images.length < 5 && (
-        <button
-          type='button'
-          className='shrink-0 w-[120px] sm:w-[220px] aspect-square | flex flex-col items-center justify-center gap-[6px] | rounded-lg bg-white dark:bg-zinc-800 shadow-md'
-          onClick={() => !isUploading && fileInputEl.current?.click()}>
-          {isUploading && (
-            <>
-              <UISpinner />
-              <p className='text-[12px] sm:text-[13px] opacity-70'>업로드 중</p>
-            </>
-          )}
-          {!isUploading && (
-            <>
-              <span className='bg-slate-100 dark:bg-zinc-700 | rounded-full p-[8px]'>
-                <Icon name='image' />
-              </span>
-              <p className='text-[12px] sm:text-[13px] opacity-70'>이미지 추가</p>
-            </>
-          )}
-        </button>
+        <div id='test2'>
+          <div className='inner'>
+            <button
+              type='button'
+              className='shrink-0 w-[120px] sm:w-[220px] aspect-square | flex flex-col items-center justify-center gap-[6px]'
+              onClick={() => !isUploading && fileInputEl.current?.click()}>
+              {isUploading && (
+                <>
+                  <UISpinner />
+                  <p className='text-[12px] sm:text-[13px] opacity-70'>업로드 중</p>
+                </>
+              )}
+              {!isUploading && (
+                <>
+                  <span className='bg-slate-100 dark:bg-zinc-700 | rounded-full p-[8px]'>
+                    <Icon name='image' />
+                  </span>
+                  <p className='text-[12px] sm:text-[13px] opacity-70'>이미지 추가</p>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       )}
       {props.images?.map((image, index) => (
         <div
-          key={index}
-          className='relative | w-[120px] sm:w-[220px] aspect-square overflow-hidden shrink-0 | rounded-lg shadow-md'>
-          <Link href={`?images=${index}`}>
-            <img
-              className='w-full h-full object-cover | bg-white dark:bg-zinc-800'
-              src={image.image}
-              alt=''
-            />
-          </Link>
-          {image.id !== 'uploading' && (
-            <Link
-              href={`?image=${index}`}
-              className='absolute right-[6px] top-[6px] | p-[2px] | bg-gray-50 dark:bg-zinc-600 rounded-full'>
-              <Icon
-                name='close'
-                className='text-[14px]'
-              />
-            </Link>
-          )}
+          id='test2'
+          key={index}>
+          <div className='inner'>
+            <div className='relative | w-[120px] sm:w-[220px] aspect-square overflow-hidden shrink-0 | rounded-lg shadow-md'>
+              <Link href={`?images=${index}`}>
+                <img
+                  className='w-full h-full object-cover | bg-white dark:bg-zinc-800'
+                  src={image.image}
+                  alt=''
+                />
+              </Link>
+              {image.id !== 'uploading' && (
+                <Link
+                  href={`?image=${index}`}
+                  className='absolute right-[6px] top-[6px] | p-[2px] | bg-gray-50 dark:bg-zinc-600 rounded-full'>
+                  <Icon
+                    name='close'
+                    className='text-[14px]'
+                  />
+                </Link>
+              )}
+            </div>
+          </div>
         </div>
       ))}
     </div>

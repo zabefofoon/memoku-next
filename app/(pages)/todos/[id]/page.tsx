@@ -504,53 +504,69 @@ export default function TodosDetail() {
           </p>
         </div>
         {todo?.parentId && (
-          <Link
-            href={`/todos/${todo?.parentId}`}
-            replace
-            className='p-[8px] mb-[12px] | text-[13px] | bg-white dark:bg-zinc-800 shadow-md rounded-xl | flex gap-[12px]'>
-            <p className='shrink-0 | flex items-center | opacity-70'>
-              <Icon
-                name='chevron-up'
-                className='text-[20px]'
-              />
-              상위
-            </p>
-            <p className='truncate'>{parentTodo?.description?.split(/\n/)[0]}</p>
-          </Link>
-        )}
-        {
-          <div className='pb-[4px] | flex-1 overflow-hidden | flex gap-[16px] flex-col sm:flex-row'>
-            <div className='flex-1 w-full h-full | flex flex-col | sm:overflow-auto | bg-white dark:bg-zinc-800 shadow-md rounded-xl'>
-              <TodosEditor
-                todo={todo}
-                updateText={saveText}
-                updateStatus={updateStatus}
-                addImages={addImages}
-              />
+          <div
+            id='test2'
+            className='mb-[12px]'>
+            <div className='inner'>
+              <Link
+                href={`/todos/${todo?.parentId}`}
+                replace
+                className='p-[8px]  | text-[13px] | flex gap-[12px]'>
+                <p className='shrink-0 | flex items-center | opacity-70'>
+                  <Icon
+                    name='chevron-up'
+                    className='text-[20px]'
+                  />
+                  상위
+                </p>
+                <p className='truncate'>{parentTodo?.description?.split(/\n/)[0]}</p>
+              </Link>
             </div>
-            <TodosImages
-              todo={todo}
-              images={images}
-              addImages={addImages}
-              deleteImage={deleteImage}
-            />
           </div>
-        }
+        )}
+        <div className='pb-[4px] | flex-1 overflow-hidden | flex gap-[16px] flex-col sm:flex-row'>
+          <div
+            id='test2'
+            className='flex-1 w-full h-full'>
+            <div className='inner | h-full bg-white'>
+              <div className='h-full | flex flex-col | sm:overflow-auto | dark:bg-zinc-800'>
+                <TodosEditor
+                  todo={todo}
+                  updateText={saveText}
+                  updateStatus={updateStatus}
+                  addImages={addImages}
+                />
+              </div>
+            </div>
+          </div>
+          <TodosImages
+            todo={todo}
+            images={images}
+            addImages={addImages}
+            deleteImage={deleteImage}
+          />
+        </div>
 
         {childTodo ? (
-          <Link
-            href={`/todos/${childTodo.id}`}
-            replace
-            className='p-[8px] mt-[12px] | text-[13px] | bg-white dark:bg-zinc-800 shadow-md rounded-xl | flex gap-[12px]'>
-            <p className='shrink-0 | flex items-center | opacity-70'>
-              <Icon
-                name='chevron-down'
-                className='text-[20px]'
-              />
-              하위
-            </p>
-            <p className='truncate'>{childTodo.description?.split(/\n/)[0]}</p>
-          </Link>
+          <div
+            id='test2'
+            className='mt-[12px]'>
+            <div className='inner'>
+              <Link
+                href={`/todos/${childTodo.id}`}
+                replace
+                className='p-[8px] | text-[13px] | flex gap-[12px]'>
+                <p className='shrink-0 | flex items-center | opacity-70'>
+                  <Icon
+                    name='chevron-down'
+                    className='text-[20px]'
+                  />
+                  하위
+                </p>
+                <p className='truncate'>{childTodo.description?.split(/\n/)[0]}</p>
+              </Link>
+            </div>
+          </div>
         ) : (
           <button
             className='flex items-center justify-center | shadow-lg bg-indigo-500 | text-white | pl-[12px] pr-[20px] py-[12px] mt-[12px] mx-auto | w-full sm:w-fit | rounded-2xl'
