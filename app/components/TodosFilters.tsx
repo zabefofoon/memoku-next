@@ -152,7 +152,9 @@ export function TodosFilters(props: Props) {
                       <span
                         className='w-[8px] aspect-square | rounded-full | bg-red-500'
                         style={{
-                          background: tag ? TAG_COLORS[tag.color].white : 'var(--color-slate-800)',
+                          background: tag
+                            ? TAG_COLORS[tag.color]?.white || 'var(--color-slate-800)'
+                            : 'var(--color-slate-800)',
                         }}></span>
                       <p className='text-[13px] text-gray-600 leading-[100%]'>
                         {tag?.label ?? 'MEMO'}

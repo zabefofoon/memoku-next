@@ -91,7 +91,9 @@ export function TodoCard({
             <div
               className='w-[8px] aspect-square | rounded-full | bg-red-500'
               style={{
-                background: tag ? TAG_COLORS[tag.color].white : 'var(--color-slate-800)',
+                background: tag
+                  ? TAG_COLORS[tag.color]?.white || 'var(--color-slate-800)'
+                  : 'var(--color-slate-800)',
               }}></div>
             <p className='text-[11px] text-gray-600 leading-[100%]'>{tag?.label ?? 'MEMO'}</p>
           </button>
