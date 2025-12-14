@@ -5,6 +5,7 @@ import { TodosDeleteModal } from '@/app/components/TodosDeleteModal'
 import TodosEditor from '@/app/components/TodosEditor'
 import { TodosImages } from '@/app/components/TodosImages'
 import TodosImagesModal from '@/app/components/TodosImagesModal'
+import { TodosStatusModal } from '@/app/components/TodosStatusModal'
 import { TodosTagModal } from '@/app/components/TodosTagModal'
 import TodosTimeModal from '@/app/components/TodosTimeModal'
 import UISpinner from '@/app/components/UISpinner'
@@ -36,6 +37,7 @@ export default function TodosDetail() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const [isShowDeleteModal, setIsShowDeleteModal] = useState(false)
+  const [isShowStatusModal, setIsShowStatusModal] = useState(false)
   const [isShowTagModal, setIsShowTagModal] = useState(false)
   const [isShowImageModal, setIsShowImageModal] = useState(false)
   const [isShowTimeModal, setIsShowTimeModal] = useState(false)
@@ -310,6 +312,8 @@ export default function TodosDetail() {
       })
 
     if (todoId === todo?.id) setTodo((prev) => ({ ...prev!, status }))
+
+    router.back()
   }
 
   const updateTime = async (
@@ -449,6 +453,7 @@ export default function TodosDetail() {
     setIsShowTagModal(!!searchParams.get('todoTag'))
     setIsShowImageModal(!!searchParams.get('images'))
     setIsShowTimeModal(!!searchParams.get('time'))
+    setIsShowStatusModal(!!searchParams.get('todoStatus'))
   }, [searchParams])
 
   if (isLoading)
@@ -475,6 +480,11 @@ export default function TodosDetail() {
           isShow={isShowTagModal}
           close={router.back}
           select={changeTag}
+        />
+        <TodosStatusModal
+          isShow={isShowStatusModal}
+          close={router.back}
+          select={(status) => updateStatus(status, todo.id)}
         />
         {todo && (
           <TodosImagesModal
@@ -533,7 +543,6 @@ export default function TodosDetail() {
                 <TodosEditor
                   todo={todo}
                   updateText={saveText}
-                  updateStatus={updateStatus}
                   addImages={addImages}
                 />
               </div>
