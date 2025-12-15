@@ -24,6 +24,36 @@ export const STATUS_COLORS = {
   done: { white: '#1abc9c', dark: '#16a085' },
 } as const
 
+export const STATUS_MAP = {
+  done: {
+    label: '완료됨',
+    icon: 'check',
+    color: 'var(--color-green-500)',
+  },
+  inprogress: {
+    label: '진행중',
+    icon: 'run',
+    color: 'var(--color-indigo-500)',
+  },
+  hold: {
+    label: '중지됨',
+    icon: 'pause',
+    color: 'var(--color-orange-600)',
+  },
+  created: {
+    label: '생성됨',
+    icon: 'plus',
+    color: 'var(--color-slate-600)',
+  },
+}
+
+export const FILTER_STATUS = [
+  { label: '생성됨', value: 'created', icon: 'plus' },
+  { label: '진행중', value: 'inprogress', icon: 'run' },
+  { label: '중단됨', value: 'hold', icon: 'pause' },
+  { label: '완료됨', value: 'done', icon: 'check' },
+] as const
+
 export const WEEK_DAYS: { name: string; value: WeekDay }[] = [
   { name: '일', value: 'sun' },
   { name: '월', value: 'mon' },
@@ -59,10 +89,3 @@ export const CALENDAR_REPEAT = {
   fri: 5,
   sat: 6,
 }
-
-export const FILTER_STATUS = [
-  { label: '생성됨', value: 'created', icon: 'plus' },
-  { label: '진행중', value: 'inprogress', icon: 'run' },
-  { label: '중단됨', value: 'hold', icon: 'pause' },
-  { label: '완료됨', value: 'done', icon: 'check' },
-] as const

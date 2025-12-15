@@ -9,12 +9,12 @@ import { Icon } from './Icon'
 import UIBottomSheet from './UIBottomSheet'
 
 interface Props {
-  isShow?: boolean
+  isShow: boolean
   select: (tag: Tag) => void
   close: () => void
 }
 
-export function TodosTagModal({ isShow, select, close }: Props) {
+export function TodosTagModal({ isShow = false, select, close }: Props) {
   const tags = useTagsStore((s) => s.tags)
   const [selectedTag, setSelectedTag] = useState<Tag>()
 
@@ -25,7 +25,7 @@ export function TodosTagModal({ isShow, select, close }: Props) {
   return (
     <UIBottomSheet
       header={() => <span>태그변경</span>}
-      open={isShow ?? false}
+      open={isShow}
       close={() => close()}
       content={() => (
         <div className='flex gap-[6px] flex-wrap | max-w-[320px] | py-[6px] px-[4px]'>

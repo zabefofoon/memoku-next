@@ -1,6 +1,6 @@
 'use client'
 
-import { FILTER_STATUS } from '@/const'
+import { FILTER_STATUS, STATUS_MAP } from '@/const'
 import { useEffect, useState } from 'react'
 import { Todo } from '../models/Todo'
 import etcUtil from '../utils/etc.util'
@@ -15,21 +15,6 @@ interface Props {
 
 export function TodosStatusModal({ isShow, select, close }: Props) {
   const [selectedStatus, setSelectedStatus] = useState<Todo['status']>()
-
-  const statusMap = {
-    done: {
-      color: 'var(--color-green-500)',
-    },
-    inprogress: {
-      color: 'var(--color-indigo-500)',
-    },
-    hold: {
-      color: 'var(--color-orange-600)',
-    },
-    created: {
-      color: 'var(--color-slate-600)',
-    },
-  }
 
   useEffect(() => {
     setSelectedStatus(undefined)
@@ -50,7 +35,7 @@ export function TodosStatusModal({ isShow, select, close }: Props) {
                 type='button'
                 className='button'
                 style={{
-                  color: statusMap[status.value].color,
+                  color: STATUS_MAP[status.value].color,
                 }}
                 onClick={() => setSelectedStatus(status.value)}>
                 <div

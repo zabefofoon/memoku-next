@@ -1,9 +1,8 @@
 'use client'
 
-import { FILTER_STATUS, TAG_COLORS } from '@/const'
+import { FILTER_STATUS, STATUS_MAP, TAG_COLORS } from '@/const'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { useCookies } from 'react-cookie'
 import { If, Then } from 'react-if'
 import { Tag, Todo } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
@@ -17,8 +16,6 @@ interface Props {
 }
 
 export function TodosFilters(props: Props) {
-  const [cookies] = useCookies()
-
   const router = useRouter()
 
   const tags = useTagsStore((s) => s.tags)
@@ -29,29 +26,6 @@ export function TodosFilters(props: Props) {
 
   const status = searchParams.get('status')
   const tagsQuery = searchParams.get('tags')
-
-  const statusMap = {
-    done: {
-      label: '완료됨',
-      icon: 'check',
-      color: 'var(--color-green-500)',
-    },
-    inprogress: {
-      label: '진행중',
-      icon: 'run',
-      color: 'var(--color-indigo-500)',
-    },
-    hold: {
-      label: '중지됨',
-      icon: 'pause',
-      color: 'var(--color-orange-600)',
-    },
-    created: {
-      label: '생성됨',
-      icon: 'plus',
-      color: 'var(--color-slate-600)',
-    },
-  }
 
   const apply = (): void => {
     const base: Record<string, string> = {}
@@ -89,7 +63,7 @@ export function TodosFilters(props: Props) {
                     type='button'
                     className='button'
                     style={{
-                      color: statusMap[item.value].color,
+                      color: STATUS_MAP[item.value].color,
                     }}
                     onClick={() =>
                       setSelectedStatus((prev) =>

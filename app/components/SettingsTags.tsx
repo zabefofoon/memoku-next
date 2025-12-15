@@ -97,7 +97,7 @@ export default function SettingsTags() {
       <TodosDeleteModal
         isShow={isShowDeleteModal}
         close={router.back}
-        delete={deleteTag}
+        done={deleteTag}
       />
       <SettingsTagModal
         isShow={isShowTagModal}

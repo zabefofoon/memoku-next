@@ -405,8 +405,10 @@ export const todosDB = {
     await db.todos.add(todo)
     return todo
   },
-  updateDescription: (id: string, description: string): Promise<number> => {
-    return db.todos.update(id, { description, modified: Date.now(), dirty: true })
+  updateDescription: async (id: string, description: string): Promise<number> => {
+    const now = Date.now()
+    await db.todos.update(id, { description, modified: now, dirty: true })
+    return now
   },
   updateTimes: async (
     id: string,

@@ -2,18 +2,17 @@
 
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Todo } from '../models/Todo'
+import { ImageRow } from '../models/Todo'
 import UICarousel, { UICarouselSlide } from './UICarousel'
 import UIModal from './UIModal'
 
 interface Props {
-  todo: Todo
-  images?: { id: string; image: string; todoId: string }[]
+  images?: ImageRow[]
   isShow?: boolean
   close: () => void
 }
 
-export default function TodosImagesModal(props: Props) {
+export default function TodosImagesModal({ images, isShow, close }: Props) {
   const searchParams = useSearchParams()
 
   const [startIndex, setStartIndex] = useState<number>()
@@ -26,12 +25,12 @@ export default function TodosImagesModal(props: Props) {
 
   return (
     <UIModal
-      open={props.isShow ?? false}
-      close={() => props.close()}
+      open={isShow ?? false}
+      close={() => close()}
       content={() => (
         <div className='sm:w-[1024px]'>
           <UICarousel startIndex={startIndex}>
-            {props.images?.map((image, index) => (
+            {images?.map((image, index) => (
               <UICarouselSlide key={index}>
                 <img
                   className='w-full sm:max-w-[992px] h-[80dvh] sm:h-[50dvh] aspect-square object-contain'

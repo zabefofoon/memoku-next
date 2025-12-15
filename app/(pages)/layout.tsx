@@ -41,7 +41,6 @@ export default async function RootLayout(props: LayoutProps<'/'>) {
           refreshToken={refreshToken}>
           <EnsureProviders isDarkMode={isDarkMode}>
             <div className='relative | h-full | flex flex-col sm:flex-row sm:gap-[36px] sm:p-[24px] sm:pr-[0]'>
-              {/* <AppTopAppBar /> */}
               <AppAside isExpand={isExpandAside} />
               <main
                 id='scroll-el'

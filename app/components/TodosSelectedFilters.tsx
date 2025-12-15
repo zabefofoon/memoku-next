@@ -20,7 +20,6 @@ export default function TodosTagsFilter() {
 
   const excludeStatus = (item: Todo['status']): void => {
     const urlParams = new URLSearchParams(searchParams.toString())
-
     const current = (urlParams.get('status') ?? '').split(',').filter(Boolean)
 
     const next = current.filter((value) => value !== item)
