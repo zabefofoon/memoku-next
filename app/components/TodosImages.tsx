@@ -38,7 +38,7 @@ export function TodosImages() {
   }, [pathname, todo?.id, searchParams])
 
   return (
-    <div className='sm:h-full overflow-y-hidden sm:overflow-y-auto sm:overflow-x-hidden | flex sm:flex-col gap-[12px]'>
+    <div className='shrink-0 sm:h-full | overflow-y-hidden sm:overflow-y-auto sm:overflow-x-hidden | flex sm:flex-col gap-[12px]'>
       <TodosDeleteModal
         isShow={isShowDeleteModal}
         close={() => router.back()}
@@ -55,25 +55,23 @@ export function TodosImages() {
       <If condition={images && images.length < 5}>
         <Then>
           <div className='emboss-sheet'>
-            <div className='inner'>
-              <button
-                type='button'
-                className='shrink-0 w-[120px] sm:w-[220px] aspect-square | flex flex-col items-center justify-center gap-[6px]'
-                onClick={() => !isUploading && fileInputEl.current?.click()}>
-                <If condition={!!isUploading}>
-                  <Then>
-                    <UISpinner />
-                    <p className='text-[12px] sm:text-[13px] opacity-70'>업로드 중</p>
-                  </Then>
-                  <Else>
-                    <span className='bg-slate-100 dark:bg-zinc-700 | rounded-full p-[8px]'>
-                      <Icon name='image' />
-                    </span>
-                    <p className='text-[12px] sm:text-[13px] opacity-70'>이미지 추가</p>
-                  </Else>
-                </If>
-              </button>
-            </div>
+            <button
+              type='button'
+              className='shrink-0 w-[120px] sm:w-[220px] aspect-square | flex flex-col items-center justify-center gap-[6px]'
+              onClick={() => !isUploading && fileInputEl.current?.click()}>
+              <If condition={!!isUploading}>
+                <Then>
+                  <UISpinner />
+                  <p className='text-[12px] sm:text-[13px] opacity-70'>업로드 중</p>
+                </Then>
+                <Else>
+                  <span className='bg-slate-100 dark:bg-zinc-700 | rounded-full p-[8px]'>
+                    <Icon name='image' />
+                  </span>
+                  <p className='text-[12px] sm:text-[13px] opacity-70'>이미지 추가</p>
+                </Else>
+              </If>
+            </button>
           </div>
         </Then>
       </If>
@@ -82,28 +80,26 @@ export function TodosImages() {
         <div
           className='emboss-sheet'
           key={index}>
-          <div className='inner'>
-            <div className='relative | w-[120px] sm:w-[220px] aspect-square overflow-hidden shrink-0 | rounded-lg shadow-md'>
-              <Link href={`?images=${index}`}>
-                <img
-                  className='w-full h-full object-cover | bg-white dark:bg-zinc-800'
-                  src={image.image}
-                  alt=''
-                />
-              </Link>
-              <If condition={image.id !== 'uploading'}>
-                <Then>
-                  <Link
-                    href={`?image=${index}`}
-                    className='absolute right-[6px] top-[6px] | p-[2px] | bg-gray-50 dark:bg-zinc-600 rounded-full'>
-                    <Icon
-                      name='close'
-                      className='text-[14px]'
-                    />
-                  </Link>
-                </Then>
-              </If>
-            </div>
+          <div className='relative | w-[120px] sm:w-[220px] aspect-square overflow-hidden shrink-0 | rounded-lg shadow-md'>
+            <Link href={`?images=${index}`}>
+              <img
+                className='w-full h-full object-cover | bg-white dark:bg-zinc-800'
+                src={image.image}
+                alt=''
+              />
+            </Link>
+            <If condition={image.id !== 'uploading'}>
+              <Then>
+                <Link
+                  href={`?image=${index}`}
+                  className='absolute right-[6px] top-[6px] | p-[2px] | bg-gray-50 dark:bg-zinc-600 rounded-full'>
+                  <Icon
+                    name='close'
+                    className='text-[14px]'
+                  />
+                </Link>
+              </Then>
+            </If>
           </div>
         </div>
       ))}

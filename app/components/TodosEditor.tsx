@@ -36,16 +36,12 @@ export default function TodosEditor() {
 
   return (
     <div className='flex flex-col gap-[12px] | flex-1 w-full overflow-auto | relative | p-[8px]'>
-      <div className='absolute top-[8px] right-[8px] | flex gap-[4px] sm:gap-[8px]'>
+      <div className='absolute top-[8px] right-[8px] | flex gap-[8px]'>
         <If condition={todo?.id}>
           <Then>
             <Link
               href={`?time=${todo?.id}}`}
-              className='rounded-full | p-[6px] | border border-gray-100'
-              type='button'
-              style={{
-                boxShadow: '1px 1px 0 var(--color-gray-300), -1px -1px 0 white',
-              }}>
+              className='neu-button !p-[4px]'>
               <Icon
                 name='alarm'
                 className='expand-hitbox | text-[16px]'
@@ -53,11 +49,7 @@ export default function TodosEditor() {
             </Link>
             <Link
               href={`?deleteModal=${todo?.id}`}
-              className='rounded-full | p-[6px] | border border-gray-100'
-              type='button'
-              style={{
-                boxShadow: '1px 1px 0 var(--color-gray-300), -1px -1px 0 white',
-              }}>
+              className='neu-button !p-[4px]'>
               <Icon
                 name='delete'
                 className='expand-hitbox | text-[16px]'
@@ -69,47 +61,39 @@ export default function TodosEditor() {
       <div className='flex items-center gap-[6px]'>
         <If condition={todo != null}>
           <Then>
-            <div className='neu-button | rounded-full | h-[34px] | flex'>
-              <button
-                type='button'
-                className='button'
-                onClick={() => router.push(`?todoTag=${todo?.id}`)}>
-                <div className='button-inner | flex items-center gap-[4px]'>
-                  <span
-                    className='w-[8px] aspect-square | rounded-full | bg-red-500'
-                    style={{
-                      background: tag
-                        ? TAG_COLORS[tag.color]?.white || 'var(--color-slate-800)'
-                        : 'var(--color-slate-800)',
-                    }}></span>
-                  <p className='text-[11px] text-gray-600 leading-[100%]'>{tag?.label ?? 'MEMO'}</p>
-                </div>
-              </button>
-            </div>
+            <button
+              type='button'
+              className='neu-button'
+              onClick={() => router.push(`?todoTag=${todo?.id}`)}>
+              <Icon
+                name='tag-active'
+                className='text-[11px] translate-y-[1px]'
+                style={{
+                  color: tag
+                    ? TAG_COLORS[tag.color]?.white || 'var(--color-slate-500)'
+                    : 'var(--color-slate-500)',
+                }}
+              />
+              <p>{tag?.label ?? 'MEMO'}</p>
+            </button>
           </Then>
         </If>
 
-        <div className='neu-button | relative | rounded-full '>
-          <button
-            type='button'
-            className='button'
-            style={{
-              color: STATUS_MAP[todo?.status ?? 'created']?.color,
-            }}
-            onClick={() => {
-              const urlParams = new URLSearchParams(searchParams.toString())
-              router.push(`?${decodeURIComponent(urlParams.toString())}&todoStatus=${todo?.id}`, {
-                scroll: false,
-              })
-            }}>
-            <div className='button-inner | flex items-center'>
-              <Icon name={STATUS_MAP[todo?.status ?? 'created']?.icon} />
-              <p className='text-[11px] leading-[100%] whitespace-nowrap'>
-                {STATUS_MAP[todo?.status ?? 'created']?.label}
-              </p>
-            </div>
-          </button>
-        </div>
+        <button
+          type='button'
+          className='neu-button'
+          style={{
+            color: STATUS_MAP[todo?.status ?? 'created']?.color,
+          }}
+          onClick={() => {
+            const urlParams = new URLSearchParams(searchParams.toString())
+            router.push(`?${decodeURIComponent(urlParams.toString())}&todoStatus=${todo?.id}`, {
+              scroll: false,
+            })
+          }}>
+          <Icon name={STATUS_MAP[todo?.status ?? 'created']?.icon} />
+          <p>{STATUS_MAP[todo?.status ?? 'created']?.label}</p>
+        </button>
       </div>
       <textarea
         ref={textareaEl}

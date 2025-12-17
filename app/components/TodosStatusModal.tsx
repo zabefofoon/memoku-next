@@ -26,39 +26,22 @@ export function TodosStatusModal({ isShow, select, close }: Props) {
       open={isShow ?? false}
       close={() => close()}
       content={() => (
-        <div className='flex gap-[8px] flex-wrap | max-w-[320px] | pb-[2px] px-[2px]'>
+        <div className='flex gap-[8px] flex-wrap | max-w-[320px] | py-[12px] px-[2px]'>
           {FILTER_STATUS.map((status) => (
-            <div
+            <button
               key={status.value}
-              className='neu-button | relative | rounded-full '>
-              <button
-                type='button'
-                className='button'
-                style={{
-                  color: STATUS_MAP[status.value].color,
-                }}
-                onClick={() => setSelectedStatus(status.value)}>
-                <div
-                  className={etcUtil.classNames([
-                    'button-inner | flex items-center gap-[4px]',
-                    { 'bg-indigo-600/10': status.value === selectedStatus },
-                  ])}>
-                  <Icon name={status.icon} />
-                  <p className='text-[13px] leading-[100%]'>{status.label}</p>
-                </div>
-              </button>
-              {selectedStatus === status.value && (
-                <div className='flex items-center justify-center  | absolute top-0 left-0 z-[1] | w-full h-full rounded-full'>
-                  <Icon
-                    name='check'
-                    className='text-white text-[24px]'
-                    style={{
-                      filter: 'drop-shadow(1px 1px 1px var(--color-gray-400))',
-                    }}
-                  />
-                </div>
-              )}
-            </div>
+              type='button'
+              className={etcUtil.classNames([
+                'neu-button',
+                { active: status.value === selectedStatus },
+              ])}
+              style={{
+                color: STATUS_MAP[status.value].color,
+              }}
+              onClick={() => setSelectedStatus(status.value)}>
+              <Icon name={status.icon} />
+              <p>{status.label}</p>
+            </button>
           ))}
         </div>
       )}

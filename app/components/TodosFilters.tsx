@@ -3,7 +3,6 @@
 import { FILTER_STATUS, STATUS_MAP, TAG_COLORS } from '@/const'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { If, Then } from 'react-if'
 import { Tag, Todo } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
 import etcUtil from '../utils/etc.util'
@@ -56,45 +55,25 @@ export function TodosFilters(props: Props) {
             </p>
             <div className='flex items-center gap-[8px] flex-wrap | text-[14px]'>
               {FILTER_STATUS.map((item) => (
-                <div
+                <button
                   key={item.value}
-                  className='neu-button | relative | rounded-full '>
-                  <button
-                    type='button'
-                    className='button'
-                    style={{
-                      color: STATUS_MAP[item.value].color,
-                    }}
-                    onClick={() =>
-                      setSelectedStatus((prev) =>
-                        prev.includes(item.value)
-                          ? prev.filter((child) => child !== item.value)
-                          : [...prev, item.value]
-                      )
-                    }>
-                    <div
-                      className={etcUtil.classNames([
-                        'button-inner | flex items-center gap-[4px]',
-                        { 'bg-indigo-600/10': selectedStatus.includes(item.value) },
-                      ])}>
-                      <Icon name={item.icon} />
-                      <p className='text-[11px] leading-[100%] whitespace-nowrap'>{item.label}</p>
-                    </div>
-                  </button>
-                  <If condition={selectedStatus.includes(item.value)}>
-                    <Then>
-                      <div className='pointer-events-none | flex items-center justify-center | absolute top-0 left-0 z-[1] | w-full h-full rounded-full'>
-                        <Icon
-                          name='check'
-                          className='text-white text-[24px]'
-                          style={{
-                            filter: 'drop-shadow(1px 1px 1px var(--color-gray-400))',
-                          }}
-                        />
-                      </div>
-                    </Then>
-                  </If>
-                </div>
+                  type='button'
+                  className={etcUtil.classNames('neu-button', [
+                    { active: selectedStatus.includes(item.value) },
+                  ])}
+                  style={{
+                    color: STATUS_MAP[item.value].color,
+                  }}
+                  onClick={() =>
+                    setSelectedStatus((prev) =>
+                      prev.includes(item.value)
+                        ? prev.filter((child) => child !== item.value)
+                        : [...prev, item.value]
+                    )
+                  }>
+                  <Icon name={item.icon} />
+                  <p>{item.label}</p>
+                </button>
               ))}
             </div>
           </div>
@@ -105,50 +84,30 @@ export function TodosFilters(props: Props) {
             </p>
             <div className='flex flex-wrap gap-[6px]'>
               {tags.map((tag) => (
-                <div
+                <button
                   key={tag.id}
-                  className='neu-button | relative | rounded-full '>
-                  <button
-                    type='button'
-                    className='button'
-                    onClick={() =>
-                      setSelectedTags((prev) =>
-                        prev.includes(tag.id)
-                          ? prev.filter((child) => child !== tag.id)
-                          : [...prev, tag.id]
-                      )
-                    }>
-                    <div
-                      className={etcUtil.classNames([
-                        'button-inner | flex items-center gap-[4px]',
-                        { 'bg-indigo-600/10': selectedTags.includes(tag.id) },
-                      ])}>
-                      <span
-                        className='w-[8px] aspect-square | rounded-full | bg-red-500'
-                        style={{
-                          background: tag
-                            ? TAG_COLORS[tag.color]?.white || 'var(--color-slate-800)'
-                            : 'var(--color-slate-800)',
-                        }}></span>
-                      <p className='text-[13px] text-gray-600 leading-[100%]'>
-                        {tag?.label ?? 'MEMO'}
-                      </p>
-                    </div>
-                  </button>
-                  <If condition={selectedTags.includes(tag.id)}>
-                    <Then>
-                      <div className='pointer-events-none | flex items-center justify-center | absolute top-0 left-0 z-[1] | w-full h-full rounded-full'>
-                        <Icon
-                          name='check'
-                          className='text-white text-[24px]'
-                          style={{
-                            filter: 'drop-shadow(1px 1px 1px var(--color-gray-400))',
-                          }}
-                        />
-                      </div>
-                    </Then>
-                  </If>
-                </div>
+                  type='button'
+                  className={etcUtil.classNames('neu-button', [
+                    { active: selectedTags.includes(tag.id) },
+                  ])}
+                  onClick={() =>
+                    setSelectedTags((prev) =>
+                      prev.includes(tag.id)
+                        ? prev.filter((child) => child !== tag.id)
+                        : [...prev, tag.id]
+                    )
+                  }>
+                  <Icon
+                    name='tag-active'
+                    className='text-[11px] translate-y-[1px]'
+                    style={{
+                      color: tag
+                        ? TAG_COLORS[tag.color]?.white || 'var(--color-slate-500)'
+                        : 'var(--color-slate-500)',
+                    }}
+                  />
+                  <p>{tag?.label ?? 'MEMO'}</p>
+                </button>
               ))}
             </div>
           </div>

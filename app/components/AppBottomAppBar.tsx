@@ -70,7 +70,7 @@ export default function AppBottomAppBar() {
                 { 'bg-indigo-500 text-white': pathname === menu.href },
               ])}>
               {menu.induce && (
-                <div className='absolute w-[4px] top-[4px] left-[16px] | aspect-square rounded-full | bg-red-500'></div>
+                <div className='absolute w-[4px] top-[4px] left-[16px] | aspect-square rounded-full'></div>
               )}
               <Icon
                 name={menu.icon}

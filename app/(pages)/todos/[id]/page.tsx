@@ -119,32 +119,26 @@ export default function TodosDetail() {
         <If condition={todo.parentId != null}>
           <Then>
             <div className='emboss-sheet | mb-[12px]'>
-              <div className='inner'>
-                <Link
-                  href={`/todos/${todo.parentId}`}
-                  replace
-                  className='p-[8px]  | text-[13px] | flex gap-[12px]'>
-                  <p className='shrink-0 | flex items-center | opacity-70'>
-                    <Icon
-                      name='chevron-up'
-                      className='text-[20px]'
-                    />
-                    상위
-                  </p>
-                  <p className='truncate'>{parentTodo?.description?.split(/\n/)[0]}</p>
-                </Link>
-              </div>
+              <Link
+                href={`/todos/${todo.parentId}`}
+                replace
+                className='p-[8px]  | text-[13px] | flex gap-[12px]'>
+                <p className='shrink-0 | flex items-center | opacity-70'>
+                  <Icon
+                    name='chevron-up'
+                    className='text-[20px]'
+                  />
+                  상위
+                </p>
+                <p className='truncate'>{parentTodo?.description?.split(/\n/)[0]}</p>
+              </Link>
             </div>
           </Then>
         </If>
 
         <div className='pb-[4px] | flex-1 overflow-hidden | flex gap-[16px] flex-col sm:flex-row'>
-          <div className='emboss-sheet | flex-1 w-full h-full'>
-            <div className='inner | h-full bg-white'>
-              <div className='h-full | flex flex-col | sm:overflow-auto | dark:bg-zinc-800'>
-                <TodosEditor />
-              </div>
-            </div>
+          <div className='emboss-sheet | w-full h-full | flex flex-col | sm:overflow-auto | dark:bg-zinc-800'>
+            <TodosEditor />
           </div>
           <TodosImages />
         </div>
@@ -152,21 +146,19 @@ export default function TodosDetail() {
         <If condition={childTodo != null}>
           <Then>
             <div className='emboss-sheet | mt-[12px]'>
-              <div className='inner'>
-                <Link
-                  href={`/todos/${childTodo?.id}`}
-                  replace
-                  className='p-[8px] | text-[13px] | flex gap-[12px]'>
-                  <p className='shrink-0 | flex items-center | opacity-70'>
-                    <Icon
-                      name='chevron-down'
-                      className='text-[20px]'
-                    />
-                    하위
-                  </p>
-                  <p className='truncate'>{childTodo?.description?.split(/\n/)[0]}</p>
-                </Link>
-              </div>
+              <Link
+                href={`/todos/${childTodo?.id}`}
+                replace
+                className='p-[8px] | text-[13px] | flex gap-[12px]'>
+                <p className='shrink-0 | flex items-center | opacity-70'>
+                  <Icon
+                    name='chevron-down'
+                    className='text-[20px]'
+                  />
+                  하위
+                </p>
+                <p className='truncate'>{childTodo?.description?.split(/\n/)[0]}</p>
+              </Link>
             </div>
           </Then>
           <Else>

@@ -28,42 +28,24 @@ export function TodosTagModal({ isShow = false, select, close }: Props) {
       open={isShow}
       close={() => close()}
       content={() => (
-        <div className='flex gap-[6px] flex-wrap | max-w-[320px] | py-[6px] px-[4px]'>
+        <div className='flex gap-[6px] flex-wrap | max-w-[320px] | py-[12px] px-[4px]'>
           {tags.map((tag) => (
-            <div
+            <button
               key={tag.id}
-              className='neu-button | relative | rounded-full '>
-              <button
-                type='button'
-                className='button'
-                onClick={() => setSelectedTag(tag)}>
-                <div
-                  className={etcUtil.classNames([
-                    'button-inner | flex items-center gap-[4px]',
-                    { 'bg-indigo-600/10': tag.id === selectedTag?.id },
-                  ])}>
-                  <span
-                    className='w-[8px] aspect-square | rounded-full | bg-red-500'
-                    style={{
-                      background: tag
-                        ? TAG_COLORS[tag.color]?.white || 'var(--color-slate-800)'
-                        : 'var(--color-slate-800)',
-                    }}></span>
-                  <p className='text-[13px] text-gray-600 leading-[100%]'>{tag?.label ?? 'MEMO'}</p>
-                </div>
-              </button>
-              {selectedTag?.id === tag.id && (
-                <div className='flex items-center justify-center  | absolute top-0 left-0 z-[1] | w-full h-full rounded-full'>
-                  <Icon
-                    name='check'
-                    className='text-white text-[24px]'
-                    style={{
-                      filter: 'drop-shadow(1px 1px 1px var(--color-gray-400))',
-                    }}
-                  />
-                </div>
-              )}
-            </div>
+              type='button'
+              className={etcUtil.classNames(['neu-button', { active: tag.id === selectedTag?.id }])}
+              onClick={() => setSelectedTag(tag)}>
+              <Icon
+                name='tag-active'
+                className='text-[11px] translate-y-[1px]'
+                style={{
+                  color: tag
+                    ? TAG_COLORS[tag.color]?.white || 'var(--color-slate-500)'
+                    : 'var(--color-slate-500)',
+                }}
+              />
+              <p className='text-[13px] text-gray-600 leading-[100%]'>{tag?.label ?? 'MEMO'}</p>
+            </button>
           ))}
         </div>
       )}
