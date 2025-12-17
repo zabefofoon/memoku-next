@@ -62,7 +62,6 @@ export default function AppBottomAppBar() {
           <Link
             href={menu.href}
             key={menu.href}
-            replace
             className='w-full | p-[6px]'>
             <div
               className={etcUtil.classNames([

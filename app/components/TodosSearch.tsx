@@ -28,7 +28,7 @@ export default function TodosSearch() {
         const queryString = urlParams.toString()
         router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false })
       }, 300),
-    [router]
+    [pathname, router, searchParams]
   )
 
   useEffect(() => {
