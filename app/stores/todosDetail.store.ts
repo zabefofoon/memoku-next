@@ -8,6 +8,7 @@ import { ImageRow, Tag, Todo } from '../models/Todo'
 import etcUtil from '../utils/etc.util'
 import { useImagesStore } from './images.store'
 import { useSheetStore } from './sheet.store'
+import { useTodosPageStore } from './todosPage.store'
 
 interface TodosDetailStore {
   isLoading: boolean
@@ -67,6 +68,9 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
 
   changeTag: async (tag: Tag, cb?: () => void) => {
     const { todo } = get()
+    const { setTodos, setTodayTodos, setThisWeekTodos, setNextWeekTodos, setChildren } =
+      useTodosPageStore.getState()
+
     if (todo == null) return
 
     const { fileId } = useSheetStore.getState()
@@ -89,10 +93,48 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
       })
     )
 
+    setTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) found.tagId = tag.id
+      })
+    )
+
+    setTodayTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) found.tagId = tag.id
+      })
+    )
+
+    setThisWeekTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) found.tagId = tag.id
+      })
+    )
+
+    setNextWeekTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) found.tagId = tag.id
+      })
+    )
+
+    setChildren((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) found.tagId = tag.id
+      })
+    )
+
     cb?.()
   },
   updateStatus: async (status: Todo['status'], cb?: () => void) => {
     const { todo } = get()
+    const { setTodos, setTodayTodos, setThisWeekTodos, setNextWeekTodos, setChildren } =
+      useTodosPageStore.getState()
+
     if (todo == null) return
 
     const { fileId } = useSheetStore.getState()
@@ -108,10 +150,49 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
         if (todo) todo.status = status
       })
     )
+
+    setTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) found.status = status
+      })
+    )
+
+    setTodayTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) found.status = status
+      })
+    )
+
+    setThisWeekTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) found.status = status
+      })
+    )
+
+    setNextWeekTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) found.status = status
+      })
+    )
+
+    setChildren((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) found.status = status
+      })
+    )
+
     cb?.()
   },
   updateTime: async (values) => {
     const { todo } = get()
+    const { setTodos, setTodayTodos, setThisWeekTodos, setNextWeekTodos, setChildren } =
+      useTodosPageStore.getState()
+
     if (todo == null) return
 
     const { fileId } = useSheetStore.getState()
@@ -136,6 +217,41 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
         if (todo) Object.assign(todo, values)
       })
     )
+
+    setTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) Object.assign(found, values)
+      })
+    )
+
+    setTodayTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) Object.assign(found, values)
+      })
+    )
+
+    setThisWeekTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) Object.assign(found, values)
+      })
+    )
+
+    setNextWeekTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) Object.assign(found, values)
+      })
+    )
+
+    setChildren((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) Object.assign(found, values)
+      })
+    )
   },
 
   syncText: debounce(async (text: string, modified: number) => {
@@ -158,6 +274,9 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
 
   saveText: debounce(async (text) => {
     const { todo, syncText } = get()
+    const { setTodos, setTodayTodos, setThisWeekTodos, setNextWeekTodos, setChildren } =
+      useTodosPageStore.getState()
+
     if (!todo) return
 
     set({ text })
@@ -168,11 +287,49 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
       })
     )
 
+    setTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) found.description = text
+      })
+    )
+
+    setTodayTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) found.description = text
+      })
+    )
+
+    setThisWeekTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) found.description = text
+      })
+    )
+
+    setNextWeekTodos((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) found.description = text
+      })
+    )
+
+    setChildren((prev) =>
+      produce(prev, (todos) => {
+        const found = todos?.find(({ id }) => id === todo.id)
+        if (found) found.description = text
+      })
+    )
+
     syncText(text, modified)
   }, 250),
 
   addChildren: async (cb?: (newTodoId: string) => void): Promise<void> => {
     const { todo } = get()
+    const { setTodos, setTodayTodos, setThisWeekTodos, setNextWeekTodos, setChildren } =
+      useTodosPageStore.getState()
+
     if (!todo) return
     const { fileId } = useSheetStore.getState()
 
@@ -211,6 +368,13 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
           }
         })
     }
+
+    setTodos(undefined)
+    setTodayTodos(undefined)
+    setThisWeekTodos(undefined)
+    setNextWeekTodos(undefined)
+    setChildren(undefined)
+
     cb?.(newTodo.id)
   },
   async loadImages(todo: Todo): Promise<void> {
@@ -404,6 +568,9 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
   },
   async deleteTodo(cb?: () => void): Promise<void> {
     const { fileId } = useSheetStore.getState()
+    const { setTodos, setTodayTodos, setThisWeekTodos, setNextWeekTodos, setChildren } =
+      useTodosPageStore.getState()
+
     const { todo, deleteImageAll } = get()
     if (todo == null) return
 
@@ -454,6 +621,12 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
 
     deleteImageAll()
     await todosDB.deleteTodo(todo.id)
+
+    setTodos(undefined)
+    setTodayTodos(undefined)
+    setThisWeekTodos(undefined)
+    setNextWeekTodos(undefined)
+    setChildren(undefined)
 
     cb?.()
   },

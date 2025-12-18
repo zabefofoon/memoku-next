@@ -60,7 +60,9 @@ export default function UIBottomSheet({ open, close, header, content, cancel, ok
                 <Icon name='close' />
               </button>
             </div>
-            <div className='mb-[12px] | flex-1 h-full overflow-auto | scroll-hidden'>
+            <div
+              id='bottomsheet-scroll-el'
+              className='mb-[12px] | flex-1 h-full overflow-auto | scroll-hidden'>
               {content?.()}
             </div>
             <div className='flex flex-col gap-[4px] | empty:hidden'>

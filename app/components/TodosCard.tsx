@@ -20,7 +20,7 @@ export function TodoCard({
   const getTagsById = useTagsStore((s) => s.getTagsById)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const createTodo = useTodosPageStore((s) => s.createTodo)
+  const addChildren = useTodosPageStore((s) => s.addChildren)
 
   const [isOpen, setOpen] = useState(false)
 
@@ -31,6 +31,7 @@ export function TodoCard({
       className='emboss-sheet !p-[16px] !sm:p-[20px] block'
       data-prevent={todo.childId && !hideChildren}
       href={`/todos/${todo.id}`}
+      saveScrollTargets={['bottomsheet-scroll-el']}
       onClick={(event) => {
         if (todo.childId && !hideChildren) {
           event.preventDefault()
@@ -131,7 +132,7 @@ export function TodoCard({
               <Else>
                 <button
                   className='flex items-center | text-gray-400'
-                  onClick={() => createTodo(todo.id).then(({ id }) => router.push(`/todos/${id}`))}>
+                  onClick={() => addChildren(todo).then(({ id }) => router.push(`/todos/${id}`))}>
                   <Icon
                     name='plus'
                     className='text-[16px]'

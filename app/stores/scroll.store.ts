@@ -15,6 +15,9 @@ export interface SavedScrollTarget {
 }
 
 interface ScrollStore {
+  prevPathname: string
+  setPrevPathname: (prevPathname: string) => void
+
   savedScroll: Map<string, SavedScrollTarget[]>
   saveScroll: (pathname: string, targets: SavedScrollTarget[]) => void
   deleteScroll: (pathname: string) => void
@@ -22,6 +25,10 @@ interface ScrollStore {
 
 export const useScrollStore = create<ScrollStore>((set) => {
   return {
+    prevPathname: '',
+    setPrevPathname(prevPathname: string) {
+      set({ prevPathname })
+    },
     savedScroll: new Map<string, SavedScrollTarget[]>(),
     saveScroll(pathname: string, targets: SavedScrollTarget[]) {
       set((state) => {

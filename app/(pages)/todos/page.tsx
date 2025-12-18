@@ -13,7 +13,8 @@ import { TodosStatusModal } from '@/app/components/TodosStatusModal'
 import { TodosTagModal } from '@/app/components/TodosTagModal'
 import TodosTimeModal from '@/app/components/TodosTimeModal'
 import UISpinner from '@/app/components/UISpinner'
-import { GetTodosParams, Tag, Todo } from '@/app/models/Todo'
+import { GetTodosParams, Todo } from '@/app/models/Todo'
+import { useScrollStore } from '@/app/stores/scroll.store'
 import { useThemeStore } from '@/app/stores/theme.store'
 import { useTodosPageStore } from '@/app/stores/todosPage.store'
 import Link from 'next/link'
@@ -27,18 +28,14 @@ export default function Todos() {
 
   const screenSize = useThemeStore((state) => state.screenSize)
   const todos = useTodosPageStore((state) => state.todos)
-  const todayTodos = useTodosPageStore((state) => state.todayTodos)
-  const thisWeekTodos = useTodosPageStore((state) => state.thisWeekTodos)
-  const nextWeekTodos = useTodosPageStore((state) => state.nextWeekTodos)
-  const setTodos = useTodosPageStore((state) => state.setTodos)
-  const children = useTodosPageStore((state) => state.children)
+
   const loadTodosInStore = useTodosPageStore((state) => state.loadTodos)
   const loadTodayTodosInStore = useTodosPageStore((state) => state.loadTodayTodos)
   const loadThisWeekTodosInStore = useTodosPageStore((state) => state.loadThisWeekTodos)
   const loadNextWeekTodosInStore = useTodosPageStore((state) => state.loadNextWeekTodos)
-  const createTodoInStore = useTodosPageStore((state) => state.createTodo)
-  const changeTagInStore = useTodosPageStore((state) => state.changeTag)
-  const updateStatusInStore = useTodosPageStore((state) => state.updateStatus)
+  const createTodo = useTodosPageStore((state) => state.createTodo)
+  const changeTag = useTodosPageStore((state) => state.changeTag)
+  const updateStatus = useTodosPageStore((state) => state.updateStatus)
   const setPage = useTodosPageStore((state) => state.setPage)
   const updateTime = useTodosPageStore((state) => state.updateTime)
   const isTodosLoading = useTodosPageStore((state) => state.isTodosLoading)
@@ -52,7 +49,6 @@ export default function Todos() {
   const statusQuery = searchParams.get('status')
   const tagsQuery = searchParams.get('tags')
   const sortQuery = searchParams.get('sort')
-  const parentQuery = searchParams.get('parent')
   const timeQuery = searchParams.get('time')
   const todoTagQuery = searchParams.get('todoTag')
   const todoStatusQuery = searchParams.get('todoStatus')
@@ -61,83 +57,29 @@ export default function Todos() {
 
   const nextLoaderEl = useRef<HTMLDivElement>(null)
 
-  const timeTargetTodo = useMemo(
-    () =>
-      parentQuery
-        ? todos?.find(({ id }) => id === parentQuery)?.children?.find(({ id }) => id === timeQuery)
-        : todos?.find(({ id }) => id === timeQuery),
-    [parentQuery, timeQuery, todos]
-  )
-
-  const createTodo = async (): Promise<void> => {
-    const todo = await createTodoInStore()
-    router.push(`/todos/${todo.id}`)
-  }
-
-  const changeTag = async (tag: Tag): Promise<void> => {
-    const tagTargetTodo =
-      children?.find(({ id }) => id === todoTagQuery) ||
-      todayTodos?.find(({ id }) => id === todoTagQuery) ||
-      thisWeekTodos?.find(({ id }) => id === todoTagQuery) ||
-      nextWeekTodos?.find(({ id }) => id === todoTagQuery) ||
-      todos?.find(({ id }) => id === todoTagQuery)
-
-    if (tagTargetTodo) changeTagInStore(tagTargetTodo, tag)
-    router.back()
-  }
-
-  const changeStatus = async (status: Todo['status']): Promise<void> => {
-    const tagTargetTodo =
-      children?.find(({ id }) => id === todoStatusQuery) ||
-      todayTodos?.find(({ id }) => id === todoStatusQuery) ||
-      thisWeekTodos?.find(({ id }) => id === todoStatusQuery) ||
-      nextWeekTodos?.find(({ id }) => id === todoStatusQuery) ||
-      todos?.find(({ id }) => id === todoStatusQuery)
-
-    if (tagTargetTodo) updateStatusInStore(tagTargetTodo, status)
-    router.back()
-  }
+  const baseParams = useMemo<Omit<GetTodosParams, 'page'>>(() => {
+    return {
+      tags: tagsQuery?.split(','),
+      status: statusQuery ? (statusQuery?.split(',') as Todo['status'][]) : undefined,
+      searchText: searchQuery ?? '',
+      sort: (sortQuery ?? 'created') as GetTodosParams['sort'],
+    }
+  }, [searchQuery, sortQuery, statusQuery, tagsQuery])
 
   const loadTodos = useCallback(
     (page = 0): void => {
-      loadTodayTodosInStore({
-        tags: tagsQuery?.split(','),
-        status: statusQuery ? (statusQuery?.split(',') as Todo['status'][]) : undefined,
-        searchText: searchQuery ?? '',
-        sort: (sortQuery ?? 'created') as GetTodosParams['sort'],
-        page,
-      })
-      loadThisWeekTodosInStore({
-        tags: tagsQuery?.split(','),
-        status: statusQuery ? (statusQuery?.split(',') as Todo['status'][]) : undefined,
-        searchText: searchQuery ?? '',
-        sort: (sortQuery ?? 'created') as GetTodosParams['sort'],
-        page,
-      })
-      loadNextWeekTodosInStore({
-        tags: tagsQuery?.split(','),
-        status: statusQuery ? (statusQuery?.split(',') as Todo['status'][]) : undefined,
-        searchText: searchQuery ?? '',
-        sort: (sortQuery ?? 'created') as GetTodosParams['sort'],
-        page,
-      })
-      loadTodosInStore({
-        tags: tagsQuery?.split(','),
-        status: statusQuery ? (statusQuery?.split(',') as Todo['status'][]) : undefined,
-        searchText: searchQuery ?? '',
-        sort: (sortQuery ?? 'created') as GetTodosParams['sort'],
-        page,
-      })
+      const params = { ...baseParams, page }
+      if (page === 0) loadTodayTodosInStore(params)
+      if (page === 0) loadThisWeekTodosInStore(params)
+      if (page === 0) loadNextWeekTodosInStore(params)
+      loadTodosInStore(params)
     },
     [
+      baseParams,
       loadNextWeekTodosInStore,
       loadThisWeekTodosInStore,
       loadTodayTodosInStore,
       loadTodosInStore,
-      searchQuery,
-      sortQuery,
-      statusQuery,
-      tagsQuery,
     ]
   )
 
@@ -160,13 +102,18 @@ export default function Todos() {
 
     return () => {
       el?.removeEventListener('scroll', handleScroll)
-      setTodos(() => undefined)
     }
-  }, [setTodos, screenSize])
+  }, [screenSize])
 
   useEffect(() => {
-    setPage(0, loadTodos)
-  }, [searchQuery, statusQuery, tagsQuery, sortQuery, setPage, loadTodos])
+    const { prevPathname } = useScrollStore.getState()
+
+    const shouldRestore = /^\/todos\/[^/]+$/.test(prevPathname)
+    if (shouldRestore) {
+      const { todos, todayTodos, thisWeekTodos, nextWeekTodos } = useTodosPageStore.getState()
+      if (!todos || !todayTodos || !thisWeekTodos || !nextWeekTodos) setPage(0, loadTodos)
+    } else setPage(0, loadTodos)
+  }, [loadTodos, setPage])
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -175,14 +122,18 @@ export default function Todos() {
     })
     if (nextLoaderEl.current) observer.observe(nextLoaderEl.current)
 
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+    }
   }, [isTodosLoading, isTodosNextLoading, loadTodos, page, setPage])
 
   return (
     <div className='flex flex-col'>
       <TodosStatusModal
         isShow={!!todoStatusQuery}
-        select={changeStatus}
+        select={(status) => {
+          if (todoStatusQuery) updateStatus(todoStatusQuery, status, () => router.back())
+        }}
         close={router.back}
       />
       <TodosChildren
@@ -195,14 +146,16 @@ export default function Todos() {
       />
       <TodosTimeModal
         isShow={!!timeQuery}
-        todo={timeTargetTodo}
-        updateTime={(todo, values) => updateTime(todo, values, parentQuery || undefined)}
+        todo={todos?.find(({ id }) => id === timeQuery)}
+        updateTime={(todo, values) => updateTime(todo, values)}
         close={router.back}
       />
       <TodosTagModal
         isShow={!!todoTagQuery}
         close={router.back}
-        select={changeTag}
+        select={(tag) => {
+          if (todoTagQuery) changeTag(todoTagQuery, tag, () => router.back())
+        }}
       />
       <div className='px-[16px] sm:px-0 mt-[24px] sm:mt-0 '>
         <h1 className='text-[20px] opacity-80'>Todos</h1>
@@ -233,7 +186,7 @@ export default function Todos() {
           <button
             type='button'
             className='ml-auto | hidden sm:flex items-center | bg-indigo-500 dark:bg-indigo-600 rounded-lg | px-[8px] py-[6px] | text-white'
-            onClick={createTodo}>
+            onClick={() => createTodo().then((todo) => router.push(`/todos/${todo.id}`))}>
             <Icon
               name='plus'
               className='text-[20px]'

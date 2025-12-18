@@ -32,9 +32,9 @@ export function Link({
       const isSupported = 'startViewTransition' in document
 
       const preserve = shouldPreserveDefault(e)
-
       // 뷰 트랜지션 안 쓰거나, 기본 동작 유지해야 하는 경우
-      if (!isSupported || preserve || e.currentTarget.dataset['prevent']) return onClick?.(e)
+      if (!isSupported || preserve || e.currentTarget.dataset['prevent'] === 'true')
+        return onClick?.(e)
 
       e.preventDefault()
       onClick?.(e)
@@ -42,8 +42,8 @@ export function Link({
       const navigate = replace ? router.replace : router.push
 
       const defaultTarget: SavedScrollTarget = {
-        elId: 'window',
-        scrollTop: window.scrollY,
+        elId: 'scroll-el',
+        scrollTop: document.getElementById('scroll-el')?.scrollTop ?? 0,
       }
 
       const scrollTargets: SavedScrollTarget[] = [defaultTarget]
@@ -55,7 +55,6 @@ export function Link({
         }))
         scrollTargets.push(...customTargets)
       }
-
       saveScroll(pathname, scrollTargets)
       navigate((as ?? href) as string, { scroll })
     },

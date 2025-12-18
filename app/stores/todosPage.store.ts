@@ -31,16 +31,16 @@ interface TodosPageStore {
   setTotal: (total: number) => void
 
   setTodos: (
-    updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+    updater?: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
   ) => void
   setTodayTodos: (
-    updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+    updater?: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
   ) => void
   setThisWeekTodos: (
-    updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+    updater?: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
   ) => void
   setNextWeekTodos: (
-    updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+    updater?: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
   ) => void
   setChildren: (
     updater?: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
@@ -51,11 +51,11 @@ interface TodosPageStore {
 
   expandRow: (todo: TodoWithChildren) => Promise<void>
   updateStatus: (
-    todo: TodoWithChildren,
+    todoId: string,
     status: TodoWithChildren['status'],
-    parentId?: string
+    cb?: () => void
   ) => Promise<void>
-  changeTag: (todo: TodoWithChildren, tag: Tag) => Promise<void>
+  changeTag: (todoId: string, tag: Tag, cb?: () => void) => Promise<void>
   updateTime: (
     todo: TodoWithChildren,
     values: {
@@ -114,7 +114,7 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
   },
 
   setTodos: (
-    updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+    updater?: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
   ) =>
     set((state) => ({
       todos: typeof updater === 'function' ? updater(state.todos) : updater,
@@ -135,21 +135,22 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
     })),
 
   setTodayTodos: (
-    updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+    updater?: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
   ) =>
     set((state) => ({
       todayTodos: typeof updater === 'function' ? updater(state.todayTodos) : updater,
     })),
 
   setThisWeekTodos: (
-    updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
-  ) =>
+    updater?: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+  ) => {
     set((state) => ({
       thisWeekTodos: typeof updater === 'function' ? updater(state.thisWeekTodos) : updater,
-    })),
+    }))
+  },
 
   setNextWeekTodos: (
-    updater: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
+    updater?: TodoWithChildren[] | ((prev?: TodoWithChildren[]) => TodoWithChildren[] | undefined)
   ) =>
     set((state) => ({
       nextWeekTodos: typeof updater === 'function' ? updater(state.nextWeekTodos) : updater,
@@ -169,9 +170,11 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
   },
 
   updateStatus: async (
-    todo: TodoWithChildren,
-    status: TodoWithChildren['status']
+    todoId: string,
+    status: TodoWithChildren['status'],
+    cb?: () => void
   ): Promise<void> => {
+    const todo = await todosDB.getTodo(todoId)
     const {
       setTodos,
       setTodayTodos,
@@ -229,9 +232,11 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
         if (target) target.status = status
       })
     )
+
+    cb?.()
   },
 
-  changeTag: async (todo: TodoWithChildren, tag: Tag): Promise<void> => {
+  changeTag: async (todoId: string, tag: Tag, cb?: () => void): Promise<void> => {
     const {
       setTodos,
       setTodayTodos,
@@ -240,7 +245,7 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
       setChildren,
       setChildrenRoot,
     } = get()
-
+    const todo = await todosDB.getTodo(todoId)
     const modified = await todosDB.updateTag(todo.id, tag.id)
 
     const fileId = useSheetStore.getState().fileId
@@ -289,6 +294,8 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
         if (target) target.tagId = tag.id
       })
     )
+
+    cb?.()
   },
 
   updateTime: async (
@@ -351,6 +358,7 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
   },
 
   createTodo: async (parentId?: string): Promise<TodoWithChildren> => {
+    const { setTodos, setTodayTodos, setThisWeekTodos, setNextWeekTodos, setChildren } = get()
     const todo = await todosDB.postDescription('', parentId)
     todosDB.updateDirties([todo.id], true)
 
@@ -370,11 +378,19 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
           }
         })
     }
+    setTimeout(() => {
+      setTodos(undefined)
+      setTodayTodos(undefined)
+      setThisWeekTodos(undefined)
+      setNextWeekTodos(undefined)
+      setChildren(undefined)
+    }, 300)
     return todo
   },
 
   addChildren: async (parent: TodoWithChildren): Promise<TodoWithChildren> => {
     await todosDB.updateDirties([parent.id], true)
+    const { setTodos, setTodayTodos, setThisWeekTodos, setNextWeekTodos, setChildren } = get()
 
     const newTodo = await todosDB.addNewTodo({
       id: etcUtil.generateUniqueId(),
@@ -410,24 +426,40 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
         }
       })
 
+    setTimeout(() => {
+      setTodos(undefined)
+      setTodayTodos(undefined)
+      setThisWeekTodos(undefined)
+      setNextWeekTodos(undefined)
+      setChildren(undefined)
+    }, 300)
+
     return newTodo
   },
 
   loadTodos: async (params: GetTodosParams): Promise<void> => {
-    if (get().isTodosLoading) return
-    if (get().isTodosNextLoading) return
+    const {
+      isTodosLoading,
+      isTodosNextLoading,
+      setTotal,
+      setTodos,
+      setIsTodosLoading,
+      setIsTodosNextLoading,
+    } = get()
+    if (isTodosLoading) return
+    if (isTodosNextLoading) return
 
-    if (params.page === 0) get().setIsTodosLoading(true)
-    else get().setIsTodosNextLoading(true)
+    if (params.page === 0) setIsTodosLoading(true)
+    else setIsTodosNextLoading(true)
 
     const res = await todosDB.getTodos(params)
-    get().setTotal(res.total)
+    setTotal(res.total)
 
-    if (params.page === 0) get().setTodos(res.todos)
-    else get().setTodos((prev) => [...(prev ?? []), ...res.todos])
+    if (params.page === 0) setTodos(res.todos)
+    else setTodos((prev) => [...(prev ?? []), ...res.todos])
 
-    get().setIsTodosLoading(false)
-    get().setIsTodosNextLoading(false)
+    setIsTodosLoading(false)
+    setIsTodosNextLoading(false)
   },
 
   async loadTodayTodos(params: GetTodosParams): Promise<void> {

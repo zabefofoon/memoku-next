@@ -60,7 +60,9 @@ export default function UIModal({ open, close, header, content, ok, cancel }: Pr
                 <Icon name='close' />
               </button>
             </div>
-            <div className='mb-[12px] | flex-1 h-full overflow-auto | scroll-hidden'>
+            <div
+              id='modal-scroll-el'
+              className='mb-[12px] | flex-1 h-full overflow-auto | scroll-hidden'>
               {content?.()}
             </div>
             <div className='flex flex-col gap-[4px]'>
