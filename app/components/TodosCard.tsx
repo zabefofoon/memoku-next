@@ -1,5 +1,4 @@
 import { STATUS_MAP, TAG_COLORS } from '@/const'
-import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { Else, If, Then } from 'react-if'
@@ -7,6 +6,7 @@ import { TodoWithChildren } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
 import { useTodosPageStore } from '../stores/todosPage.store'
 import { Icon } from './Icon'
+import { Link } from './Link'
 import TodoTimeText from './TodoTimeText'
 import UIDropdown from './UIDropdown'
 
@@ -29,6 +29,7 @@ export function TodoCard({
   return (
     <Link
       className='emboss-sheet !p-[16px] !sm:p-[20px] block'
+      data-prevent={todo.childId && !hideChildren}
       href={`/todos/${todo.id}`}
       onClick={(event) => {
         if (todo.childId && !hideChildren) {

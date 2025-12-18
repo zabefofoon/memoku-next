@@ -12,12 +12,14 @@ import TodosSelectedFilters from '@/app/components/TodosSelectedFilters'
 import { TodosStatusModal } from '@/app/components/TodosStatusModal'
 import { TodosTagModal } from '@/app/components/TodosTagModal'
 import TodosTimeModal from '@/app/components/TodosTimeModal'
+import UISpinner from '@/app/components/UISpinner'
 import { GetTodosParams, Tag, Todo } from '@/app/models/Todo'
 import { useThemeStore } from '@/app/stores/theme.store'
 import { useTodosPageStore } from '@/app/stores/todosPage.store'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { If, Then } from 'react-if'
 
 export default function Todos() {
   const router = useRouter()
@@ -39,6 +41,10 @@ export default function Todos() {
   const updateStatusInStore = useTodosPageStore((state) => state.updateStatus)
   const setPage = useTodosPageStore((state) => state.setPage)
   const updateTime = useTodosPageStore((state) => state.updateTime)
+  const isTodosLoading = useTodosPageStore((state) => state.isTodosLoading)
+  const total = useTodosPageStore((state) => state.total)
+  const isTodosNextLoading = useTodosPageStore((state) => state.isTodosNextLoading)
+  const page = useTodosPageStore((state) => state.page)
 
   const [isShow, setIsShow] = useState(true)
 
@@ -52,6 +58,8 @@ export default function Todos() {
   const todoStatusQuery = searchParams.get('todoStatus')
   const filterQuery = searchParams.get('filter')
   const childrenQuery = searchParams.get('children')
+
+  const nextLoaderEl = useRef<HTMLDivElement>(null)
 
   const timeTargetTodo = useMemo(
     () =>
@@ -160,6 +168,16 @@ export default function Todos() {
     setPage(0, loadTodos)
   }, [searchQuery, statusQuery, tagsQuery, sortQuery, setPage, loadTodos])
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      const isLoadable = entry.isIntersecting && !isTodosNextLoading && !isTodosLoading
+      if (isLoadable) setPage(page + 1, loadTodos)
+    })
+    if (nextLoaderEl.current) observer.observe(nextLoaderEl.current)
+
+    return () => observer.disconnect()
+  }, [isTodosLoading, isTodosNextLoading, loadTodos, page, setPage])
+
   return (
     <div className='flex flex-col'>
       <TodosStatusModal
@@ -229,7 +247,16 @@ export default function Todos() {
         <TodosCardsToday />
         <TodosCardsThisWeek />
         <TodosCardsNextWeek />
-        <TodosCards loadTodos={loadTodos} />
+        <TodosCards />
+        <If condition={!isTodosLoading && todos && (total ?? 0) > todos.length}>
+          <Then>
+            <div
+              ref={nextLoaderEl}
+              className='text-center | py-[6px]'>
+              <UISpinner />
+            </div>
+          </Then>
+        </If>
       </div>
     </div>
   )

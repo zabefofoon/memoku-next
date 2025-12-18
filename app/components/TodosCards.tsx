@@ -1,36 +1,16 @@
-import { Fragment, useEffect, useRef } from 'react'
+import { Fragment } from 'react'
 import { Else, If, Then } from 'react-if'
 import { useTodosPageStore } from '../stores/todosPage.store'
 import { Icon } from './Icon'
 import { TodoCard } from './TodosCard'
 import UISpinner from './UISpinner'
 
-interface Props {
-  loadTodos: (page: number) => void
-}
-
-export default function TodosCards(props: Props) {
-  const isTodosNextLoading = useTodosPageStore((state) => state.isTodosNextLoading)
+export default function TodosCards() {
   const isTodosLoading = useTodosPageStore((state) => state.isTodosLoading)
-  const page = useTodosPageStore((state) => state.page)
-  const setPage = useTodosPageStore((state) => state.setPage)
   const todos = useTodosPageStore((state) => state.todos)
-  const total = useTodosPageStore((state) => state.total)
   const todayTodos = useTodosPageStore((state) => state.todayTodos)
   const thisWeekTodos = useTodosPageStore((state) => state.thisWeekTodos)
   const nextWeekTodos = useTodosPageStore((state) => state.nextWeekTodos)
-
-  const nextLoaderEl = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      const isLoadable = entry.isIntersecting && !isTodosNextLoading && !isTodosLoading
-      if (isLoadable) setPage(page + 1, props.loadTodos)
-    })
-    if (nextLoaderEl.current) observer.observe(nextLoaderEl.current)
-
-    return () => observer.disconnect()
-  }, [isTodosLoading, isTodosNextLoading, page, props.loadTodos, setPage])
 
   return (
     <If condition={isTodosLoading}>
@@ -83,15 +63,6 @@ export default function TodosCards(props: Props) {
                     </If>
                   </Fragment>
                 ))}
-                <If condition={!isTodosLoading && todos && (total ?? 0) > todos.length}>
-                  <Then>
-                    <div
-                      ref={nextLoaderEl}
-                      className='text-center | py-[6px]'>
-                      <UISpinner />
-                    </div>
-                  </Then>
-                </If>
               </div>
             </div>
           </Else>

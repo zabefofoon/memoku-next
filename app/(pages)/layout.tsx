@@ -9,6 +9,8 @@ import { AppAside } from '../components/AppAside'
 import AppBottomAppBar from '../components/AppBottomAppBar'
 import EnsureAuth from '../components/EnsureAuth'
 import { EnsureProviders } from '../components/EnsureProviders'
+import ScrollRestorer from '../components/ScrollRestorer'
+import { ViewTransitions } from '../components/ViewTransitions'
 
 const notoSansKr = Noto_Sans_KR({
   weight: ['400', '700', '900'],
@@ -31,28 +33,31 @@ export default async function RootLayout(props: LayoutProps<'/'>) {
   const refreshToken = cookieStore.get('x-google-refresh-token')?.value ?? ''
 
   return (
-    <html
-      lang='en'
-      className={etcUtil.classNames(['h-full', { dark: isDarkMode }])}>
-      <body
-        className={`${notoSansKr.className} antialiased | h-full | text-slate-800 dark:text-white/95 | bg-gray-100 dark:bg-zinc-900`}>
-        <EnsureAuth
-          accessToken={accessToken}
-          refreshToken={refreshToken}>
-          <EnsureProviders isDarkMode={isDarkMode}>
-            <div className='relative | h-full | flex flex-col sm:flex-row sm:gap-[36px] sm:p-[24px] sm:pr-[0]'>
-              <AppAside isExpand={isExpandAside} />
-              <main
-                id='scroll-el'
-                className='relative z-[1] | flex flex-col | w-full h-full overflow-auto flex-1 sm:pr-[24px] pb-[4px]'>
-                <div className='sm:h-full | flex flex-col | flex-1'>{props.children}</div>
+    <ViewTransitions rootPages={['/', '/todos', '/calendar', '/news', '/settings']}>
+      <ScrollRestorer />
+      <html
+        lang='en'
+        className={etcUtil.classNames(['h-full', { dark: isDarkMode }])}>
+        <body
+          className={`${notoSansKr.className} antialiased | h-full | text-slate-800 dark:text-white/95 | bg-gray-100 dark:bg-zinc-900`}>
+          <EnsureAuth
+            accessToken={accessToken}
+            refreshToken={refreshToken}>
+            <EnsureProviders isDarkMode={isDarkMode}>
+              <div className='relative | h-full | flex flex-col sm:flex-row sm:gap-[36px] sm:p-[24px] sm:pr-[0]'>
+                <AppAside isExpand={isExpandAside} />
+                <main
+                  id='scroll-el'
+                  className='relative z-[1] | flex flex-col | w-full h-full overflow-auto flex-1 sm:pr-[24px] pb-[4px]'>
+                  <div className='sm:h-full | flex flex-col | flex-1'>{props.children}</div>
 
-                <AppBottomAppBar />
-              </main>
-            </div>
-          </EnsureProviders>
-        </EnsureAuth>
-      </body>
-    </html>
+                  <AppBottomAppBar />
+                </main>
+              </div>
+            </EnsureProviders>
+          </EnsureAuth>
+        </body>
+      </html>
+    </ViewTransitions>
   )
 }
