@@ -69,6 +69,7 @@ export default function Todos() {
   const loadTodos = useCallback(
     (page = 0): void => {
       const params = { ...baseParams, page }
+
       if (page === 0) loadTodayTodosInStore(params)
       if (page === 0) loadThisWeekTodosInStore(params)
       if (page === 0) loadNextWeekTodosInStore(params)
@@ -106,13 +107,14 @@ export default function Todos() {
   }, [screenSize])
 
   useEffect(() => {
-    const { prevPathname } = useScrollStore.getState()
-
+    const { prevPathname, setPrevPathname } = useScrollStore.getState()
     const shouldRestore = /^\/todos\/[^/]+$/.test(prevPathname)
-    if (shouldRestore) {
+    if (!shouldRestore) setPage(0, loadTodos)
+    else {
       const { todos, todayTodos, thisWeekTodos, nextWeekTodos } = useTodosPageStore.getState()
       if (!todos || !todayTodos || !thisWeekTodos || !nextWeekTodos) setPage(0, loadTodos)
-    } else setPage(0, loadTodos)
+      else setPrevPathname(location.pathname)
+    }
   }, [loadTodos, setPage])
 
   useEffect(() => {
