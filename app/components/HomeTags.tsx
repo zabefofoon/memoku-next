@@ -44,8 +44,8 @@ export default function HomeTags() {
   }, [])
 
   return (
-    <div className='flex-1 min-w-[300px] shrink-0 | flex flex-col | bg-white dark:bg-zinc-800 shadow-md rounded-xl | p-[16px]'>
-      <div className='relative | flex-1'>
+    <div className='emboss-sheet flex-1 min-w-[300px] shrink-0 | flex flex-col'>
+      <div className='flex flex-col | p-[16px]'>
         {data.map((item) => (
           <Link
             key={item.id}

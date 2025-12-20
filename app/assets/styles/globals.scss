@@ -308,12 +308,9 @@ button {
   }
 }
 
-@keyframes -ua-mix-blend-mode-plus-lighter {
-  from {
-    mix-blend-mode: none;
-  }
-
-  to {
-    mix-blend-mode: none;
-  }
+.neu-sheet {
+  background: rgb(252 252 252 / 100%);
+  box-shadow:
+    6px 6px 12px var(--color-gray-200),
+    -2px -2px 0 white;
 }
