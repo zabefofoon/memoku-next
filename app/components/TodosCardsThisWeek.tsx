@@ -1,11 +1,15 @@
-import { Fragment } from 'react'
+import { COOKIE_DISPLAY } from '@/const'
+import { useCookies } from 'react-cookie'
 import { Else, If, Then } from 'react-if'
+import { useThemeStore } from '../stores/theme.store'
 import { useTodosPageStore } from '../stores/todosPage.store'
-import { Icon } from './Icon'
+import etcUtil from '../utils/etc.util'
 import { TodoCard } from './TodosCard'
 import UISpinner from './UISpinner'
 
 export default function TodosCardsThisWeek() {
+  const [cookies] = useCookies([COOKIE_DISPLAY])
+  const screenSize = useThemeStore((s) => s.screenSize)
   const isTodosLoading = useTodosPageStore((state) => state.isThisWeekTodosLoading)
   const todos = useTodosPageStore((state) => state.thisWeekTodos)
 
@@ -30,26 +34,18 @@ export default function TodosCardsThisWeek() {
               </div>
             </Then>
             <Else>
-              <div className='grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-[12px] | px-[16px]'>
+              <div
+                className={etcUtil.classNames([
+                  'grid | px-[16px]',
+                  screenSize === 'desktop' && cookies[COOKIE_DISPLAY] !== 'grid'
+                    ? 'grid-cols-1'
+                    : 'grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-[12px]',
+                ])}>
                 {todos?.map((todo) => (
-                  <Fragment key={todo.id}>
-                    <TodoCard todo={todo} />
-                    <If condition={todo.isExpanded}>
-                      <Then>
-                        {todo.children?.map((child) => (
-                          <div
-                            key={child.id}
-                            className='flex items-center gap-[4px]'>
-                            <Icon
-                              name='reply'
-                              className='text-[16px]'
-                            />
-                            <TodoCard todo={child} />
-                          </div>
-                        ))}
-                      </Then>
-                    </If>
-                  </Fragment>
+                  <TodoCard
+                    key={todo.id}
+                    todo={todo}
+                  />
                 ))}
               </div>
             </Else>

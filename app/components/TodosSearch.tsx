@@ -3,6 +3,7 @@
 import debounce from 'lodash.debounce'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { If, Then } from 'react-if'
 import { Icon } from './Icon'
 
 export default function TodosSearch() {
@@ -64,21 +65,23 @@ export default function TodosSearch() {
         }}
       />
 
-      {value && (
-        <button
-          type='button'
-          onClick={() => {
-            setValue('')
-            updateQuery('')
-          }}
-          aria-label='검색어 지우기'
-          className='ml-auto'>
-          <Icon
-            name='close'
-            className='text-[20px]'
-          />
-        </button>
-      )}
+      <If condition={!!value}>
+        <Then>
+          <button
+            type='button'
+            onClick={() => {
+              setValue('')
+              updateQuery('')
+            }}
+            aria-label='검색어 지우기'
+            className='ml-auto'>
+            <Icon
+              name='close'
+              className='text-[20px]'
+            />
+          </button>
+        </Then>
+      </If>
     </label>
   )
 }

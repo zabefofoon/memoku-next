@@ -17,14 +17,17 @@ import { GetTodosParams, Todo } from '@/app/models/Todo'
 import { useScrollStore } from '@/app/stores/scroll.store'
 import { useThemeStore } from '@/app/stores/theme.store'
 import { useTodosPageStore } from '@/app/stores/todosPage.store'
+import { AGE_1_YEAR, COOKIE_DISPLAY } from '@/const'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { If, Then } from 'react-if'
+import { useCookies } from 'react-cookie'
+import { Else, If, Then } from 'react-if'
 
 export default function Todos() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [cookieDisplay, setCookie] = useCookies([COOKIE_DISPLAY])
 
   const screenSize = useThemeStore((state) => state.screenSize)
   const todos = useTodosPageStore((state) => state.todos)
@@ -170,8 +173,31 @@ export default function Todos() {
           backdropFilter: 'blur(4px)',
           transform: isShow ? 'translate(0, 0)' : 'translate(0, -100%)',
         }}>
-        <div className='flex items-center gap-[12px] | px-[16px] mb-[8px] sm:mb-[20px]'>
+        <div className='flex items-center gap-[6px] | px-[16px] mb-[8px] sm:mb-[20px]'>
           <TodosSearch />
+          <button
+            type='button'
+            className='hidden sm:block'
+            onClick={() =>
+              setCookie(COOKIE_DISPLAY, cookieDisplay[COOKIE_DISPLAY] === 'grid' ? 'row' : 'grid', {
+                maxAge: AGE_1_YEAR,
+              })
+            }>
+            <If condition={cookieDisplay[COOKIE_DISPLAY] === 'grid'}>
+              <Then>
+                <Icon
+                  name='grid'
+                  className='text-[20px]'
+                />
+              </Then>
+              <Else>
+                <Icon
+                  name='row'
+                  className='text-[20px]'
+                />
+              </Else>
+            </If>
+          </button>
           <Link
             href={{ query: { ...Object.fromEntries(searchParams), filter: 'true' } }}
             className='shrink-0 flex items-center gap-[12px] ml-auto sm:ml-0'

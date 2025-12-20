@@ -248,6 +248,7 @@ export const todosDB = {
       if (start != null || end != null) {
         const s = start ?? createdAt
         const e = end ?? weekEnd
+        if (now.valueOf() < e) return false
         if (s <= weekEnd && e >= tomorrowStart) return true
       }
 
@@ -299,6 +300,7 @@ export const todosDB = {
       if (start != null || end != null) {
         const s = start ?? createdAt
         const e = end ?? nextWeekEndMs
+        if (now.valueOf() < e) return false
         if (s <= nextWeekEndMs && e >= nextWeekStartMs) return true
       }
 

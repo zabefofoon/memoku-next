@@ -21,7 +21,7 @@ export default function TodoTimeText({ todo, timeFormat = 'YYYY/MM/DD HH:mm:ss' 
   const isAfterRemainedTime = now > end
 
   return (
-    <div className='flex items-center gap-[4px] | mt-[6px] | leading-[100%] tracking-tight'>
+    <div className='flex items-center gap-[4px] | leading-[100%] tracking-tight'>
       <If condition={todo.status === 'done'}>
         <Then>
           <div className='flex items-center gap-[3px] '>
