@@ -66,7 +66,7 @@ export function AppAside(props: Props) {
   return (
     <aside
       className={etcUtil.classNames([
-        'neu-sheet !rounded-r-t-0 | relative | hidden lg:flex flex-col | sticky top-[24px] | h-[calc(100dvh-48px)] | bg-white dark:bg-zinc-800 | rounded-l-2xl rounded-b-2xl | transition-[width]',
+        'relative | hidden lg:flex flex-col | sticky top-[24px] | h-[calc(100dvh-48px)] | bg-white dark:bg-zinc-800 | shadow-lg rounded-l-2xl rounded-b-2xl | transition-[width]',
         isExpand ? 'w-[240px]' : 'w-[62px]',
       ])}>
       <button

@@ -16,6 +16,7 @@ export default function TodosCards() {
   const todayTodos = useTodosPageStore((state) => state.todayTodos)
   const thisWeekTodos = useTodosPageStore((state) => state.thisWeekTodos)
   const nextWeekTodos = useTodosPageStore((state) => state.nextWeekTodos)
+  const total = useTodosPageStore((state) => state.total)
 
   return (
     <If condition={isTodosLoading}>
@@ -46,7 +47,7 @@ export default function TodosCards() {
           </Then>
           <Else>
             <div>
-              <p className='px-[16px] mb-[16px] | text-[15px] text-gray-600'>전체</p>
+              <p className='px-[16px] mb-[16px] | text-[15px] text-gray-600'>전체({total})</p>
               <div
                 className={etcUtil.classNames([
                   'grid | px-[16px]',

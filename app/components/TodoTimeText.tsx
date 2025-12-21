@@ -7,9 +7,14 @@ import etcUtil from '../utils/etc.util'
 interface Props {
   todo: Todo
   timeFormat?: string
+  hideTime?: boolean
 }
 
-export default function TodoTimeText({ todo, timeFormat = 'YYYY/MM/DD HH:mm:ss' }: Props) {
+export default function TodoTimeText({
+  todo,
+  timeFormat = 'YYYY/MM/DD HH:mm:ss',
+  hideTime = false,
+}: Props) {
   const now = Date.now()
   const start = todo.start ?? 0
   const end = todo.end ?? 0
@@ -95,12 +100,16 @@ export default function TodoTimeText({ todo, timeFormat = 'YYYY/MM/DD HH:mm:ss' 
               {/* 남은 시간 */}
 
               {/* 생성일 */}
-              <div className='flex items-center gap-[3px] '>
-                <div className='w-[3px] aspect-square bg-gray-300 rounded-full'></div>
-                <p className='text-[11px] text-gray-500'>
-                  {dayjs(todo.created).format(timeFormat)} 생성
-                </p>
-              </div>
+              <If condition={!hideTime}>
+                <Then>
+                  <div className='flex items-center gap-[3px] '>
+                    <div className='w-[3px] aspect-square bg-gray-300 rounded-full'></div>
+                    <p className='text-[11px] text-gray-500'>
+                      {dayjs(todo.created).format(timeFormat)} 생성
+                    </p>
+                  </div>
+                </Then>
+              </If>
               {/* 생성일 */}
             </Else>
           </If>
