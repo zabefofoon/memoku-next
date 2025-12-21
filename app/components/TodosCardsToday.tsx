@@ -43,6 +43,11 @@ export default function TodosCardsToday() {
                 ])}>
                 {todos?.map((todo) => (
                   <TodoCard
+                    display={
+                      screenSize === 'desktop' && cookies[COOKIE_DISPLAY] !== 'grid'
+                        ? 'row'
+                        : 'grid'
+                    }
                     key={todo.id}
                     todo={todo}
                   />

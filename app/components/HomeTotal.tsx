@@ -1,6 +1,7 @@
 'use client'
 
 import { todosDB } from '@/app/lib/todos.db'
+import { STATUS_MAP } from '@/const'
 import { useCallback, useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
 import { PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer } from 'recharts'
@@ -13,10 +14,11 @@ export default function HomeTotal() {
 
   const [total, setTotal] = useState<number>(0)
 
-  const [data, setData] = useState<{ name: string; value: number; fill: string }[]>([])
+  const [data, setData] = useState<{ key: string; name: string; value: number; fill: string }[]>([])
 
   const loadTodos = useCallback(async () => {
     const res = await todosDB.getAllTodos()
+
     setTotal(res.length)
 
     const createds = res.filter((todo) => todo.status === 'created')
@@ -27,40 +29,42 @@ export default function HomeTotal() {
     setData(
       [
         {
-          name: 'created',
+          key: 'created',
+          name: STATUS_MAP['created'].label,
           value: createds.length,
-          fill: cookies['x-theme'] === 'dark' ? 'var(--color-slate-600)' : 'var(--color-slate-500)',
+          fill: STATUS_MAP['created'].color,
         },
         {
-          name: 'inprogress',
+          key: 'inprogress',
+          name: STATUS_MAP['inprogress'].label,
           value: inprogresses.length,
-          fill:
-            cookies['x-theme'] === 'dark' ? 'var(--color-indigo-600)' : 'var(--color-indigo-500)',
+          fill: STATUS_MAP['inprogress'].color,
         },
         {
-          name: 'done',
+          key: 'done',
+          name: STATUS_MAP['done'].label,
           value: dones.length,
-          fill: cookies['x-theme'] === 'dark' ? 'var(--color-green-600)' : 'var(--color-green-500)',
+          fill: STATUS_MAP['done'].color,
         },
         {
-          name: 'hold',
+          key: 'hold',
+          name: STATUS_MAP['hold'].label,
           value: holds.length,
-          fill:
-            cookies['x-theme'] === 'dark' ? 'var(--color-orange-600)' : 'var(--color-orange-500)',
+          fill: STATUS_MAP['hold'].color,
         },
       ]
         .slice()
         .sort((a, b) => b.value - a.value)
     )
-  }, [cookies])
+  }, [])
 
   useEffect(() => {
     loadTodos()
   }, [loadTodos])
 
   return (
-    <div className='emboss-sheet | relative | flex-1 min-w-[300px] shrink-0 | flex flex-col'>
-      <div>
+    <div className='emboss-sheet | flex-1 min-w-[300px] shrink-0 | flex flex-col justify-center'>
+      <div className='relative'>
         <ResponsiveContainer
           width={'100%'}
           height={'100%'}
@@ -110,7 +114,7 @@ export default function HomeTotal() {
         </div>
         <div className='font-[700] | flex flex-col items-center justify-center | absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'>
           <p className='text-[16px] | flex gap-[4px]'>
-            <span>{data.find(({ name }) => name === 'done')?.value}개</span>/
+            <span>{data.find(({ key }) => key === 'done')?.value}개</span>/
             <span className='opacity-50'>{total}개</span>
           </p>
         </div>

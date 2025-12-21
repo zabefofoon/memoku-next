@@ -50,11 +50,13 @@ export function TodosChildren({ isShow, close }: Props) {
           <If condition={childrenRoot != null}>
             <Then>
               <TodoCard
+                display='grid'
                 todo={childrenRoot!}
                 hideChildren
               />
               {children?.map((todo) => (
                 <TodoCard
+                  display='grid'
                   key={todo.id}
                   todo={todo}
                   hideChildren

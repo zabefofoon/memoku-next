@@ -2,7 +2,7 @@ import { Icon } from './Icon'
 
 export default function HomeBadge() {
   return (
-    <div className='min-w-[300px] flex-1 | gap-[8px] flex flex-col items-center justify-center | shadow-md rounded-xl bg-blue-400 dark:bg-blue-500 | p-[16px]'>
+    <div className='min-w-[300px] flex-1 | gap-[8px] flex flex-col items-center justify-center | shadow-md rounded-xl bg-indigo-400 dark:bg-indigo-500 | p-[16px]'>
       <div className='aspect-square p-[16px] | w-fit | flex flex-col items-center | bg-white/20 border-t border-white dark:border-white/50 rounded-2xl shadow-md'>
         <Icon
           name='badge'

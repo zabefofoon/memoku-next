@@ -143,12 +143,12 @@ export function AppAside(props: Props) {
             'flex items-center justify-between | px-[8px] py-[12px]',
             { 'flex-col': !isExpand },
           ])}>
-          <div className='flex items-center gap-[6px]'>
+          <div className='flex items-center gap-[6px] flex-wrap'>
             {!memberInfo && (
               <Link
                 href='/api/auth/google'
                 prefetch={false}
-                className='w-[32px] aspect-square | flex items-center justify-center | rounded-full bg-white dark:bg-zinc-700 shadow-sm shadow-black/30 dark:shadow-black/60'>
+                className='mx-auto | w-[32px] aspect-square | flex items-center justify-center | rounded-full bg-white dark:bg-zinc-700 shadow-sm shadow-black/30 dark:shadow-black/60'>
                 <Icon name='google' />
               </Link>
             )}

@@ -1,11 +1,9 @@
-import { COOKIE_DISPLAY, STATUS_MAP, TAG_COLORS } from '@/const'
+import { STATUS_MAP, TAG_COLORS } from '@/const'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
-import { useCookies } from 'react-cookie'
 import { Else, If, Then } from 'react-if'
 import { TodoWithChildren } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
-import { useThemeStore } from '../stores/theme.store'
 import { useTodosPageStore } from '../stores/todosPage.store'
 import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
@@ -14,15 +12,16 @@ import TodoTimeText from './TodoTimeText'
 import UIDropdown from './UIDropdown'
 
 export function TodoCard({
+  className,
   todo,
   hideChildren,
+  display = 'grid',
 }: {
+  className?: string
+  display: 'row' | 'grid'
   todo: TodoWithChildren
   hideChildren?: boolean
 }) {
-  const [cookies] = useCookies([COOKIE_DISPLAY])
-  const screenSize = useThemeStore((s) => s.screenSize)
-
   const getTagsById = useTagsStore((s) => s.getTagsById)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -35,8 +34,9 @@ export function TodoCard({
   return (
     <Link
       className={etcUtil.classNames([
+        className,
         'emboss-sheet !p-[16px] !sm:p-[20px]',
-        { 'flex items-center': screenSize === 'desktop' && cookies[COOKIE_DISPLAY] !== 'grid' },
+        { 'flex items-center': display !== 'grid' },
       ])}
       data-prevent={todo.childId && !hideChildren}
       href={`/todos/${todo.id}`}
@@ -55,7 +55,7 @@ export function TodoCard({
         type='button'
         className={etcUtil.classNames([
           'expand-hitbox | flex items-center gap-[4px]',
-          screenSize === 'desktop' && cookies[COOKIE_DISPLAY] !== 'grid' ? 'w-[120px]' : '',
+          display !== 'grid' ? 'w-[120px]' : '',
         ])}
         onClick={(event) => {
           event.preventDefault()
@@ -84,9 +84,7 @@ export function TodoCard({
       <div
         className={etcUtil.classNames([
           'flex items-center gap-[6px] justify-between',
-          screenSize === 'desktop' && cookies[COOKIE_DISPLAY] !== 'grid'
-            ? 'ml-[12px] w-full'
-            : 'mt-[6px]',
+          display !== 'grid' ? 'ml-[12px] w-full' : 'mt-[6px]',
         ])}>
         {/* 제목 */}
         <p className='truncate | text-[15px] font-[600] leading-[130%]'>
@@ -97,9 +95,7 @@ export function TodoCard({
         {/* 상태 */}
         <div
           className={etcUtil.classNames([
-            screenSize === 'desktop' && cookies[COOKIE_DISPLAY] !== 'grid'
-              ? 'w-[120px] | flex justify-center'
-              : 'shrink-0',
+            display !== 'grid' ? 'w-[120px] | flex justify-center' : 'shrink-0',
           ])}>
           <button
             type='button'
@@ -125,9 +121,7 @@ export function TodoCard({
       {/* 제목, 상태 */}
       <div
         className={etcUtil.classNames([
-          screenSize === 'desktop' && cookies[COOKIE_DISPLAY] !== 'grid'
-            ? 'w-[240px] shrink-0 | flex justify-center'
-            : '',
+          display !== 'grid' ? 'w-[240px] shrink-0 | flex justify-center' : 'mt-[6px]',
         ])}>
         <TodoTimeText
           todo={todo}
@@ -140,13 +134,10 @@ export function TodoCard({
           <div
             className={etcUtil.classNames([
               'flex items-center',
-              screenSize === 'desktop' && cookies[COOKIE_DISPLAY] !== 'grid' ? '' : 'mt-[6px]',
+              display !== 'grid' ? '' : 'mt-[6px]',
             ])}>
             {/* 하위 일 더 보기 */}
-            <div
-              className={etcUtil.classNames([
-                screenSize === 'desktop' && cookies[COOKIE_DISPLAY] !== 'grid' ? 'w-[120px]' : '',
-              ])}>
+            <div className={etcUtil.classNames([display !== 'grid' ? 'w-[120px]' : ''])}>
               <If condition={todo.childId}>
                 <Then>
                   <button

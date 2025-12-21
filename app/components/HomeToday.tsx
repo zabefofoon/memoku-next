@@ -36,7 +36,7 @@ export default function HomeTody() {
 
   return (
     <div className='emboss-sheet'>
-      <div className='p-[8px] sm:p-[16px] text-[14px] sm:text-[15px]'>
+      <div className='p-[8px] text-[14px] sm:text-[14px]'>
         <If condition={isLoading}>
           <Then>
             <div className='flex justify-center py-[26px]'>
