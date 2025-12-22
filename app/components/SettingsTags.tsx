@@ -2,14 +2,15 @@
 
 import { TAG_COLORS } from '@/const'
 import Link from 'next/link'
+
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { api } from '../lib/api'
 import { Tag } from '../models/Todo'
 import { useSheetStore } from '../stores/sheet.store'
 import { useTagsStore } from '../stores/tags.store'
 import { Icon } from './Icon'
 import { SettingsTagModal } from './SettingsTagModal'
-import TagBadge from './TagBadge'
 import { TodosDeleteModal } from './TodosDeleteModal'
 
 export default function SettingsTags() {
@@ -27,8 +28,6 @@ export default function SettingsTags() {
   const searchParams = useSearchParams()
 
   const [tags, setTags] = useState<Tag[]>()
-  const [isShowDeleteModal, setIsShowDeleteModal] = useState(false)
-  const [isShowTagModal, setIsShowTagModal] = useState(false)
 
   const deleteTag = async (): Promise<void> => {
     const tagId = searchParams.get('delete')
@@ -37,10 +36,11 @@ export default function SettingsTags() {
       const currentTag = await getTag(tagId)
       if (currentTag == null) return
 
-      const res = await fetch(
-        `/api/sheet/google/tag?fileId=${fileId}&index=${currentTag?.index}&deleted=${true}&modified=${Date.now()}`,
-        { method: 'PATCH' }
-      )
+      const res = await api.patchSheetGoogleTag(fileId, {
+        index: currentTag?.index ?? 0,
+        deleted: true,
+        now: Date.now(),
+      })
       const result = await res.json()
       if (result) deleteTags([tagId])
     } else deleteTags([tagId])
@@ -57,10 +57,7 @@ export default function SettingsTags() {
     if (fileId) {
       if (tagQuery === 'new') {
         const [id, now] = await addTag(tagInfo)
-        const res = await fetch(
-          `/api/sheet/google/tag?fileId=${fileId}&id=${id}&color=${tagInfo.color}&label=${tagInfo.label}&modified=${now}`,
-          { method: 'POST' }
-        )
+        const res = await api.postSheetGoogleTag(fileId, id, tagInfo.color, tagInfo.label, now)
         const result = await res.json()
         updateIndex(id, result.index)
         updateDirties([id], false)
@@ -68,10 +65,13 @@ export default function SettingsTags() {
         const currentTag = await getTag(tagQuery)
         if (currentTag == null) return
         const now = await updateTag(tagQuery, tagInfo)
-        const res = await fetch(
-          `/api/sheet/google/tag?fileId=${fileId}&color=${tagInfo.color}&label=${tagInfo.label}&index=${currentTag?.index}&modified=${now}`,
-          { method: 'PATCH' }
-        )
+        const res = await api.patchSheetGoogleTag(fileId, {
+          color: tagInfo.color,
+          label: tagInfo.label,
+          index: currentTag?.index ?? 0,
+          now,
+        })
+
         const result = await res.json()
         if (result.ok) updateDirties([tagQuery], false)
       }
@@ -87,54 +87,65 @@ export default function SettingsTags() {
     setTags(allTags)
   }, [allTags])
 
-  useEffect(() => {
-    setIsShowDeleteModal(!!searchParams.get('delete'))
-    setIsShowTagModal(!!searchParams.get('tag'))
-  }, [searchParams])
-
   return (
-    <div className='w-full | bg-white dark:bg-zinc-800 shadow-md rounded-xl | p-[16px]'>
-      <TodosDeleteModal
-        isShow={isShowDeleteModal}
-        close={router.back}
-        done={deleteTag}
-      />
-      <SettingsTagModal
-        isShow={isShowTagModal}
-        close={router.back}
-        done={handleTagDone}
-      />
-      <div className='flex items-start flex-col lg:flex-row gap-[12px] lg:gap-[24px]'>
-        <p className='text-[15px] font-[700] | shrink-0 | lg:py-[8px] | w-[100px]'>태그</p>
-        <div className='flex items-center gap-[6px] flex-wrap'>
-          {tags && (
-            <>
-              {tags?.map((tag) => (
-                <div
-                  key={tag.id}
-                  className='relative'>
-                  <TagBadge
-                    id={tag.id}
-                    click={(tag) => router.push(`?tag=${tag?.id}`)}
+    <div className='emboss-sheet'>
+      <div className='p-[8px]'>
+        <TodosDeleteModal
+          isShow={!!searchParams.get('delete')}
+          close={router.back}
+          done={deleteTag}
+        />
+        <SettingsTagModal
+          isShow={!!searchParams.get('tag')}
+          close={router.back}
+          done={handleTagDone}
+        />
+        <div className='flex items-start flex-col lg:flex-row gap-[12px] lg:gap-[24px]'>
+          <p className='text-[15px] font-[700] | shrink-0 | lg:py-[8px] | w-[100px]'>태그</p>
+
+          <div className='flex flex-wrap gap-[8px]'>
+            {tags?.map((tag) => (
+              <button
+                key={tag.id}
+                type='button'
+                className='neu-button'
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+
+                  const urlParams = new URLSearchParams(searchParams.toString())
+                  router.push(`?${decodeURIComponent(urlParams.toString())}&tag=${tag.id}`, {
+                    scroll: false,
+                  })
+                }}>
+                <Icon
+                  name='tag-active'
+                  className='text-[11px] translate-y-[1px]'
+                  style={{
+                    color: tag
+                      ? TAG_COLORS[tag.color]?.white || 'var(--color-slate-500)'
+                      : 'var(--color-slate-500)',
+                  }}
+                />
+                <p>{tag?.label ?? 'MEMO'}</p>
+
+                <Link
+                  className=' bg-gray-50 dark:bg-zinc-700 rounded-full p-[2px]'
+                  href={`?delete=${tag.id}`}>
+                  <Icon
+                    name='delete'
+                    className='text-[16px]'
                   />
-                  <Link
-                    className='absolute z-[1] top-0 right-0 translate-x-[4px] -translate-y-[4px] | bg-gray-50 dark:bg-zinc-700 rounded-full p-[2px]'
-                    href={`?delete=${tag.id}`}>
-                    <Icon
-                      name='delete'
-                      className='text-[16px]'
-                    />
-                  </Link>
-                </div>
-              ))}
-              <TagBadge />
-            </>
-          )}
-          <Link
-            className='w-[36px] aspect-square | border border-dashed rounded-full border-slate-400 dark:border-zinc-500 | flex items-center justify-center'
-            href='?tag=new'>
-            <Icon name='plus' />
-          </Link>
+                </Link>
+              </button>
+            ))}
+            <Link
+              href='?tag=new'
+              className='pl-[12px] pr-[6px] | border border-dashed rounded-full border-slate-400 dark:border-zinc-500 | flex items-center justify-center'>
+              <p className='text-[12px] text-gray-600'>New Tag</p>
+              <Icon name='plus' />
+            </Link>
+          </div>
         </div>
       </div>
     </div>

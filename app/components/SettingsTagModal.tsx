@@ -3,8 +3,8 @@
 import { TAG_COLORS } from '@/const'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { useCookies } from 'react-cookie'
 import { useTagsStore } from '../stores/tags.store'
+import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
 import UIModal from './UIModal'
 
@@ -14,9 +14,8 @@ interface Props {
   close: () => void
 }
 
-export function SettingsTagModal(props: Props) {
+export function SettingsTagModal({ isShow = false, done, close }: Props) {
   const searchParams = useSearchParams()
-  const [cookies] = useCookies()
   const getTagsById = useTagsStore((s) => s.getTagsById)
 
   const [tagName, setTagName] = useState<string>('')
@@ -25,15 +24,17 @@ export function SettingsTagModal(props: Props) {
   const tag = getTagsById(searchParams?.get('tag') ?? '')
 
   useEffect(() => {
-    setTagName(tag?.label ?? '')
-    setSelectedColor(tag?.color)
+    if (tag) {
+      setTagName(tag.label || 'MEMO')
+      setSelectedColor(tag.color)
+    }
   }, [tag])
 
   return (
     <UIModal
       header={() => <span>태그 설정</span>}
-      open={props.isShow ?? false}
-      close={() => props.close()}
+      open={isShow}
+      close={() => close()}
       content={() => (
         <div className='flex flex-col | gap-[12px] | pb-[2px]'>
           <label className='flex items-center'>
@@ -49,29 +50,25 @@ export function SettingsTagModal(props: Props) {
             <span className='w-[100px] | text-[15px] | py-[8px]'>색</span>
             <div className='flex flex-wrap gap-[6px] max-w-[240px]'>
               {Object.entries(TAG_COLORS).map(([key, value]) => (
-                <button
-                  key={key}
-                  className='relative | flex flex-wrap gap-[6px] max-w-[240px]'
-                  onClick={() => setSelectedColor(key as keyof typeof TAG_COLORS)}>
-                  <span className='dark:bg-zinc-700 | p-[4px] shadow-sm shadow-gray-400 dark:shadow-gray-800 rounded-full'>
-                    <span
-                      className='w-[32px] | flex items-center justify-center | rounded-full | text-[14px] font-[700] | aspect-square'
-                      style={{
-                        background: cookies['x-theme'] === 'dark' ? value.dark : `${value.white}24`,
-                        color: cookies['x-theme'] === 'dark' ? 'white' : value.white,
-                      }}>
-                      {tagName.slice(0, 1) || 'M'}
-                    </span>
-                  </span>
-                  {selectedColor === key && (
-                    <span className='flex items-center justify-center | absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 | w-full h-full bg-black/50 | rounded-full'>
-                      <Icon
-                        name='check'
-                        className='text-white text-[24px]'
-                      />
-                    </span>
-                  )}
-                </button>
+                <div
+                  className='relative'
+                  key={key}>
+                  <button
+                    key={key}
+                    type='button'
+                    className={etcUtil.classNames([
+                      'neu-button',
+                      { active: selectedColor === key },
+                    ])}
+                    onClick={() => setSelectedColor(key as keyof typeof TAG_COLORS)}>
+                    <Icon
+                      name='tag-active'
+                      className='text-[11px] translate-y-[1px]'
+                      style={{ color: value.white }}
+                    />
+                    {tagName || 'MEMO'}
+                  </button>
+                </div>
               ))}
             </div>
           </div>
@@ -81,7 +78,7 @@ export function SettingsTagModal(props: Props) {
         <button
           className='rounded-md bg-indigo-500 py-[12px]'
           onClick={() =>
-            tagName && selectedColor && props.done({ label: tagName, color: selectedColor })
+            tagName && selectedColor && done({ label: tagName, color: selectedColor })
           }>
           <p className='text-white text-[15px] font-[700]'>설정하기</p>
         </button>
@@ -89,7 +86,7 @@ export function SettingsTagModal(props: Props) {
       cancel={() => (
         <button
           className='rounded-md bg-gray-200 dark:bg-zinc-700 text-[15px] py-[12px]'
-          onClick={() => props.close()}>
+          onClick={() => close()}>
           <p className='text-[15px]'>취소하기</p>
         </button>
       )}

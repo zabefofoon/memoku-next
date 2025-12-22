@@ -15,12 +15,9 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
-import { useCookies } from 'react-cookie'
 import { useThemeStore } from '../stores/theme.store'
 
 export default function PageCalendar() {
-  const [cookies] = useCookies()
-
   const isDarkMode = useThemeStore((state) => state.isDarkMode)
   const getTagsById = useTagsStore((state) => state.getTagsById)
   const router = useRouter()
@@ -48,14 +45,9 @@ export default function PageCalendar() {
         id: todo.id,
         title: todo.description?.slice(0, 20),
         date: dayjs(todo.created).format('YYYY-MM-DD'),
-        backgroundColor:
-          cookies['x-theme'] === 'dark'
-            ? tagColor
-              ? (TAG_COLORS[tagColor]?.dark ?? '#000000')
-              : '#000000'
-            : tagColor
-              ? (TAG_COLORS[tagColor]?.white ?? '#000000')
-              : '#000000',
+        backgroundColor: tagColor
+          ? (TAG_COLORS[tagColor]?.white ?? 'var(--color-slate-800)')
+          : 'var(--color-slate-800)',
         start: todo.start ? dayjs(todo.start).toDate() : undefined,
         end: todo.end ? dayjs(todo.end).toDate() : undefined,
         daysOfWeek: todo.days?.map((day) => CALENDAR_REPEAT[day]),
@@ -65,7 +57,7 @@ export default function PageCalendar() {
   }
 
   return (
-    <div className='page calendar | flex-1 h-full flex | bg-white dark:bg-zinc-800 shadow-md rounded-xl | py-[16px]'>
+    <div className='page calendar | flex-1 h-full flex | pt-[16px] mb-[80px]'>
       <FullCalendar
         key={`${isDarkMode}`}
         contentHeight='100%'

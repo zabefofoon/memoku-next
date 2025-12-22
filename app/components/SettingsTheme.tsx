@@ -22,8 +22,8 @@ export default function SettingsTags() {
   }
 
   return (
-    <div className='w-full | bg-white dark:bg-zinc-800 shadow-md rounded-xl | p-[16px]'>
-      <div className='flex items-start flex-col lg:flex-row gap-[12px] lg:gap-[24px]'>
+    <div className='emboss-sheet'>
+      <div className='p-[8px] | flex items-start flex-col lg:flex-row gap-[12px] lg:gap-[24px]'>
         <p className='text-[15px] font-[700] | shrink-0 | lg:py-[8px] | w-[100px]'>다크모드</p>
         <div className='flex items-center gap-[6px] flex-wrap'>
           <UIToggle

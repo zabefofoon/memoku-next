@@ -51,4 +51,28 @@ export const api = {
       method: 'DELETE',
     })
   },
+
+  patchSheetGoogleTag(
+    fileId: string,
+    searchParams: {
+      index: number
+      now: number
+      color?: string
+      label?: string
+      deleted?: boolean
+    }
+  ) {
+    const init = { fileId, ...searchParams } as unknown as Record<string, string>
+    const params = new URLSearchParams(init)
+    return fetch(`/api/sheet/google/tag?${decodeURIComponent(params.toString())}`, {
+      method: 'PATCH',
+    })
+  },
+
+  postSheetGoogleTag(fileId: string, id: string, color: string, label: string, now: number) {
+    return fetch(
+      `/api/sheet/google/tag?fileId=${fileId}&id=${id}&color=${color}&label=${label}&modified=${now}`,
+      { method: 'POST' }
+    )
+  },
 }
