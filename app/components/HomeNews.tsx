@@ -3,10 +3,10 @@ import { Icon } from './Icon'
 export default function HomeNews() {
   return (
     <div className='order-2 sm:order-0 flex-1 min-w-[300px] shrink-0 | flex flex-col gap-[12px]'>
-      <div className='emboss-sheet'>
-        <div className='relative rounded-lg overflow-hidden'>
+      <div className='emboss-sheet | w-full h-full'>
+        <div className='relative rounded-lg overflow-hidden | w-full h-full'>
           <img
-            className='aspect-square'
+            className='w-full aspect-square object-cover'
             src='https://hopxvfhalrmkomnxznpf.supabase.co/storage/v1/object/public/memoku-bucket/public/RMZofdzDyN.jpg'
             alt=''
           />

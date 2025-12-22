@@ -36,10 +36,8 @@ interface StepCard {
   value: 'plan' | 'iterate' | 'reset'
 }
 
-export default function TodosTimeModal({ isShow, todo, updateTime, close }: Props): ReactNode {
+export default function TodosTimeModal({ isShow = false, todo, updateTime, close }: Props) {
   const searchParams = useSearchParams()
-
-  const [isShowDateModal, setIsShowDateModal] = useState<boolean>(false)
 
   const [step, setStep] = useState<'select' | 'plan' | 'iterate'>('select')
   const [selectedMode, setSelectedMode] = useState<'plan' | 'iterate' | 'reset'>('plan')
@@ -130,17 +128,13 @@ export default function TodosTimeModal({ isShow, todo, updateTime, close }: Prop
   }
 
   useEffect(() => {
-    setIsShowDateModal(!!searchParams.get('date'))
-  }, [searchParams])
-
-  useEffect(() => {
     if (isShow) initStates()
   }, [initStates, isShow])
 
   return (
     <>
       <UIModal
-        open={isShow ?? false}
+        open={isShow}
         close={() => close()}
         header={() => <span>시간 설정</span>}
         content={() => (
@@ -187,7 +181,10 @@ export default function TodosTimeModal({ isShow, todo, updateTime, close }: Prop
 
                 <div className='flex flex-col gap-[8px] | text-[13px] | mb-[24px] pb-[24px] | border-b border-slate-200 dark:border-zinc-600'>
                   {step === 'plan' ? (
-                    <PlanContent date={mode === 'start' ? start.date : end.date} />
+                    <PlanContent
+                      todo={todo}
+                      date={mode === 'start' ? start.date : end.date}
+                    />
                   ) : (
                     <IterateContent
                       mode={mode}
@@ -230,7 +227,7 @@ export default function TodosTimeModal({ isShow, todo, updateTime, close }: Prop
       />
       <DatePickerModal
         key={`date-${mode}`}
-        isShow={isShowDateModal}
+        isShow={!!searchParams.get('date')}
         selectedDate={mode === 'start' ? start.date : end.date}
         close={close}
         validRange={{ start: mode === 'start' ? undefined : start.date }}
@@ -318,7 +315,7 @@ function SelectContent({
   )
 }
 
-function PlanContent({ date }: { date?: Date }): ReactNode {
+function PlanContent({ todo, date }: { todo?: Todo; date?: Date }): ReactNode {
   const dateUtil = useDateUtil()
   return (
     <div className='flex items-center justify-between'>
@@ -326,7 +323,7 @@ function PlanContent({ date }: { date?: Date }): ReactNode {
       <div className='flex items-center gap-[8px]'>
         {date && <p>{dateUtil.parseOnlyDate(date?.getTime())}</p>}
         <Link
-          href='?time=true&date=true'
+          href={`?time=${todo?.id}&date=true`}
           type='button'>
           <Icon
             name='calendar'

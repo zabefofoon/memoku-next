@@ -31,6 +31,9 @@ export default function Todos() {
 
   const screenSize = useThemeStore((state) => state.screenSize)
   const todos = useTodosPageStore((state) => state.todos)
+  const todayTodos = useTodosPageStore((state) => state.todayTodos)
+  const thisWeekTodos = useTodosPageStore((state) => state.thisWeekTodos)
+  const nextWeekTodos = useTodosPageStore((state) => state.nextWeekTodos)
 
   const loadTodosInStore = useTodosPageStore((state) => state.loadTodos)
   const loadTodayTodosInStore = useTodosPageStore((state) => state.loadTodayTodos)
@@ -151,8 +154,13 @@ export default function Todos() {
       />
       <TodosTimeModal
         isShow={!!timeQuery}
-        todo={todos?.find(({ id }) => id === timeQuery)}
-        updateTime={(todo, values) => updateTime(todo, values)}
+        todo={[
+          ...(todos ?? []),
+          ...(todayTodos ?? []),
+          ...(thisWeekTodos ?? []),
+          ...(nextWeekTodos ?? []),
+        ]?.find(({ id }) => id === timeQuery)}
+        updateTime={updateTime}
         close={router.back}
       />
       <TodosTagModal
