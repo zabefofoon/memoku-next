@@ -88,64 +88,62 @@ export default function SettingsTags() {
   }, [allTags])
 
   return (
-    <div className='emboss-sheet'>
-      <div className='p-[8px]'>
-        <TodosDeleteModal
-          isShow={!!searchParams.get('delete')}
-          close={router.back}
-          done={deleteTag}
-        />
-        <SettingsTagModal
-          isShow={!!searchParams.get('tag')}
-          close={router.back}
-          done={handleTagDone}
-        />
-        <div className='flex items-start flex-col lg:flex-row gap-[12px] lg:gap-[24px]'>
-          <p className='text-[15px] font-[700] | shrink-0 | lg:py-[8px] | w-[100px]'>태그</p>
+    <div className='emboss-sheet | p-[16px]'>
+      <TodosDeleteModal
+        isShow={!!searchParams.get('delete')}
+        close={router.back}
+        done={deleteTag}
+      />
+      <SettingsTagModal
+        isShow={!!searchParams.get('tag')}
+        close={router.back}
+        done={handleTagDone}
+      />
+      <div className='flex items-start flex-col lg:flex-row gap-[12px] lg:gap-[24px]'>
+        <p className='text-[14px] font-[700] | shrink-0 | lg:py-[8px] | w-[100px]'>태그</p>
 
-          <div className='flex flex-wrap gap-[8px]'>
-            {tags?.map((tag) => (
-              <button
-                key={tag.id}
-                type='button'
-                className='neu-button'
-                onClick={(event) => {
-                  event.preventDefault()
-                  event.stopPropagation()
+        <div className='flex flex-wrap gap-[8px] | my-auto'>
+          {tags?.map((tag) => (
+            <button
+              key={tag.id}
+              type='button'
+              className='neu-button'
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
 
-                  const urlParams = new URLSearchParams(searchParams.toString())
-                  router.push(`?${decodeURIComponent(urlParams.toString())}&tag=${tag.id}`, {
-                    scroll: false,
-                  })
-                }}>
+                const urlParams = new URLSearchParams(searchParams.toString())
+                router.push(`?${decodeURIComponent(urlParams.toString())}&tag=${tag.id}`, {
+                  scroll: false,
+                })
+              }}>
+              <Icon
+                name='tag-active'
+                className='text-[11px] translate-y-[1px]'
+                style={{
+                  color: tag
+                    ? TAG_COLORS[tag.color]?.white || 'var(--color-slate-500)'
+                    : 'var(--color-slate-500)',
+                }}
+              />
+              <p>{tag?.label ?? 'MEMO'}</p>
+
+              <Link
+                className=' bg-gray-50 dark:bg-zinc-700 rounded-full p-[2px]'
+                href={`?delete=${tag.id}`}>
                 <Icon
-                  name='tag-active'
-                  className='text-[11px] translate-y-[1px]'
-                  style={{
-                    color: tag
-                      ? TAG_COLORS[tag.color]?.white || 'var(--color-slate-500)'
-                      : 'var(--color-slate-500)',
-                  }}
+                  name='delete'
+                  className='text-[16px]'
                 />
-                <p>{tag?.label ?? 'MEMO'}</p>
-
-                <Link
-                  className=' bg-gray-50 dark:bg-zinc-700 rounded-full p-[2px]'
-                  href={`?delete=${tag.id}`}>
-                  <Icon
-                    name='delete'
-                    className='text-[16px]'
-                  />
-                </Link>
-              </button>
-            ))}
-            <Link
-              href='?tag=new'
-              className='pl-[12px] pr-[6px] | border border-dashed rounded-full border-slate-400 dark:border-zinc-500 | flex items-center justify-center'>
-              <p className='text-[12px] text-gray-600'>New Tag</p>
-              <Icon name='plus' />
-            </Link>
-          </div>
+              </Link>
+            </button>
+          ))}
+          <Link
+            href='?tag=new'
+            className='pl-[12px] pr-[6px] | border border-dashed rounded-full border-slate-400 dark:border-zinc-500 | flex items-center justify-center'>
+            <p className='text-[12px] text-gray-600'>New Tag</p>
+            <Icon name='plus' />
+          </Link>
         </div>
       </div>
     </div>

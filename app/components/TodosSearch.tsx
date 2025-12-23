@@ -16,11 +16,16 @@ export default function TodosSearch() {
   const [value, setValue] = useState<string>(() => searchTextQuery)
 
   const inputEl = useRef<HTMLInputElement>(null)
+  const searchParamsRef = useRef(searchParams)
+
+  useEffect(() => {
+    searchParamsRef.current = searchParams
+  }, [searchParams])
 
   const updateQuery = useMemo(
     () =>
       debounce((next: string) => {
-        const urlParams = new URLSearchParams(searchParams.toString())
+        const urlParams = new URLSearchParams(searchParamsRef.current.toString())
 
         const trimmed = next.trim()
         if (trimmed) urlParams.set('searchText', trimmed)
@@ -29,17 +34,19 @@ export default function TodosSearch() {
         const queryString = urlParams.toString()
         router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false })
       }, 300),
-    [pathname, router, searchParams]
+    [pathname, router]
   )
 
   useEffect(() => {
-    const urlValue = searchTextQuery
-    setValue(urlValue)
+    if (document.activeElement === inputEl.current) return
+    setValue(searchTextQuery)
   }, [searchTextQuery])
 
   useEffect(() => {
-    if (inputEl.current) inputEl.current.value = searchTextQuery
-  }, [inputEl, searchTextQuery])
+    return () => {
+      updateQuery.cancel()
+    }
+  }, [updateQuery])
 
   return (
     <label className='search | w-full sm:w-fit flex items-center | border-b border-gray-300 dark:border-zinc-600 has-focus:border-indigo-500 | pr-[8px]'>
