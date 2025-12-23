@@ -35,69 +35,67 @@ export default function HomeTody() {
   }, [])
 
   return (
-    <div className='emboss-sheet'>
-      <div className='p-[8px] text-[14px] sm:text-[14px]'>
-        <If condition={isLoading}>
-          <Then>
-            <div className='flex justify-center py-[26px]'>
-              <UISpinner />
-            </div>
-          </Then>
-          <Else>
-            <h3 className='rounded-full | font-[700]'>오늘 할 일</h3>
-            <div className='mt-[6px] | flex flex-col gap-[4px]'>
-              <If condition={!todos?.total}>
-                <Then>
-                  <p className='text-gray-600'>오늘 할 일을 추가해보세요.</p>
-                  <button
-                    type='button'
-                    className='text-gray-600 text-[14px] | flex items-center | underline | w-fit | mt-[2px]'
-                    onClick={() => createTodo().then((todo) => router.push(`/todos/${todo.id}`))}>
-                    추가하기
-                    <Icon name='chevron-right' />
-                  </button>
-                </Then>
-                <Else>
-                  <Link href={`/todos/${todo?.id}`}>
-                    <div className='flex items-center gap-[16px] | text-gray-600'>
-                      <p className=''>{todo?.description?.slice(0, 40)?.split(/\n/)[0]}</p>
-                    </div>
-                    <div className='flex items-center gap-[8px] | mt-[12px]'>
-                      <p className='flex items-center gap-[4px] | text-[12px] leading-[100%]'>
-                        <Icon
-                          name='tag-active'
-                          style={{
-                            color: tag?.color,
-                          }}
-                        />
-                        <span>{tag?.label ?? 'MEMO'}</span>
-                      </p>
+    <div className='emboss-sheet | p-[16px] text-[14px] sm:text-[14px]'>
+      <If condition={isLoading}>
+        <Then>
+          <div className='flex justify-center py-[26px]'>
+            <UISpinner />
+          </div>
+        </Then>
+        <Else>
+          <h3 className='rounded-full | font-[700]'>오늘 할 일</h3>
+          <div className='mt-[6px] | flex flex-col gap-[4px]'>
+            <If condition={!todos?.total}>
+              <Then>
+                <p className='text-gray-600'>오늘 할 일을 추가해보세요.</p>
+                <button
+                  type='button'
+                  className='text-gray-600 text-[14px] | flex items-center | underline | w-fit | mt-[2px]'
+                  onClick={() => createTodo().then((todo) => router.push(`/todos/${todo.id}`))}>
+                  추가하기
+                  <Icon name='chevron-right' />
+                </button>
+              </Then>
+              <Else>
+                <Link href={`/todos/${todo?.id}`}>
+                  <div className='flex items-center gap-[16px] | text-gray-600'>
+                    <p className=''>{todo?.description?.slice(0, 40)?.split(/\n/)[0]}</p>
+                  </div>
+                  <div className='flex items-center gap-[8px] | mt-[12px]'>
+                    <p className='flex items-center gap-[4px] | text-[12px] leading-[100%]'>
+                      <Icon
+                        name='tag-active'
+                        style={{
+                          color: tag?.color,
+                        }}
+                      />
+                      <span>{tag?.label ?? 'MEMO'}</span>
+                    </p>
 
-                      <p className='text-[12px] | flex items-center gap-[2px] leading-[100%]'>
-                        <Icon
-                          name={STATUS_MAP[todo?.status ?? 'created'].icon}
-                          style={{
-                            color: STATUS_MAP[todo?.status ?? 'created'].color,
-                          }}
-                        />
-                        {STATUS_MAP[todo?.status ?? 'created'].label}
-                      </p>
+                    <p className='text-[12px] | flex items-center gap-[2px] leading-[100%]'>
+                      <Icon
+                        name={STATUS_MAP[todo?.status ?? 'created'].icon}
+                        style={{
+                          color: STATUS_MAP[todo?.status ?? 'created'].color,
+                        }}
+                      />
+                      {STATUS_MAP[todo?.status ?? 'created'].label}
+                    </p>
 
-                      {todo && (
-                        <TodoTimeText
-                          todo={todo}
-                          timeFormat='YY/MM/DD'
-                          hideTime
-                        />
-                      )}
-                    </div>
-                  </Link>
-                </Else>
-              </If>
-            </div>
-          </Else>
-        </If>
-      </div>
+                    {todo && (
+                      <TodoTimeText
+                        todo={todo}
+                        timeFormat='YY/MM/DD'
+                        hideTime
+                      />
+                    )}
+                  </div>
+                </Link>
+              </Else>
+            </If>
+          </div>
+        </Else>
+      </If>
     </div>
   )
 }

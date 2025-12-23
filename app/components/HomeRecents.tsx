@@ -18,20 +18,18 @@ export default function HomeRecents() {
   }, [])
 
   return (
-    <div className='emboss-sheet | w-full'>
-      <div className='flex flex-col p-[8px]'>
-        <h3 className='font-[700] text-[14px]'>최근 수정</h3>
-        <div className='mt-[8px] | grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-[6px]'>
-          {recentTodos.map((todo) => (
-            <TodoCard
-              key={todo.id}
-              className='w-full'
-              todo={todo}
-              display='grid'
-              hideChildren
-            />
-          ))}
-        </div>
+    <div className='emboss-sheet | w-full | flex flex-col p-[16px]'>
+      <h3 className='font-[700] text-[14px]'>최근 수정</h3>
+      <div className='mt-[8px] | grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-[6px]'>
+        {recentTodos.map((todo) => (
+          <TodoCard
+            key={todo.id}
+            className='w-full'
+            todo={todo}
+            display='grid'
+            hideChildren
+          />
+        ))}
       </div>
     </div>
   )

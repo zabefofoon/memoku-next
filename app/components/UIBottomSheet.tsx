@@ -2,20 +2,32 @@
 
 import { ReactElement, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { If, Then } from 'react-if'
 import { CSSTransition } from 'react-transition-group'
 import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
 
 interface Props {
+  containerClass?: string
   open: boolean
   close?: () => void
   header?: () => ReactElement
+  filters?: () => ReactElement
   content: () => ReactElement
   cancel?: () => ReactElement
   ok?: () => ReactElement
 }
 
-export default function UIBottomSheet({ open, close, header, content, cancel, ok }: Props) {
+export default function UIBottomSheet({
+  open,
+  close,
+  header,
+  filters,
+  content,
+  cancel,
+  ok,
+  containerClass,
+}: Props) {
   const nodeRef = useRef<HTMLDivElement>(null)
 
   // ESC로 닫기
@@ -46,7 +58,11 @@ export default function UIBottomSheet({ open, close, header, content, cancel, ok
           onClick={close}
           className='fixed inset-0 bg-black/50 | w-full h-full | backdrop-blur-[2px]'
         />
-        <div className='flex justify-center | sm:py-[32px] | w-full max-h-[90%] sm:max-w-[320px] overflow-auto | scroll-hidden'>
+        <div
+          className={etcUtil.classNames([
+            'flex justify-center | sm:py-[32px] | w-full max-h-[90%] sm:max-w-[320px] overflow-auto | scroll-hidden',
+            containerClass,
+          ])}>
           <div
             className={etcUtil.classNames([
               'bottom-sheet-card | flex flex-col gap-[12px] | relative z-10 | w-full | p-[16px] | rounded-t-4xl sm:rounded-xl bg-gray-100 dark:bg-zinc-800 shadow-xl',
@@ -60,6 +76,9 @@ export default function UIBottomSheet({ open, close, header, content, cancel, ok
                 <Icon name='close' />
               </button>
             </div>
+            <If condition={!!filters}>
+              <Then>{filters?.()}</Then>
+            </If>
             <div
               id='bottomsheet-scroll-el'
               className='mb-[12px] | flex-1 h-full overflow-auto | scroll-hidden'>

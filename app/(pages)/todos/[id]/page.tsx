@@ -137,7 +137,7 @@ export default function TodosDetail() {
         </If>
 
         <div className='pb-[4px] | flex-1 overflow-hidden | flex gap-[16px] flex-col sm:flex-row'>
-          <div className='emboss-sheet | w-full h-full | flex flex-col | sm:overflow-auto | dark:bg-zinc-800'>
+          <div className='emboss-sheet | p-[16px] | w-full h-full | flex flex-col | sm:overflow-auto | dark:bg-zinc-800'>
             <TodosEditor />
           </div>
           <TodosImages />

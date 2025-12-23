@@ -5,6 +5,7 @@ export const AGE_1_YEAR = 60 * 60 * 24 * 365
 export const COOKIE_THEME = 'x-theme'
 export const COOKIE_EXPAND = 'x-expand-aside'
 export const COOKIE_DISPLAY = 'x-display'
+export const COOKIE_CHILDREN_STATUS = 'x-children-status'
 
 export const TAG_COLORS = {
   green: { white: '#1abc9c', dark: '#16a085' },

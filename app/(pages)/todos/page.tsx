@@ -136,7 +136,7 @@ export default function Todos() {
   }, [isTodosLoading, isTodosNextLoading, loadTodos, page, setPage])
 
   return (
-    <div className='flex flex-col'>
+    <div className='h-full | flex flex-col'>
       <TodosStatusModal
         isShow={!!todoStatusQuery}
         select={(status) => {
@@ -174,78 +174,83 @@ export default function Todos() {
         <h1 className='text-[20px] opacity-80'>Todos</h1>
         <p className='text-[16px] opacity-50'>할 일을 정리해보세요.</p>
       </div>
-
-      <div
-        className='sticky top-0 left-0 z-[50] | pt-[16px] pb-[6px] | bg-gray-100/50 | transition-transform'
-        style={{
-          backdropFilter: 'blur(4px)',
-          transform: isShow ? 'translate(0, 0)' : 'translate(0, -100%)',
-        }}>
-        <div className='flex items-center gap-[6px] | px-[16px] mb-[8px] sm:mb-[20px]'>
-          <TodosSearch />
-          <button
-            type='button'
-            className='hidden sm:block'
-            onClick={() =>
-              setCookie(COOKIE_DISPLAY, cookieDisplay[COOKIE_DISPLAY] === 'grid' ? 'row' : 'grid', {
-                maxAge: AGE_1_YEAR,
-              })
-            }>
-            <If condition={cookieDisplay[COOKIE_DISPLAY] === 'grid'}>
-              <Then>
-                <Icon
-                  name='grid'
-                  className='text-[20px]'
-                />
-              </Then>
-              <Else>
-                <Icon
-                  name='row'
-                  className='text-[20px]'
-                />
-              </Else>
-            </If>
-          </button>
-          <Link
-            href={{ query: { ...Object.fromEntries(searchParams), filter: 'true' } }}
-            className='shrink-0 flex items-center gap-[12px] ml-auto sm:ml-0'
-            scroll={false}>
-            <Icon
-              name='filter'
-              className='text-[20px]'
-            />
-            <Icon
-              name='chevron-down'
-              className='ml-[-16px] | text-[16px]'
-            />
-          </Link>
-          <button
-            type='button'
-            className='ml-auto | hidden sm:flex items-center | bg-indigo-500 dark:bg-indigo-600 rounded-lg | px-[8px] py-[6px] | text-white'
-            onClick={() => createTodo().then((todo) => router.push(`/todos/${todo.id}`))}>
-            <Icon
-              name='plus'
-              className='text-[20px]'
-            />
-            <p className='text-[14px]'>추가하기</p>
-          </button>
+      <div className='w-full h-full | flex flex-col | sm:overflow-hidden'>
+        <div
+          className='sticky top-0 left-0 z-[50] | pt-[16px] pb-[6px] | bg-gray-100/50 | transition-transform'
+          style={{
+            backdropFilter: 'blur(4px)',
+            transform: isShow ? 'translate(0, 0)' : 'translate(0, -100%)',
+          }}>
+          <div className='flex items-center gap-[6px] | px-[16px] sm:p-0 mb-[8px] sm:mb-[20px]'>
+            <TodosSearch />
+            <button
+              type='button'
+              className='hidden sm:block'
+              onClick={() =>
+                setCookie(
+                  COOKIE_DISPLAY,
+                  cookieDisplay[COOKIE_DISPLAY] === 'grid' ? 'row' : 'grid',
+                  {
+                    maxAge: AGE_1_YEAR,
+                  }
+                )
+              }>
+              <If condition={cookieDisplay[COOKIE_DISPLAY] === 'grid'}>
+                <Then>
+                  <Icon
+                    name='grid'
+                    className='text-[20px]'
+                  />
+                </Then>
+                <Else>
+                  <Icon
+                    name='row'
+                    className='text-[20px]'
+                  />
+                </Else>
+              </If>
+            </button>
+            <Link
+              href={{ query: { ...Object.fromEntries(searchParams), filter: 'true' } }}
+              className='shrink-0 flex items-center gap-[12px] ml-auto sm:ml-0'
+              scroll={false}>
+              <Icon
+                name='filter'
+                className='text-[20px]'
+              />
+              <Icon
+                name='chevron-down'
+                className='ml-[-16px] | text-[16px]'
+              />
+            </Link>
+            <button
+              type='button'
+              className='ml-auto | hidden sm:flex items-center | bg-indigo-500 dark:bg-indigo-600 rounded-lg | px-[8px] py-[6px] | text-white'
+              onClick={() => createTodo().then((todo) => router.push(`/todos/${todo.id}`))}>
+              <Icon
+                name='plus'
+                className='text-[20px]'
+              />
+              <p className='text-[14px]'>추가하기</p>
+            </button>
+          </div>
+          <TodosSelectedFilters />
         </div>
-        <TodosSelectedFilters />
-      </div>
-      <div className='flex flex-col gap-[32px] mb-[88px]'>
-        <TodosCardsToday />
-        <TodosCardsThisWeek />
-        <TodosCardsNextWeek />
-        <TodosCards />
-        <If condition={!isTodosLoading && todos && (total ?? 0) > todos.length}>
-          <Then>
-            <div
-              ref={nextLoaderEl}
-              className='text-center | py-[6px]'>
-              <UISpinner />
-            </div>
-          </Then>
-        </If>
+        <div className='overflow-auto | flex-1 flex flex-col gap-[32px] mb-[88px] sm:mb-0'>
+          <TodosCardsToday />
+          <TodosCardsThisWeek />
+          <TodosCardsNextWeek />
+          <TodosCards />
+          <If condition={!isTodosLoading && todos && (total ?? 0) > todos.length}>
+            <Then>
+              <div
+                ref={nextLoaderEl}
+                className='text-center | py-[6px]'>
+                <UISpinner />
+              </div>
+            </Then>
+          </If>
+        </div>
       </div>
     </div>
   )

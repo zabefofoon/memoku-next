@@ -171,26 +171,36 @@ button {
 
 .emboss-sheet {
   position: relative;
-  padding: 6px;
-  border: 2px solid;
-  border-color: transparent white white transparent;
+  overflow: hidden;
   border-radius: 12px;
-  box-shadow: inset 2px 2px 0 rgb(0 0 0 / 5%);
+  box-shadow: inset 1px 1px 0 rgb(0 0 0 / 3%);
 
   &::before {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: calc(100% - 6px);
-    height: calc(100% - 6px);
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
     pointer-events: none;
     content: '';
-    border: 2px solid;
-    border-color: white transparent transparent white;
     border-radius: 8px;
     box-shadow:
-      2px 2px 0 rgb(0 0 0 / 10%),
-      -2px -2px 0 rgb(0 0 0 / 5%);
+      1px 1px 0 rgb(0 0 0 / 3%),
+      inset -1px -1px 0 rgb(0 0 0 / 10%),
+      inset 2px 2px 0 white;
+    transform: translate(-50%, -50%);
+  }
+
+  &::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: calc(100% - 10px);
+    height: calc(100% - 10px);
+    pointer-events: none;
+    content: '';
+    border-radius: 8px;
+    box-shadow: 1px 1px 4% rgb(0 0 0 / 3%);
     transform: translate(-50%, -50%);
   }
 }

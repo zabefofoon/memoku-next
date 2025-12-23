@@ -17,7 +17,9 @@ export default function TodosCardsToday() {
 
   return (
     <div>
-      <p className='px-[16px] mb-[16px] | text-[15px] text-gray-600'>오늘 할 일({todos.length})</p>
+      <p className='px-[16px] sm:p-0 mb-[16px] | text-[15px] text-gray-600'>
+        오늘 할 일({todos.length})
+      </p>
       <If condition={isTodosLoading}>
         <Then>
           {() => (
@@ -36,10 +38,10 @@ export default function TodosCardsToday() {
             <Else>
               <div
                 className={etcUtil.classNames([
-                  'grid | px-[16px]',
+                  'grid | px-[16px] sm:pl-0',
                   screenSize === 'desktop' && cookies[COOKIE_DISPLAY] !== 'grid'
                     ? 'grid-cols-1'
-                    : 'grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-[12px]',
+                    : 'grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-[8px]',
                 ])}>
                 {todos?.map((todo) => (
                   <TodoCard
