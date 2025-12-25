@@ -28,8 +28,8 @@
   --fc-now-indicator-color: red;
 
   &.dark {
-    --fc-border-color: var(--color-zinc-600);
-    --fc-today-bg-color: var(--color-zinc-600);
+    --fc-border-color: var(--color-zinc-800);
+    --fc-today-bg-color: var(--color-zinc-800);
   }
 }
 
@@ -38,6 +38,7 @@
     .fc-toolbar-title {
       font-size: 14px;
       font-weight: 600;
+      opacity: 0.8;
     }
 
     .fc-button {

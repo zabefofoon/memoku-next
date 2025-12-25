@@ -32,6 +32,7 @@ export default function SettingsTags() {
             offIcon='sun'
             checked={isDarkMode}
             toggle={toggleDarkMode}
+            trackClass='dark:!bg-zinc-950'
           />
         </div>
       </div>

@@ -176,7 +176,7 @@ export default function Todos() {
       </div>
       <div className='w-full h-full | flex flex-col | sm:overflow-hidden'>
         <div
-          className='sticky top-0 left-0 z-[50] | pt-[16px] pb-[6px] | bg-gray-100/50 | transition-transform'
+          className='sticky top-0 left-0 z-[50] | pt-[16px] pb-[6px] | bg-gray-100/50 dark:bg-transparent | transition-transform'
           style={{
             backdropFilter: 'blur(4px)',
             transform: isShow ? 'translate(0, 0)' : 'translate(0, -100%)',

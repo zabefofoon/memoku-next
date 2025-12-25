@@ -63,7 +63,7 @@ export default function HomeTags() {
                   }}
                 />
 
-                <p className='text-[12px] text-gray-600 leading-[100%]'>
+                <p className='text-[12px] text-gray-600 dark:text-zinc-200 leading-[100%]'>
                   {tagsMap[item.id]?.label ?? 'MEMO'}
                 </p>
               </div>

@@ -129,19 +129,19 @@ export default function SettingsTags() {
               <p>{tag?.label ?? 'MEMO'}</p>
 
               <Link
-                className=' bg-gray-50 dark:bg-zinc-700 rounded-full p-[2px]'
+                className='p-[2px]'
                 href={`?delete=${tag.id}`}>
                 <Icon
                   name='delete'
-                  className='text-[16px]'
+                  className='text-[14px]'
                 />
               </Link>
             </button>
           ))}
           <Link
             href='?tag=new'
-            className='pl-[12px] pr-[6px] | border border-dashed rounded-full border-slate-400 dark:border-zinc-500 | flex items-center justify-center'>
-            <p className='text-[12px] text-gray-600'>New Tag</p>
+            className='pl-[12px] pr-[6px] | border border-dashed rounded-full border-slate-400 dark:border-zinc-600 | flex items-center justify-center gap-[4px]'>
+            <p className='text-[12px] text-gray-600 dark:text-gray-200'>새 태그</p>
             <Icon name='plus' />
           </Link>
         </div>

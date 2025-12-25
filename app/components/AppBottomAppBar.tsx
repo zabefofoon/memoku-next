@@ -54,7 +54,7 @@ export default function AppBottomAppBar() {
       }}>
       <FloatingButtons />
       <nav
-        className='flex items-center | border-t border-x border-white | rounded-full shadow-lg overflow-hidden'
+        className='flex items-center | border-t border-x border-white dark:border-white/30 | rounded-full shadow-lg overflow-hidden'
         style={{
           backdropFilter: 'blur(4px)',
         }}>

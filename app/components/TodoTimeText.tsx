@@ -64,7 +64,7 @@ export default function TodoTimeText({
               {/* 시간 */}
               <div className='flex items-center gap-[3px] '>
                 <div className='w-[3px] aspect-square bg-gray-300 rounded-full'></div>
-                <p className='text-[11px] text-gray-600'>
+                <p className='text-[11px] text-gray-600 dark:text-zinc-400'>
                   {`${dayjs(start).hour()}`.padStart(2, '0')}:
                   {`${dayjs(start).minute()}`.padStart(2, '0')} ~{' '}
                   {`${dayjs(end).hour()}`.padStart(2, '0')}:
@@ -82,7 +82,7 @@ export default function TodoTimeText({
                     <p className='text-[11px]'>
                       <Switch>
                         <Case condition={isBeforeRemainedTime}>
-                          <span className='text-gray-600 font-[600]'>
+                          <span className='text-gray-600 dark:text-zinc-400 font-[600]'>
                             {etcUtil.formatDuration(start - now, 'until')} 후 시작
                           </span>
                         </Case>
@@ -108,7 +108,7 @@ export default function TodoTimeText({
                 <Then>
                   <div className='flex items-center gap-[3px] '>
                     <div className='w-[3px] aspect-square bg-gray-300 rounded-full'></div>
-                    <p className='text-[11px] text-gray-500'>
+                    <p className='text-[11px] text-gray-600 dark:text-zinc-400'>
                       {dayjs(todo.created).format(timeFormat)} 생성
                     </p>
                   </div>

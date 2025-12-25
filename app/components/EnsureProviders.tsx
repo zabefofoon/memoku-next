@@ -9,14 +9,15 @@ interface Props extends PropsWithChildren {
   isDarkMode: boolean
 }
 
-export function EnsureProviders(props: Props) {
+export function EnsureProviders({ isDarkMode, children }: Props) {
   const initTags = useTagsStore((state) => state.initTags)
   const setIsDarkMode = useThemeStore((state) => state.setIsDarkMode)
+  const isDarkModeInStore = useThemeStore((state) => state.isDarkMode)
   const setScreenSize = useThemeStore((state) => state.setScreenSize)
 
   useEffect(() => {
     initTags()
-    setIsDarkMode(props.isDarkMode)
+    setIsDarkMode(isDarkMode)
 
     setScreenSize(window.innerWidth < 640 ? 'mobile' : 'desktop')
     const handleResize = () => setScreenSize(window.innerWidth < 640 ? 'mobile' : 'desktop')
@@ -25,7 +26,14 @@ export function EnsureProviders(props: Props) {
     return () => {
       window.removeEventListener('resize', handleResize)
     }
-  }, [initTags, props.isDarkMode, setIsDarkMode, setScreenSize])
+  }, [initTags, isDarkMode, setIsDarkMode, setScreenSize])
 
-  return <CookiesProvider>{props.children}</CookiesProvider>
+  useEffect(() => {
+    console.log(isDarkModeInStore)
+    document
+      .querySelector('meta[name=theme-color]')
+      ?.setAttribute('content', isDarkModeInStore ? '#18181b' : 'white')
+  }, [isDarkModeInStore])
+
+  return <CookiesProvider>{children}</CookiesProvider>
 }

@@ -31,21 +31,25 @@ export const STATUS_MAP = {
     label: '완료됨',
     icon: 'check',
     color: 'var(--color-green-500)',
+    darkColor: 'var(--color-green-500)',
   },
   inprogress: {
     label: '진행중',
     icon: 'run',
     color: 'var(--color-indigo-500)',
+    darkColor: 'var(--color-indigo-500)',
   },
   hold: {
     label: '중지됨',
     icon: 'pause',
     color: 'var(--color-orange-600)',
+    darkColor: 'var(--color-orange-600)',
   },
   created: {
     label: '생성됨',
     icon: 'plus',
     color: 'var(--color-slate-600)',
+    darkColor: 'var(--color-zinc-400)',
   },
 }
 

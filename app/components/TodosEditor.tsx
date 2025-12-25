@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ClipboardEvent, useEffect, useRef, useState } from 'react'
 import { If, Then } from 'react-if'
 import { useTagsStore } from '../stores/tags.store'
+import { useThemeStore } from '../stores/theme.store'
 import { useTodosDetailStore } from '../stores/todosDetail.store'
 import { Icon } from './Icon'
 import TodoTimeText from './TodoTimeText'
@@ -15,6 +16,7 @@ export default function TodosEditor() {
   const todo = useTodosDetailStore((s) => s.todo)
   const saveText = useTodosDetailStore((s) => s.saveText)
   const addImages = useTodosDetailStore((s) => s.addImages)
+  const isDarkMode = useThemeStore((s) => s.isDarkMode)
 
   const tag = getTagsById(todo?.tagId)
 
@@ -83,7 +85,9 @@ export default function TodosEditor() {
           type='button'
           className='neu-button'
           style={{
-            color: STATUS_MAP[todo?.status ?? 'created']?.color,
+            color: isDarkMode
+              ? STATUS_MAP[todo?.status ?? 'created']?.darkColor
+              : STATUS_MAP[todo?.status ?? 'created']?.color,
           }}
           onClick={() => {
             const urlParams = new URLSearchParams(searchParams.toString())

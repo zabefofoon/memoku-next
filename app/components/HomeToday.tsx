@@ -1,6 +1,6 @@
 'use client'
 
-import { STATUS_MAP } from '@/const'
+import { STATUS_MAP, TAG_COLORS } from '@/const'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Else, If, Then } from 'react-if'
@@ -47,10 +47,10 @@ export default function HomeTody() {
           <div className='mt-[6px] | flex flex-col gap-[4px]'>
             <If condition={!todos?.total}>
               <Then>
-                <p className='text-gray-600'>오늘 할 일을 추가해보세요.</p>
+                <p className='text-gray-600 dark:text-zinc-400'>오늘 할 일을 추가해보세요.</p>
                 <button
                   type='button'
-                  className='text-gray-600 text-[14px] | flex items-center | underline | w-fit | mt-[2px]'
+                  className='text-gray-600 dark:text-zinc-400 text-[14px] | flex items-center | underline | w-fit | mt-[2px]'
                   onClick={() => createTodo().then((todo) => router.push(`/todos/${todo.id}`))}>
                   추가하기
                   <Icon name='chevron-right' />
@@ -58,15 +58,17 @@ export default function HomeTody() {
               </Then>
               <Else>
                 <Link href={`/todos/${todo?.id}`}>
-                  <div className='flex items-center gap-[16px] | text-gray-600'>
+                  <div className='flex items-center gap-[16px] | text-gray-600 dark:text-zinc-500'>
                     <p className=''>{todo?.description?.slice(0, 40)?.split(/\n/)[0]}</p>
                   </div>
-                  <div className='flex items-center gap-[8px] | mt-[12px]'>
+                  <div className='flex items-center gap-[8px] | mt-[12px] dark:text-zinc-300'>
                     <p className='flex items-center gap-[4px] | text-[12px] leading-[100%]'>
                       <Icon
                         name='tag-active'
                         style={{
-                          color: tag?.color,
+                          color: tag
+                            ? TAG_COLORS[tag.color]?.white || 'var(--color-slate-500)'
+                            : 'var(--color-slate-500)',
                         }}
                       />
                       <span>{tag?.label ?? 'MEMO'}</span>

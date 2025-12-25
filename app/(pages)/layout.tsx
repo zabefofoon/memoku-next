@@ -38,6 +38,12 @@ export default async function RootLayout(props: LayoutProps<'/'>) {
       <html
         lang='en'
         className={etcUtil.classNames(['h-full', { dark: isDarkMode }])}>
+        <head>
+          <meta
+            name='theme-color'
+            content='white'
+          />
+        </head>
         <body
           className={`${notoSansKr.className} antialiased | h-full | text-slate-800 dark:text-white/95 | bg-gray-100 dark:bg-zinc-900`}>
           <EnsureAuth

@@ -3,6 +3,7 @@
 import { FILTER_STATUS, STATUS_MAP } from '@/const'
 import { useEffect, useState } from 'react'
 import { Todo } from '../models/Todo'
+import { useThemeStore } from '../stores/theme.store'
 import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
 import UIBottomSheet from './UIBottomSheet'
@@ -15,6 +16,7 @@ interface Props {
 
 export function TodosStatusModal({ isShow, select, close }: Props) {
   const [selectedStatus, setSelectedStatus] = useState<Todo['status']>()
+  const isDarkMode = useThemeStore((s) => s.isDarkMode)
 
   useEffect(() => {
     setSelectedStatus(undefined)
@@ -36,7 +38,9 @@ export function TodosStatusModal({ isShow, select, close }: Props) {
                 { active: status.value === selectedStatus },
               ])}
               style={{
-                color: STATUS_MAP[status.value].color,
+                color: isDarkMode
+                  ? STATUS_MAP[status.value]?.darkColor
+                  : STATUS_MAP[status.value]?.color,
               }}
               onClick={() => setSelectedStatus(status.value)}>
               <Icon name={status.icon} />

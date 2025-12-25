@@ -149,7 +149,7 @@ export default function PageCalendar() {
           eventClick={handleEventClick}
           moreLinkClick={handleMoreLinkClick}
           datesSet={handleDatesSet}
-          dayMaxEvents={screenSize === 'desktop' ? 2 : 1}
+          dayMaxEvents={screenSize === 'desktop' ? 3 : 1}
         />
       </div>
     </div>

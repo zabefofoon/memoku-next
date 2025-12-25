@@ -17,7 +17,7 @@ export default function TodosCardsThisWeek() {
 
   return (
     <div>
-      <p className='px-[16px] sm:p-0 mb-[16px] | text-[15px] text-gray-600'>
+      <p className='px-[16px] sm:p-0 mb-[16px] | text-[15px] text-gray-600 dark:text-zinc-400'>
         이번주 할 일({todos.length})
       </p>
       <If condition={todos?.length && isTodosLoading}>

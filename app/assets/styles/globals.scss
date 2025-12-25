@@ -35,12 +35,6 @@
   border-color: var(--tag-color);
 }
 
-.dark {
-  ::-webkit-scrollbar-track {
-    @apply bg-zinc-900;
-  }
-}
-
 .recharts-surface {
   outline: 0;
 }
@@ -315,5 +309,46 @@ button {
   to {
     filter: brightness(0.85);
     transform: translateX(-15%);
+  }
+}
+
+.dark {
+  ::-webkit-scrollbar-track {
+    @apply bg-zinc-900;
+  }
+
+  .emboss-sheet {
+    box-shadow: inset 1px 1px 0 rgb(0 0 0 / 20%);
+
+    &::before {
+      box-shadow:
+        1px 1px 0 rgb(0 0 0 / 20%),
+        inset -1px -1px 0 rgb(0 0 0 / 20%),
+        inset 2px 2px 0 var(--color-zinc-800);
+    }
+
+    &::after {
+      box-shadow: 1px 1px 4% rgb(0 0 0 / 20%);
+    }
+  }
+
+  .neu-button {
+    color: var(--color-gray-200);
+    box-shadow:
+      inset 2px 2px 2px rgb(0 0 0 / 50%),
+      inset -2px -2px 2px var(--color-zinc-800),
+      2px 2px 4px rgb(0 0 0 / 50%),
+      -2px -2px 2px var(--color-zinc-800);
+
+    &.active {
+      color: var(--color-indigo-200);
+      background: var(--color-zinc-700);
+      box-shadow:
+        inset 2px 2px 4px rgb(0 0 0 / 50%),
+        inset -2px -2px 2px var(--color-zinc-600),
+        2px 2px 4px rgb(0 0 0 / 50%),
+        -2px -2px 2px var(--color-zinc-600),
+        0 0 14px -2px var(--color-indigo-300);
+    }
   }
 }

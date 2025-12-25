@@ -53,7 +53,7 @@ export function TodosFilters(props: Props) {
               <Icon name='run' />
               <span>상태</span>
             </p>
-            <div className='flex items-center gap-[8px] flex-wrap | text-[14px]'>
+            <div className='flex items-center gap-[8px] flex-wrap | text-[14px] | px-[8px]'>
               {FILTER_STATUS.map((item) => (
                 <button
                   key={item.value}
@@ -82,7 +82,7 @@ export function TodosFilters(props: Props) {
               <Icon name='tag' />
               <span>태그</span>
             </p>
-            <div className='flex flex-wrap gap-[6px]'>
+            <div className='flex flex-wrap gap-[6px] | px-[8px]'>
               {tags.map((tag) => (
                 <button
                   key={tag.id}

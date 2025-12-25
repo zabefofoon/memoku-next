@@ -22,7 +22,9 @@ export default function TodosCards() {
     <If condition={isTodosLoading}>
       <Then>
         <div>
-          <p className='px-[16px] sm:p-0 mb-[16px] | text-[15px] text-gray-600'>전체</p>
+          <p className='px-[16px] sm:p-0 mb-[16px] | text-[15px] text-gray-600 dark:text-zinc-400'>
+            전체
+          </p>
           <div className='flex-1 h-full | py-[80px] px-[16px] | text-center'>
             <UISpinner />
           </div>
@@ -34,7 +36,9 @@ export default function TodosCards() {
             <If condition={!todayTodos?.length && !thisWeekTodos?.length && !nextWeekTodos?.length}>
               <Then>
                 <div>
-                  <p className='px-[16px] sm:p-0 mb-[16px] | text-[15px] text-gray-600'>전체</p>
+                  <p className='px-[16px] sm:p-0 mb-[16px] | text-[15px] text-gray-600 dark:text-zinc-400'>
+                    전체
+                  </p>
                   <div className='flex-1 h-full | py-[80px] px-[16px] | text-center'>
                     <p className='text-[13px] opacity-70'>데이터가 없습니다.</p>
                   </div>
@@ -47,7 +51,7 @@ export default function TodosCards() {
           </Then>
           <Else>
             <div>
-              <p className='px-[16px] sm:p-0 mb-[16px] | text-[15px] text-gray-600'>
+              <p className='px-[16px] sm:p-0 mb-[16px] | text-[15px] text-gray-600 dark:text-zinc-400'>
                 전체({total})
               </p>
               <div

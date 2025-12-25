@@ -4,6 +4,7 @@ import { MouseEvent, useState } from 'react'
 import { Else, If, Then } from 'react-if'
 import { TodoWithChildren } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
+import { useThemeStore } from '../stores/theme.store'
 import { useTodosPageStore } from '../stores/todosPage.store'
 import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
@@ -25,6 +26,7 @@ export function TodoCard({
   const router = useRouter()
   const searchParams = useSearchParams()
   const addChildren = useTodosPageStore((s) => s.addChildren)
+  const isDarkMode = useThemeStore((state) => state.isDarkMode)
 
   const [isOpen, setOpen] = useState(false)
 
@@ -91,7 +93,9 @@ export function TodoCard({
           }}
         />
 
-        <p className='text-[11px] text-gray-600 leading-[100%]'>{tag?.label ?? 'MEMO'}</p>
+        <p className='text-[11px] text-gray-600 dark:text-zinc-400 leading-[100%]'>
+          {tag?.label ?? 'MEMO'}
+        </p>
       </button>
       {/* 태그 */}
       {/* 제목, 상태 */}
@@ -123,7 +127,9 @@ export function TodoCard({
               },
             ])}
             style={{
-              color: STATUS_MAP[todo.status ?? 'created']?.color,
+              color: isDarkMode
+                ? STATUS_MAP[todo.status ?? 'created']?.darkColor
+                : STATUS_MAP[todo.status ?? 'created']?.color,
             }}
             onClick={(event) => {
               event.stopPropagation()
@@ -199,7 +205,7 @@ export function TodoCard({
                 </Then>
                 <Else>
                   <button
-                    className='flex items-center | text-gray-400'
+                    className='flex items-center | text-gray-400 dark:text-zinc-400'
                     onClick={() => addChildren(todo).then(({ id }) => router.push(`/todos/${id}`))}>
                     <Icon
                       name='plus'
