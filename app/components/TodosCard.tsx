@@ -1,6 +1,6 @@
 import { STATUS_MAP, TAG_COLORS } from '@/const'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { MouseEvent, useState } from 'react'
 import { Else, If, Then } from 'react-if'
 import { TodoWithChildren } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
@@ -36,13 +36,13 @@ export function TodoCard({
       bgColor = ''
       break
     case 'inprogress':
-      bgColor = 'bg-indigo-500/3'
+      bgColor = 'bg-indigo-500/5'
       break
     case 'hold':
-      bgColor = 'bg-orange-600/3'
+      bgColor = 'bg-orange-600/5'
       break
     case 'done':
-      bgColor = 'bg-green-300/3'
+      bgColor = 'bg-green-300/5'
       break
   }
 
@@ -101,19 +101,27 @@ export function TodoCard({
           display !== 'grid' ? 'ml-[12px] w-full' : 'mt-[6px]',
         ])}>
         {/* 제목 */}
-        <p className='truncate | text-[14px] font-[600] leading-[130%]'>
+        <p
+          className={etcUtil.classNames([
+            'w-full truncate | text-[14px] font-[600] leading-[130%]',
+            { 'order-1': display !== 'grid' },
+          ])}>
           {todo.description?.slice(0, 40)?.split(/\n/)[0]}
         </p>
         {/* 제목 */}
 
         {/* 상태 */}
         <div
-          className={etcUtil.classNames([
-            display !== 'grid' ? 'w-[120px] | flex justify-center' : 'shrink-0',
-          ])}>
+          className={etcUtil.classNames([display !== 'grid' ? 'w-[120px] | flex ' : 'shrink-0'])}>
           <button
             type='button'
-            className='neu-button !gap-[2px] | shrink-0'
+            className={etcUtil.classNames([
+              'shrink-0',
+              {
+                'neu-button !gap-[2px]': display !== 'row',
+                'flex items-center text-[12px] gap-[4px]': display === 'row',
+              },
+            ])}
             style={{
               color: STATUS_MAP[todo.status ?? 'created']?.color,
             }}
@@ -129,13 +137,12 @@ export function TodoCard({
             <p>{STATUS_MAP[todo.status ?? 'created']?.label}</p>
           </button>
         </div>
-
         {/* 상태 */}
       </div>
       <If condition={display === 'grid'}>
         <Then>
-          <p className='mt-[6px] | line-2 text-[12px] text-gray-400 leading-[160%]'>
-            {todo.description}
+          <p className='h-[40px] mt-[6px] | line-2 text-[12px] text-gray-400 leading-[160%]'>
+            {todo.description?.replace(todo.description?.slice(0, 40)?.split(/\n/)[0], '')}
           </p>
         </Then>
       </If>
@@ -147,6 +154,16 @@ export function TodoCard({
         <TodoTimeText
           todo={todo}
           timeFormat='YY/MM/DD'
+          onClick={(event: MouseEvent) => {
+            event.stopPropagation()
+            event.preventDefault()
+
+            const urlParams = new URLSearchParams(searchParams.toString())
+            urlParams.append('time', todo.id)
+            router.push(`?${decodeURIComponent(urlParams.toString())}`, {
+              scroll: false,
+            })
+          }}
         />
       </div>
       <If condition={!hideChildren}>
@@ -154,7 +171,7 @@ export function TodoCard({
           <div
             className={etcUtil.classNames([
               'flex items-center',
-              display !== 'grid' ? '' : 'mt-[auto] pt-[12px]',
+              display !== 'grid' ? '' : 'mt-[auto] pt-[6px]',
             ])}>
             {/* 하위 일 더 보기 */}
             <div className={etcUtil.classNames([display !== 'grid' ? 'w-[120px]' : ''])}>

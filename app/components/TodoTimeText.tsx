@@ -1,19 +1,21 @@
 import { WEEK_DAYS_NAME } from '@/const'
 import dayjs from 'dayjs'
+import { MouseEvent } from 'react'
 import { Case, Else, If, Switch, Then } from 'react-if'
 import { Todo } from '../models/Todo'
 import etcUtil from '../utils/etc.util'
-
 interface Props {
   todo: Todo
   timeFormat?: string
   hideTime?: boolean
+  onClick?: (event: MouseEvent) => void
 }
 
 export default function TodoTimeText({
   todo,
   timeFormat = 'YYYY/MM/DD HH:mm:ss',
   hideTime = false,
+  onClick,
 }: Props) {
   const now = Date.now()
   const start = todo.start ?? 0
@@ -26,7 +28,9 @@ export default function TodoTimeText({
   const isAfterRemainedTime = now > end
 
   return (
-    <div className='flex items-center gap-[4px] | leading-[100%] tracking-tight'>
+    <button
+      className='flex items-center gap-[4px] | leading-[100%] tracking-tight'
+      onClick={onClick}>
       <If condition={todo.status === 'done'}>
         <Then>
           <div className='flex items-center gap-[3px] '>
@@ -115,6 +119,6 @@ export default function TodoTimeText({
           </If>
         </Else>
       </If>
-    </div>
+    </button>
   )
 }
