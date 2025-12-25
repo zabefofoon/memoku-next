@@ -53,7 +53,7 @@ export default function HomeCalendar() {
 
       return {
         id: todo.id,
-        title: todo.description?.slice(0, 20),
+        title: todo.description?.slice(0, 40)?.split(/\n/)[0],
         date: dayjs(todo.created).format('YYYY-MM-DD'),
         backgroundColor:
           cookies['x-theme'] === 'dark'
@@ -73,7 +73,7 @@ export default function HomeCalendar() {
   }
 
   return (
-    <div className='emboss-sheet calendar | hidden sm:block | flex-1 min-w-[500px] min-h-[420px] h-full'>
+    <div className='emboss-sheet calendar | hidden sm:block | flex-1 min-w-[500px] min-h-[420px] h-full | p-[8px]'>
       <div className='w-full h-full p-[6px]'>
         <FullCalendar
           key={`${isDarkMode}`}
@@ -81,28 +81,10 @@ export default function HomeCalendar() {
           plugins={[dayGridPlugin, timeGridPlugin]}
           initialView='dayGridMonth'
           height='100%'
-          customButtons={{
-            myToday: {
-              text: 'Today',
-              click: () => calendarRef.current?.getApi().today(),
-            },
-            myMonth: {
-              text: 'Month',
-              click: () => calendarRef.current?.getApi().changeView('dayGridMonth'),
-            },
-            myWeek: {
-              text: 'Week',
-              click: () => calendarRef.current?.getApi().changeView('timeGridWeek'),
-            },
-            myDay: {
-              text: 'Day',
-              click: () => calendarRef.current?.getApi().changeView('timeGridDay'),
-            },
-          }}
           headerToolbar={{
-            left: 'prev,next myToday',
-            center: 'title',
-            right: 'myMonth,myWeek,myDay',
+            left: 'title',
+            center: '',
+            right: 'myToday,prev,next',
           }}
           dayMaxEvents={1}
           events={events}

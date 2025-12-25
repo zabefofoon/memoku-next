@@ -35,41 +35,59 @@
 
 .calendar {
   .fc {
-    padding: 0 16px;
-
     .fc-toolbar-title {
-      font-size: 16px;
-      font-weight: 700;
+      font-size: 14px;
+      font-weight: 600;
     }
 
     .fc-button {
       padding: 0;
-      font-size: 14px;
+      font-size: 12px;
       outline: 0;
+
+      @media (min-width: 640px) {
+        font-size: 14px;
+      }
+    }
+
+    .fc-toolbar-chunk {
+      display: flex;
     }
 
     .fc-toolbar {
       &.fc-header-toolbar {
-        margin-bottom: 12px;
+        margin-bottom: 20px;
       }
     }
 
     .fc-col-header-cell-cushion {
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .fc-daygrid-day-top {
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .fc-daygrid-more-link {
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .fc-daygrid-block-event {
       .fc-event-time,
       .fc-event-title {
         padding: 0;
+      }
+    }
+
+    .fc-day-sun {
+      .fc-col-header-cell-cushion {
+        color: var(--color-red-500);
+      }
+    }
+
+    .fc-day-sat {
+      .fc-col-header-cell-cushion {
+        color: var(--color-blue-500);
       }
     }
 
@@ -80,20 +98,17 @@
     .fc-button-group {
       gap: 4px;
     }
-
-    .fc-timegrid-axis-cushion {
-      font-size: 13px;
-    }
-
-    .fc-timegrid-slot-label-cushion {
-      font-size: 13px;
-    }
   }
 }
 
 .page {
   .fc {
     width: 100%;
+
+    .fc-toolbar-title {
+      font-size: 20px;
+      font-weight: 400;
+    }
 
     .fc-daygrid-body-unbalanced {
       .fc-daygrid-day-events {

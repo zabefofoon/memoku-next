@@ -27,6 +27,9 @@ export const todosDB = {
     const [res] = await db.todos.where({ parentId: id }).toArray()
     return res
   },
+  getAllTodos: (): Promise<Todo[]> => {
+    return db.todos.toArray()
+  },
   getTodos: async (params?: GetTodosParams): Promise<{ total: number; todos: Todo[] }> => {
     const tags = params?.tags?.filter(Boolean)
     const statuses = params?.status?.filter(Boolean)
@@ -519,9 +522,7 @@ export const todosDB = {
   updateDirties: async (ids: string[], value: boolean): Promise<number> => {
     return db.todos.bulkUpdate(ids.map((id) => ({ key: id, changes: { dirty: value } })))
   },
-  getAllTodos: (): Promise<Todo[]> => {
-    return db.todos.toArray()
-  },
+
   addNewTodoBulk: (todos: Todo[]): Promise<number> => {
     return db.todos.bulkPut(todos)
   },
