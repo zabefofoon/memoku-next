@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Tag, Todo } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
+import { useThemeStore } from '../stores/theme.store'
 import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
 import UIBottomSheet from './UIBottomSheet'
@@ -17,6 +18,7 @@ interface Props {
 export function TodosFilters(props: Props) {
   const router = useRouter()
 
+  const isDarkMode = useThemeStore((s) => s.isDarkMode)
   const tags = useTagsStore((s) => s.tags)
   const searchParams = useSearchParams()
 
@@ -62,7 +64,9 @@ export function TodosFilters(props: Props) {
                     { active: selectedStatus.includes(item.value) },
                   ])}
                   style={{
-                    color: STATUS_MAP[item.value].color,
+                    color: isDarkMode
+                      ? STATUS_MAP[item.value].darkColor
+                      : STATUS_MAP[item.value].color,
                   }}
                   onClick={() =>
                     setSelectedStatus((prev) =>

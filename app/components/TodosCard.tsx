@@ -158,7 +158,7 @@ export function TodoCard({
       </div>
       <If condition={display === 'grid'}>
         <Then>
-          <p className='sm:h-[40px] | line-2 text-[12px] text-gray-400 leading-[160%]'>
+          <p className='sm:h-[40px] | line-2 text-[12px] text-gray-400 leading-[160%] | mt-[4px]'>
             {todo.description?.replace(todo.description?.slice(0, 40)?.split(/\n/)[0], '')}
           </p>
         </Then>
