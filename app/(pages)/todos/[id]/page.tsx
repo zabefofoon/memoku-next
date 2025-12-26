@@ -4,7 +4,6 @@ import { Icon } from '@/app/components/Icon'
 import { TodosDeleteModal } from '@/app/components/TodosDeleteModal'
 import TodosEditor from '@/app/components/TodosEditor'
 import { TodosImages } from '@/app/components/TodosImages'
-import TodosImagesModal from '@/app/components/TodosImagesModal'
 import { TodosStatusModal } from '@/app/components/TodosStatusModal'
 import { TodosTagModal } from '@/app/components/TodosTagModal'
 import TodosTimeModal from '@/app/components/TodosTimeModal'
@@ -31,7 +30,6 @@ export default function TodosDetail() {
   const addChildren = useTodosDetailStore((s) => s.addChildren)
   const parentTodo = useTodosDetailStore((s) => s.parentTodo)
   const childTodo = useTodosDetailStore((s) => s.childTodo)
-  const images = useTodosDetailStore((s) => s.images)
   const loadImages = useTodosDetailStore((s) => s.loadImages)
   const deleteTodo = useTodosDetailStore((s) => s.deleteTodo)
   const loadTodo = useTodosDetailStore((s) => s.loadTodo)
@@ -91,11 +89,6 @@ export default function TodosDetail() {
           isShow={!!searchParams.get('todoStatus')}
           close={router.back}
           select={(status) => updateStatus(status, router.back)}
-        />
-        <TodosImagesModal
-          isShow={!!searchParams.get('images')}
-          images={images}
-          close={router.back}
         />
 
         <div className='mb-[24px]'>

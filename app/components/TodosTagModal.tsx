@@ -4,7 +4,6 @@ import { TAG_COLORS } from '@/const'
 import { useEffect, useState } from 'react'
 import { Tag } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
-import { useThemeStore } from '../stores/theme.store'
 import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
 import UIBottomSheet from './UIBottomSheet'
@@ -17,7 +16,6 @@ interface Props {
 
 export function TodosTagModal({ isShow = false, select, close }: Props) {
   const tags = useTagsStore((s) => s.tags)
-  const isDarkMode = useThemeStore((s) => s.isDarkMode)
 
   const [selectedTag, setSelectedTag] = useState<Tag>()
 
