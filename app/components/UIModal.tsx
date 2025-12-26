@@ -49,7 +49,7 @@ export default function UIModal({ open, close, header, content, ok, cancel }: Pr
         <div className='flex justify-center | max-h-full py-[32px] overflow-auto | scroll-hidden'>
           <div
             className={etcUtil.classNames([
-              'modal-card | flex flex-col gap-[12px] | relative z-10 | min-w-[320px] max-w-[calc(100%-32px)] max-h-[calc(100dvh-64px)] | p-[16px] | rounded-xl bg-white dark:bg-zinc-800 shadow-xl',
+              'modal-card | flex flex-col gap-[12px] | relative z-10 | min-w-[320px] max-w-[calc(100%-32px)] max-h-[calc(100dvh-64px)] | p-[16px] | rounded-xl bg-white dark:bg-zinc-900 shadow-xl',
             ])}>
             <div className='flex justify-between'>
               {header && <p className='text-[16px] sm:text-[20px] font-[700]'>{header()}</p>}

@@ -65,7 +65,7 @@ export default function UIBottomSheet({
           ])}>
           <div
             className={etcUtil.classNames([
-              'bottom-sheet-card | flex flex-col gap-[12px] | relative z-10 | w-full | p-[16px] | rounded-t-4xl sm:rounded-xl bg-gray-100 dark:bg-zinc-800 shadow-xl',
+              'bottom-sheet-card | flex flex-col gap-[12px] | relative z-10 | w-full | p-[16px] | rounded-t-4xl sm:rounded-xl bg-gray-100 dark:bg-zinc-900 shadow-xl',
             ])}>
             <div className='flex justify-between'>
               {header && <p className='text-[16px] sm:text-[20px] font-[700]'>{header()}</p>}

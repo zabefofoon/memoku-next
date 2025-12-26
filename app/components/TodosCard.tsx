@@ -105,13 +105,24 @@ export function TodoCard({
           display !== 'grid' ? 'ml-[12px] w-full' : 'mt-[6px]',
         ])}>
         {/* 제목 */}
-        <p
-          className={etcUtil.classNames([
-            'w-full truncate | text-[14px] font-[600] leading-[130%]',
-            { 'order-1': display !== 'grid' },
-          ])}>
-          {todo.description?.slice(0, 40)?.split(/\n/)[0]}
-        </p>
+        <div className='flex items-center gap-[4px] | w-full overflow-hidden'>
+          <If condition={todo.images?.length}>
+            <Then>
+              <Icon
+                name='image'
+                className='opacity-60 text-[16px]'
+              />
+            </Then>
+          </If>
+          <p
+            className={etcUtil.classNames([
+              'w-full truncate | text-[14px] font-[600] leading-[130%]',
+              { 'order-1': display !== 'grid' },
+            ])}>
+            {todo.description?.slice(0, 40)?.split(/\n/)[0]}
+          </p>
+        </div>
+
         {/* 제목 */}
 
         {/* 상태 */}
