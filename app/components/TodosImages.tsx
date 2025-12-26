@@ -113,7 +113,7 @@ export function TodosImages() {
             className='emboss-sheet'>
             <div className='relative | w-[120px] sm:w-[220px] aspect-square overflow-hidden shrink-0 | rounded-lg shadow-md'>
               <Link
-                href={image.image ?? ''}
+                href={typeof image.image === 'string' ? image.image : ''}
                 data-pswp-width={sizes[index]?.width}
                 data-pswp-height={sizes[index]?.height}
                 target='_blank'
