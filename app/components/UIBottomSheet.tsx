@@ -87,12 +87,18 @@ export default function UIBottomSheet({
 
   useEffect(() => {
     if (open) {
-      touchMovedY.current = 0
-      touchStarted.current = 0
-      document.documentElement.style.overscrollBehavior = 'contain'
-      if (containerRef.current) containerRef.current.style.transform = 'translate(0, 0)'
+      setTimeout(() => {
+        touchMovedY.current = 0
+        touchStarted.current = 0
+        document.documentElement.style.overscrollBehavior = 'contain'
+        if (containerRef.current) containerRef.current.style.transform = 'translate(0, 0)'
+      }, 100)
     } else {
-      document.documentElement.style.overscrollBehavior = 'auto'
+      document.documentElement.style.overscrollBehavior = document.querySelector(
+        '[data-sheet=true]'
+      )
+        ? 'contain'
+        : 'auto'
     }
   }, [open])
 
@@ -124,6 +130,7 @@ export default function UIBottomSheet({
         role='dialog'
         aria-modal='true'
         className='fixed left-0 top-0 z-50 | w-full h-full | flex items-end sm:items-center justify-center'
+        data-sheet={open}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchCancel={handleTouchEnd}

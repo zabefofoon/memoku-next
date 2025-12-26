@@ -41,8 +41,17 @@ export default async function RootLayout(props: LayoutProps<'/'>) {
         <head>
           <meta
             name='theme-color'
-            content='white'
+            content='transparent'
           />
+          <meta
+            name='apple-mobile-web-app-capable'
+            content='yes'></meta>
+          <meta
+            name='apple-mobile-web-app-status-bar-style'
+            content='black-translucent'></meta>
+          <meta
+            name='viewport'
+            content='width=device-width, initial-scale=1, viewport-fit=cover'></meta>
         </head>
         <body
           className={`${notoSansKr.className} antialiased | h-full | text-slate-800 dark:text-white/95 | bg-gray-100 dark:bg-zinc-900`}>

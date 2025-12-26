@@ -72,7 +72,7 @@ export function TodoCard({
         type='button'
         className={etcUtil.classNames([
           'expand-hitbox | flex items-center gap-[4px]',
-          display !== 'grid' ? 'w-[120px]' : '',
+          display !== 'grid' ? 'w-[120px]' : 'w-fit',
         ])}
         onClick={(event) => {
           event.preventDefault()
@@ -158,7 +158,7 @@ export function TodoCard({
       </div>
       <If condition={display === 'grid'}>
         <Then>
-          <p className='sm:h-[40px] | line-2 text-[12px] text-gray-400 leading-[160%] | mt-[4px]'>
+          <p className='min-h-[16px] sm:h-[40px] | line-2 text-[12px] text-gray-400 leading-[160%] | mt-[4px]'>
             {todo.description?.replace(todo.description?.slice(0, 40)?.split(/\n/)[0], '')}
           </p>
         </Then>

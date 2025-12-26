@@ -115,7 +115,7 @@ export default function TodosDetail() {
               <Link
                 href={`/todos/${todo.parentId}`}
                 replace
-                className='p-[8px]  | text-[13px] | flex gap-[12px]'>
+                className='px-[8px] py-[12px] | text-[13px] | flex gap-[12px]'>
                 <p className='shrink-0 | flex items-center | opacity-70'>
                   <Icon
                     name='chevron-up'
@@ -130,7 +130,7 @@ export default function TodosDetail() {
         </If>
 
         <div className='pb-[4px] | flex-1 overflow-hidden | flex gap-[16px] flex-col sm:flex-row'>
-          <div className='emboss-sheet | p-[16px] | w-full h-full | flex flex-col | sm:overflow-auto'>
+          <div className='emboss-sheet | p-[8px] | w-full h-full | flex flex-col | sm:overflow-auto'>
             <TodosEditor />
           </div>
           <TodosImages />
@@ -142,7 +142,7 @@ export default function TodosDetail() {
               <Link
                 href={`/todos/${childTodo?.id}`}
                 replace
-                className='p-[8px] | text-[13px] | flex gap-[12px]'>
+                className='px-[8px] py-[12px] | text-[13px] | flex gap-[12px]'>
                 <p className='shrink-0 | flex items-center | opacity-70'>
                   <Icon
                     name='chevron-down'

@@ -115,6 +115,7 @@ export default function Todos() {
   useEffect(() => {
     const { prevPathname, setPrevPathname } = useScrollStore.getState()
     const shouldRestore = /^\/todos\/[^/]+$/.test(prevPathname)
+
     if (!shouldRestore) setPage(0, loadTodos)
     else {
       const { todos, todayTodos, thisWeekTodos, nextWeekTodos } = useTodosPageStore.getState()
