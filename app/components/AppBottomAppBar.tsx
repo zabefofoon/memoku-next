@@ -8,11 +8,39 @@ import FloatingButtons from './FloatingButtons'
 import { Icon } from './Icon'
 
 const menus = [
-  { href: '/', name: '홈', divided: false, icon: 'home', induce: false },
-  { href: '/todos', name: '할일', divided: false, icon: 'todos', induce: false },
-  { href: '/calendar', name: '달력', divided: false, icon: 'calendar', induce: false },
-  { href: '/news', name: '소식', divided: true, icon: 'news', induce: true },
-  { href: '/settings', name: '설정', divided: false, icon: 'setting', induce: false },
+  { href: '/', name: '홈', divided: false, icon: 'home', activeIcon: 'home-active', induce: false },
+  {
+    href: '/todos',
+    name: '할일',
+    divided: false,
+    icon: 'todos',
+    activeIcon: 'todos-active',
+    induce: false,
+  },
+  {
+    href: '/calendar',
+    name: '달력',
+    divided: false,
+    icon: 'calendar',
+    activeIcon: 'calendar-active',
+    induce: false,
+  },
+  {
+    href: '/news',
+    name: '소식',
+    divided: true,
+    icon: 'news',
+    activeIcon: 'news-active',
+    induce: true,
+  },
+  {
+    href: '/settings',
+    name: '설정',
+    divided: false,
+    icon: 'setting',
+    activeIcon: 'setting-active',
+    induce: false,
+  },
 ]
 
 export default function AppBottomAppBar() {
@@ -54,7 +82,7 @@ export default function AppBottomAppBar() {
       }}>
       <FloatingButtons />
       <nav
-        className='flex items-center | border-t border-x border-white dark:border-white/30 | rounded-full shadow-lg overflow-hidden'
+        className='flex items-center | border-t border-x border-white dark:border-white/30 | bg-gray-50/50 dark:bg-zinc-900/50 rounded-full shadow-lg overflow-hidden'
         style={{
           backdropFilter: 'blur(4px)',
         }}>
@@ -72,7 +100,7 @@ export default function AppBottomAppBar() {
                 <div className='absolute w-[4px] top-[4px] left-[16px] | aspect-square rounded-full'></div>
               )}
               <Icon
-                name={menu.icon}
+                name={pathname === menu.href ? menu.activeIcon : menu.icon}
                 className='text-[24px]'
               />
               <span className='text-[10px]'>{menu.name}</span>

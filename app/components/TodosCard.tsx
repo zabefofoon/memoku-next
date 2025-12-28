@@ -105,7 +105,11 @@ export function TodoCard({
           display !== 'grid' ? 'ml-[12px] w-full' : 'mt-[6px]',
         ])}>
         {/* 제목 */}
-        <div className='flex items-center gap-[4px] | w-full overflow-hidden'>
+        <div
+          className={etcUtil.classNames([
+            'flex items-center gap-[4px] | w-full overflow-hidden',
+            { 'order-1': display === 'row' },
+          ])}>
           <If condition={todo.images?.length}>
             <Then>
               <Icon
@@ -122,7 +126,6 @@ export function TodoCard({
             {todo.description?.slice(0, 40)?.split(/\n/)[0]}
           </p>
         </div>
-
         {/* 제목 */}
 
         {/* 상태 */}
@@ -166,7 +169,9 @@ export function TodoCard({
       {/* 제목, 상태 */}
       <div
         className={etcUtil.classNames([
-          display !== 'grid' ? 'w-[240px] shrink-0 | flex justify-center' : 'mt-[6px]',
+          display !== 'grid'
+            ? `w-[240px] shrink-0 | flex  ${hideChildren ? 'justify-end' : 'justify-center'}`
+            : 'mt-[6px]',
         ])}>
         <TodoTimeText
           todo={todo}

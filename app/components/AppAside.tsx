@@ -19,13 +19,55 @@ interface Props {
 }
 
 const menus = [
-  { href: '/', name: '홈', divided: false, icon: 'home', induce: false },
-  { href: '/todos', name: '할일', divided: false, icon: 'todos', induce: false },
-  { href: '/calendar', name: '달력', divided: false, icon: 'calendar', induce: false },
-  { href: '/settings', name: '설정', divided: false, icon: 'setting', induce: false },
-  { href: '/notifications', name: '알림', divided: false, icon: 'notification', induce: false },
-  { href: '/news', name: '소식', divided: true, icon: 'news', induce: true },
-  { href: '/intro', name: '소개', divided: false, icon: 'help', induce: false },
+  { href: '/', name: '홈', divided: false, icon: 'home', activeIcon: 'home-active', induce: false },
+  {
+    href: '/todos',
+    name: '할일',
+    divided: false,
+    icon: 'todos',
+    activeIcon: 'todos-active',
+    induce: false,
+  },
+  {
+    href: '/calendar',
+    name: '달력',
+    divided: false,
+    icon: 'calendar',
+    activeIcon: 'calendar-active',
+    induce: false,
+  },
+  {
+    href: '/settings',
+    name: '설정',
+    divided: false,
+    icon: 'setting',
+    activeIcon: 'setting-active',
+    induce: false,
+  },
+  {
+    href: '/notifications',
+    name: '알림',
+    divided: false,
+    icon: 'notification',
+    activeIcon: 'notification-active',
+    induce: false,
+  },
+  {
+    href: '/news',
+    name: '소식',
+    divided: true,
+    icon: 'news',
+    activeIcon: 'news-active',
+    induce: true,
+  },
+  {
+    href: '/intro',
+    name: '소개',
+    divided: false,
+    icon: 'help',
+    activeIcon: 'help-active',
+    induce: false,
+  },
 ]
 
 export function AppAside(props: Props) {
@@ -104,7 +146,7 @@ export function AppAside(props: Props) {
                 },
               ])}>
               <Icon
-                name={menu.icon}
+                name={pathname === menu.href ? menu.activeIcon : menu.icon}
                 className='text-[20px]'
               />
               {isExpand && (
