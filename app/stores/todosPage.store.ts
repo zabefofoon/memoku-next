@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import { produce } from 'immer'
 import { create } from 'zustand'
 import { api } from '../lib/api'
@@ -5,6 +6,7 @@ import { todosDB } from '../lib/todos.db'
 import { GetTodosParams, Tag, TodoWithChildren } from '../models/Todo'
 import etcUtil from '../utils/etc.util'
 import { useSheetStore } from './sheet.store'
+import { useThemeStore } from './theme.store'
 
 interface TodosPageStore {
   page: number
@@ -63,7 +65,7 @@ interface TodosPageStore {
       end: TodoWithChildren['end']
       days?: TodoWithChildren['days']
     },
-    parentId?: string
+    device_id?: string
   ) => Promise<void>
   createTodo: (parentId?: string) => Promise<TodoWithChildren>
   addChildren: (parent: TodoWithChildren) => Promise<TodoWithChildren>
@@ -304,10 +306,11 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
       start: TodoWithChildren['start']
       end: TodoWithChildren['end']
       days?: TodoWithChildren['days']
-    }
+    },
+    device_id?: string
   ): Promise<void> => {
     const { setTodos, setTodayTodos, setThisWeekTodos, setNextWeekTodos } = get()
-
+    const { isSubscribedPush } = useThemeStore.getState()
     const modified = await todosDB.updateTimes(todo.id, values)
 
     const fileId = useSheetStore.getState().fileId
@@ -355,6 +358,17 @@ export const useTodosPageStore = create<TodosPageStore>((set, get) => ({
         if (target) Object.assign(target, values)
       })
     )
+
+    if (isSubscribedPush && device_id) {
+      api.registAlarm({
+        device_id,
+        todo_id: todo.id,
+        text: todo.description?.slice(0, 40)?.split(/\n/)[0],
+        start: values.start,
+        end: values.days?.length ? dayjs(values.end).add(100, 'year').valueOf() : values.end,
+        days: values.days,
+      })
+    }
   },
 
   createTodo: async (parentId?: string): Promise<TodoWithChildren> => {

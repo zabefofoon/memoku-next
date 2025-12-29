@@ -73,7 +73,7 @@ export default function HomeCalendar() {
   }
 
   return (
-    <div className='emboss-sheet calendar | hidden sm:block | flex-1 min-w-[500px] min-h-[420px] h-full | p-[8px]'>
+    <div className='emboss-sheet calendar | hidden sm:block | flex-1 min-w-[360px] min-h-[360px] h-full | p-[8px]'>
       <div className='w-full h-full p-[6px]'>
         <FullCalendar
           key={`${isDarkMode}`}

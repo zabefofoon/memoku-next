@@ -63,12 +63,12 @@ export default function HomeTotal() {
   }, [loadTodos])
 
   return (
-    <div className='emboss-sheet | flex-1 min-w-[300px] shrink-0 | flex flex-col justify-center'>
+    <div className='emboss-sheet | flex-1 min-w-[240px] shrink-0 | flex flex-col justify-center'>
       <div className='relative'>
         <ResponsiveContainer
           width={'100%'}
           height={'100%'}
-          minHeight={'300px'}>
+          minHeight={'240px'}>
           <RadialBarChart
             margin={{ top: 0, left: 0, right: 0, bottom: 0 }}
             data={data}

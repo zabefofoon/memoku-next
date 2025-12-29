@@ -68,11 +68,11 @@ export default function TimePicker(props: Props) {
         vertical
         perview={3}
         change={props.changeMinute}>
-        {Array.from({ length: 12 }).map((_, index) => (
+        {Array.from({ length: 60 }).map((_, index) => (
           <UICarouselSlide
             key={index}
             className='h-[40px] | flex items-center justify-center'>
-            <span className='text-[18px]'>{`${index * 5}`.padStart(2, '0')}</span>
+            <span className='text-[18px]'>{`${index}`.padStart(2, '0')}</span>
           </UICarouselSlide>
         ))}
       </UICarousel>

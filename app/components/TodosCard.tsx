@@ -72,7 +72,7 @@ export function TodoCard({
         type='button'
         className={etcUtil.classNames([
           'expand-hitbox | flex items-center gap-[4px]',
-          display !== 'grid' ? 'w-[120px]' : 'w-fit',
+          display !== 'grid' ? 'w-[120px] shrink-0' : 'w-fit',
         ])}
         onClick={(event) => {
           event.preventDefault()
@@ -101,13 +101,13 @@ export function TodoCard({
       {/* 제목, 상태 */}
       <div
         className={etcUtil.classNames([
-          'flex items-center gap-[6px] justify-between',
+          'flex items-center gap-[6px] justify-between overflow-hidden',
           display !== 'grid' ? 'ml-[12px] w-full' : 'mt-[6px]',
         ])}>
         {/* 제목 */}
         <div
           className={etcUtil.classNames([
-            'flex items-center gap-[4px] | w-full overflow-hidden',
+            'flex items-center gap-[4px] | w-full truncate',
             { 'order-1': display === 'row' },
           ])}>
           <If condition={todo.images?.length}>
@@ -130,7 +130,9 @@ export function TodoCard({
 
         {/* 상태 */}
         <div
-          className={etcUtil.classNames([display !== 'grid' ? 'w-[120px] | flex ' : 'shrink-0'])}>
+          className={etcUtil.classNames([
+            display !== 'grid' ? 'w-[120px] shrink-0 | flex' : 'shrink-0',
+          ])}>
           <button
             type='button'
             className={etcUtil.classNames([
@@ -196,12 +198,15 @@ export function TodoCard({
               display !== 'grid' ? '' : 'mt-[auto] pt-[6px]',
             ])}>
             {/* 하위 일 더 보기 */}
-            <div className={etcUtil.classNames([display !== 'grid' ? 'w-[120px]' : ''])}>
+            <div className={etcUtil.classNames([display !== 'grid' ? 'w-[120px] shrink-0' : ''])}>
               <If condition={todo.childId}>
                 <Then>
                   <button
                     type='button'
-                    className='flex items-center | mt-[6px]'
+                    className={etcUtil.classNames([
+                      'flex items-center',
+                      { 'mt-[6px]': display === 'grid' },
+                    ])}
                     onClick={(event) => {
                       event.preventDefault()
                       const urlParams = new URLSearchParams(searchParams.toString())

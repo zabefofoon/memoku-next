@@ -1,3 +1,5 @@
+import { RegistAlarmParams } from '../models/Alarm'
+
 export const api = {
   postSheetGoogleTodo(
     fileId: string,
@@ -74,5 +76,29 @@ export const api = {
       `/api/sheet/google/tag?fileId=${fileId}&id=${id}&color=${color}&label=${label}&modified=${now}`,
       { method: 'POST' }
     )
+  },
+
+  postAlarmSubscribe(subscription: PushSubscription, device_id: string) {
+    return fetch(`/api/alarm/subscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ subscription, device_id }),
+    })
+  },
+
+  deleteAlarmSubscribe(device_id: string) {
+    return fetch(`/api/alarm/subscribe`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ device_id }),
+    })
+  },
+
+  registAlarm(params: RegistAlarmParams) {
+    return fetch(`/api/alarm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ params }),
+    })
   },
 }

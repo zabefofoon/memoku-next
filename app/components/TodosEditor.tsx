@@ -1,7 +1,7 @@
 import { STATUS_MAP, TAG_COLORS } from '@/const'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ClipboardEvent, useEffect, useRef, useState } from 'react'
+import { ClipboardEvent, MouseEvent, useEffect, useRef, useState } from 'react'
 import { If, Then } from 'react-if'
 import { useTagsStore } from '../stores/tags.store'
 import { useThemeStore } from '../stores/theme.store'
@@ -107,7 +107,21 @@ export default function TodosEditor() {
         onChange={(e) => setTextValue(e.currentTarget.value)}
         onInput={(event) => saveText(event.currentTarget.value)}
         onPaste={handlePaste}></textarea>
-      {todo && <TodoTimeText todo={todo} />}
+      {todo && (
+        <TodoTimeText
+          todo={todo}
+          onClick={(event: MouseEvent) => {
+            event.stopPropagation()
+            event.preventDefault()
+
+            const urlParams = new URLSearchParams(searchParams.toString())
+            urlParams.append('time', todo.id)
+            router.push(`?${decodeURIComponent(urlParams.toString())}`, {
+              scroll: false,
+            })
+          }}
+        />
+      )}
     </div>
   )
 }

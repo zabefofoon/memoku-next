@@ -20,7 +20,7 @@ export default function HomeRecents() {
   return (
     <div className='emboss-sheet | w-full | flex flex-col p-[16px]'>
       <h3 className='font-[700] text-[14px]'>최근 수정</h3>
-      <div className='mt-[8px] | grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-[6px]'>
+      <div className='mt-[8px] | grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-[6px]'>
         {recentTodos.map((todo) => (
           <TodoCard
             key={todo.id}

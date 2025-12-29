@@ -1,10 +1,11 @@
 'use client'
 
-import { WEEK_DAYS, WEEK_DAYS_NAME } from '@/const'
+import { COOKIE_DEVICE_ID, WEEK_DAYS, WEEK_DAYS_NAME } from '@/const'
 import dayjs from 'dayjs'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { useCookies } from 'react-cookie'
 import { useDateUtil } from '../hooks/useDateUtil'
 import { Todo, WeekDay } from '../models/Todo'
 import etcUtil from '../utils/etc.util'
@@ -18,7 +19,8 @@ interface Props {
   todo?: Todo
   updateTime: (
     todo: Todo,
-    values: { start: Todo['start']; end: Todo['end']; days?: Todo['days'] }
+    values: { start: Todo['start']; end: Todo['end']; days?: Todo['days'] },
+    device_id?: string
   ) => Promise<void>
   close: () => void
 }
@@ -38,7 +40,7 @@ interface StepCard {
 
 export default function TodosTimeModal({ isShow = false, todo, updateTime, close }: Props) {
   const searchParams = useSearchParams()
-
+  const [cookies] = useCookies()
   const [step, setStep] = useState<'select' | 'plan' | 'iterate'>('select')
   const [selectedMode, setSelectedMode] = useState<'plan' | 'iterate' | 'reset'>('plan')
 
@@ -104,7 +106,11 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
     if (todo == null) return
 
     if (selectedMode === 'reset') {
-      updateTime(todo, { start: undefined, end: undefined, days: undefined })
+      updateTime(
+        todo,
+        { start: undefined, end: undefined, days: undefined },
+        cookies[COOKIE_DEVICE_ID]
+      )
       close()
     } else if (step === 'select') setStep(selectedMode)
     else {
@@ -122,7 +128,11 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
         .valueOf()
       const daysValue = selectedMode === 'iterate' && days.length ? days : undefined
 
-      updateTime(todo, { start: startValue, end: endValue, days: daysValue })
+      updateTime(
+        todo,
+        { start: startValue, end: endValue, days: daysValue },
+        cookies[COOKIE_DEVICE_ID]
+      )
       close()
     }
   }
@@ -174,8 +184,8 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
                     else setEnd((prev) => ({ ...prev, hour: index }))
                   }}
                   changeMinute={(index) => {
-                    if (mode === 'start') setStart((prev) => ({ ...prev, minute: index * 5 }))
-                    else setEnd((prev) => ({ ...prev, minute: index * 5 }))
+                    if (mode === 'start') setStart((prev) => ({ ...prev, minute: index }))
+                    else setEnd((prev) => ({ ...prev, minute: index }))
                   }}
                 />
 

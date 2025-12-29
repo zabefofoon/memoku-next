@@ -67,7 +67,7 @@ export default function TodosDetail() {
         <TodosTimeModal
           isShow={!!searchParams.get('time')}
           todo={todo}
-          updateTime={(_, values) => updateTime(values)}
+          updateTime={(_, values, device_id) => updateTime(values, device_id)}
           close={router.back}
         />
         <TodosDeleteModal

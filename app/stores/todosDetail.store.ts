@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import { produce } from 'immer'
 import type { DebouncedFunc } from 'lodash'
 import debounce from 'lodash.debounce'
@@ -8,6 +9,7 @@ import { ImageRow, Tag, Todo } from '../models/Todo'
 import etcUtil from '../utils/etc.util'
 import { useImagesStore } from './images.store'
 import { useSheetStore } from './sheet.store'
+import { useThemeStore } from './theme.store'
 import { useTodosPageStore } from './todosPage.store'
 
 interface TodosDetailStore {
@@ -26,11 +28,14 @@ interface TodosDetailStore {
   setImages: (updater: ImageRow[] | ((prev?: ImageRow[]) => ImageRow[] | undefined)) => void
   changeTag: (tag: Tag, cb?: () => void) => void
   updateStatus: (status: Todo['status'], cb?: () => void) => Promise<void>
-  updateTime: (values: {
-    start: Todo['start']
-    end: Todo['end']
-    days?: Todo['days']
-  }) => Promise<void>
+  updateTime: (
+    values: {
+      start: Todo['start']
+      end: Todo['end']
+      days?: Todo['days']
+    },
+    device_id?: string
+  ) => Promise<void>
 
   addChildren: (cb?: (newTodoId: string) => void) => Promise<void>
   loadImages: (todo: Todo) => Promise<void>
@@ -188,10 +193,11 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
 
     cb?.()
   },
-  updateTime: async (values) => {
+  updateTime: async (values, device_id?: string) => {
     const { todo } = get()
     const { setTodos, setTodayTodos, setThisWeekTodos, setNextWeekTodos, setChildren } =
       useTodosPageStore.getState()
+    const { isSubscribedPush } = useThemeStore.getState()
 
     if (todo == null) return
 
@@ -252,6 +258,16 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
         if (found) Object.assign(found, values)
       })
     )
+
+    if (isSubscribedPush && device_id)
+      api.registAlarm({
+        device_id,
+        todo_id: todo.id,
+        text: todo.description?.slice(0, 40)?.split(/\n/)[0],
+        start: values.start,
+        end: values.days?.length ? dayjs(values.end).add(100, 'year').valueOf() : values.end,
+        days: values.days,
+      })
   },
 
   syncText: debounce(async (text: string, modified: number) => {

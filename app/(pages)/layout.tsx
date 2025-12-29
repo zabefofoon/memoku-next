@@ -9,6 +9,7 @@ import { AppAside } from '../components/AppAside'
 import AppBottomAppBar from '../components/AppBottomAppBar'
 import EnsureAuth from '../components/EnsureAuth'
 import { EnsureProviders } from '../components/EnsureProviders'
+import { PermissionNotificationDetector } from '../components/PermissionNotificationDetector'
 import ScrollRestorer from '../components/ScrollRestorer'
 import { ViewTransitions } from '../components/ViewTransitions'
 
@@ -44,7 +45,7 @@ export default async function RootLayout(props: LayoutProps<'/'>) {
             content='transparent'
           />
           <meta
-            name='apple-mobile-web-app-capable'
+            name='mobile-web-app-capable'
             content='yes'></meta>
           <meta
             name='apple-mobile-web-app-status-bar-style'
@@ -59,6 +60,7 @@ export default async function RootLayout(props: LayoutProps<'/'>) {
             accessToken={accessToken}
             refreshToken={refreshToken}>
             <EnsureProviders isDarkMode={isDarkMode}>
+              <PermissionNotificationDetector />
               <div className='relative | h-full | flex flex-col sm:flex-row sm:gap-[36px] sm:p-[24px] sm:pr-[0]'>
                 <AppAside isExpand={isExpandAside} />
                 <main

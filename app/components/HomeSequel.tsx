@@ -40,7 +40,7 @@ export default function HomeSequel() {
       <ResponsiveContainer
         width='100%'
         height='100%'
-        minHeight={240}>
+        minHeight={200}>
         <ComposedChart
           data={data}
           margin={{ top: 20, left: 12, right: 12, bottom: 20 }}>
