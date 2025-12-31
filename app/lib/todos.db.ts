@@ -135,9 +135,9 @@ export const todosDB = {
         : db.todos.orderBy('created').reverse()
 
     // 기존처럼: 아무 필터도 없으면 root만 보여주기 + 날짜 범위 제외
-    if (!tags && !statuses && !query) {
+    if (!query) {
       coll = coll.and((t) => isRoot(t) && excludeDateRanges(t))
-    } else {
+
       if (tags?.length) coll = coll.and((t) => tags.includes(t.tagId ?? ''))
 
       if (statuses) {
@@ -147,7 +147,7 @@ export const todosDB = {
             : statuses.includes(status)
         )
       }
-
+    } else {
       if (query) coll = coll.and((t) => (t.description ?? '').toLowerCase().includes(query))
 
       // 여기서도 날짜 범위 제외
