@@ -57,7 +57,7 @@ export function PermissionNotificationDetector() {
 
     const handleVisibilitychange = async (): Promise<void> => {
       if (document.hidden) return
-      setNotificationPermission(Notification.permission)
+      permissionChangeHandler()
     }
 
     permissionChangeHandler()
