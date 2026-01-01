@@ -2,7 +2,7 @@ import { Icon } from './Icon'
 
 export default function HomeNews() {
   return (
-    <div className='order-2 sm:order-0 flex-1 min-w-[240px] shrink-0 | flex flex-col gap-[12px]'>
+    <div className='order-2 sm:order-0 flex-1 min-w-[260px] shrink-0 | flex flex-col gap-[12px]'>
       <div className='emboss-sheet | w-full h-full'>
         <div className='relative rounded-lg overflow-hidden | w-full h-full'>
           <img

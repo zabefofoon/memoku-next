@@ -10,6 +10,7 @@ import { useThemeStore } from '../stores/theme.store'
 export default function HomeTotal() {
   const [cookies] = useCookies()
 
+  const screenSize = useThemeStore((s) => s.screenSize)
   const isDarkMode = useThemeStore((state) => state.isDarkMode)
 
   const [total, setTotal] = useState<number>(0)
@@ -63,12 +64,12 @@ export default function HomeTotal() {
   }, [loadTodos])
 
   return (
-    <div className='emboss-sheet | flex-1 min-w-[240px] shrink-0 | flex flex-col justify-center'>
+    <div className='emboss-sheet | flex-1 min-w-[260px] aspect-square shrink-0 overflow-hidden | flex flex-col justify-center'>
       <div className='relative'>
         <ResponsiveContainer
           width={'100%'}
           height={'100%'}
-          minHeight={'240px'}>
+          minHeight='300px'>
           <RadialBarChart
             margin={{ top: 0, left: 0, right: 0, bottom: 0 }}
             data={data}
