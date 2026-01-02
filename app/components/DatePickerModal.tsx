@@ -12,33 +12,40 @@ interface Props {
   close: () => void
 }
 
-export default function DatePickerModal(props: Props) {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(props.selectedDate)
+export default function DatePickerModal({
+  isShow,
+  selectedDate,
+  validRange,
+  select,
+  close,
+}: Props) {
+  const [date, setDate] = useState<Date | undefined>(selectedDate)
 
   return (
     <UIModal
-      open={props.isShow}
+      open={isShow}
       header={() => <span>날짜 설정</span>}
       content={() => (
         <div className='max-w-[360px]'>
           <TodosDatePicker
-            select={setSelectedDate}
-            validRange={props.validRange}
+            initialDate={selectedDate}
+            select={setDate}
+            validRange={validRange}
           />
         </div>
       )}
-      close={() => props.close()}
+      close={() => close()}
       ok={() => (
         <button
           className='rounded-md bg-indigo-500 py-[12px]'
-          onClick={() => selectedDate && props.select(selectedDate)}>
+          onClick={() => date && select(date)}>
           <p className='text-white text-[15px] font-[700]'>선택하기</p>
         </button>
       )}
       cancel={() => (
         <button
           className='rounded-md bg-gray-200 dark:bg-zinc-700 text-[15px] py-[12px]'
-          onClick={() => props.close()}>
+          onClick={() => close()}>
           <p className='text-[15px]'>취소하기</p>
         </button>
       )}

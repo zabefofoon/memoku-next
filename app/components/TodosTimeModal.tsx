@@ -1,17 +1,16 @@
 'use client'
 
-import { COOKIE_DEVICE_ID, WEEK_DAYS, WEEK_DAYS_NAME } from '@/const'
+import { COOKIE_DEVICE_ID, WEEK_DAYS } from '@/const'
 import dayjs from 'dayjs'
-import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
-import { useDateUtil } from '../hooks/useDateUtil'
+import { If, Then } from 'react-if'
 import { Todo, WeekDay } from '../models/Todo'
 import etcUtil from '../utils/etc.util'
 import DatePickerModal from './DatePickerModal'
 import { Icon } from './Icon'
-import TimePicker from './TimePicker'
+import TimePickerModal from './TimePickerModal'
 import UIModal from './UIModal'
 
 interface Props {
@@ -31,20 +30,10 @@ interface TimeState {
   minute?: number
 }
 
-interface StepCard {
-  title: string
-  desc: string
-  caption: string
-  value: 'plan' | 'iterate' | 'reset'
-}
-
 export default function TodosTimeModal({ isShow = false, todo, updateTime, close }: Props) {
-  const searchParams = useSearchParams()
   const [cookies] = useCookies()
-  const [step, setStep] = useState<'select' | 'plan' | 'iterate'>('select')
-  const [selectedMode, setSelectedMode] = useState<'plan' | 'iterate' | 'reset'>('plan')
-
-  const [mode, setMode] = useState<'start' | 'end'>('start')
+  const searchParams = useSearchParams()
+  const router = useRouter()
 
   const [start, setStart] = useState<TimeState>({
     date: dayjs().set('hour', 0).set('minute', 0).toDate(),
@@ -61,380 +50,218 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
   const initStates = useCallback((): void => {
     if (todo == null) return
 
-    let step: 'select' | 'plan' | 'iterate' = 'select'
-    if (todo.start && todo.days) step = 'iterate'
-    else if (todo.start) step = 'plan'
+    const start = dayjs(todo.start)
+    const startDate = start.toDate()
+    const startHour = todo.start ? start.get('hour').valueOf() : 0
+    const startMinute = todo.start ? start.get('minute').valueOf() : 0
 
-    const startDate = dayjs(todo.start).toDate()
-    const startHour = todo.start ? dayjs(todo.start).get('hour').valueOf() : 0
-    const startMinute = todo.start ? dayjs(todo.start).get('minute').valueOf() : 0
+    const end = dayjs(todo.end)
+    const endtDate = end.toDate()
+    const endtHour = todo.end ? end.get('hour').valueOf() : 23
+    const endinute = todo.end ? end.get('minute').valueOf() : 55
 
-    const endtDate = dayjs(todo.end).toDate()
-    const endtHour = todo.end ? dayjs(todo.end).get('hour').valueOf() : 23
-    const endinute = todo.end ? dayjs(todo.end).get('minute').valueOf() : 55
-
-    setStep(step)
-    setMode('start')
-    setSelectedMode(todo.days ? 'iterate' : 'plan')
     setStart({ date: startDate, hour: startHour, minute: startMinute })
     setEnd({ date: endtDate, hour: endtHour, minute: endinute })
     setDays(todo.days ?? [])
   }, [todo])
 
   const setDate = (value: Date): void => {
+    const mode = searchParams.get('date')
     if (mode === 'start') {
       const date = dayjs(value).startOf('day').toDate()
       setStart((prev) => ({ ...prev, date }))
-
-      if (end.date && value > end.date) setEnd((prev) => ({ ...prev, date: undefined }))
+      if (end.date && value > end.date) {
+        const date = dayjs(value).endOf('day').toDate()
+        setEnd((prev) => ({ ...prev, date }))
+      }
     } else {
-      const date = dayjs(value).endOf('day').toDate()
+      const date = dayjs(value).startOf('day').toDate()
       setEnd((prev) => ({ ...prev, date }))
     }
-
     close()
   }
 
-  const toggleWeekDays = (value: WeekDay) => {
-    setDays((prev) => {
-      if (prev.includes(value)) return prev.filter((item) => item != value)
-      else return [...prev, value]
-    })
+  const setTime = (hour: number, minute: number): void => {
+    const mode = searchParams.get('hour')
+    if (mode === 'start') setStart((prev) => ({ ...prev, hour, minute }))
+    else setEnd((prev) => ({ ...prev, hour, minute }))
+    close()
   }
 
   const handleSelect = (): void => {
     if (todo == null) return
 
-    if (selectedMode === 'reset') {
-      updateTime(
-        todo,
-        { start: undefined, end: undefined, days: undefined },
-        cookies[COOKIE_DEVICE_ID]
-      )
-      close()
-    } else if (step === 'select') setStep(selectedMode)
-    else {
-      const startValue = dayjs(start.date)
-        .hour(start.hour ?? 0)
-        .minute(start.minute ?? 0)
-        .second(0)
-        .millisecond(0)
-        .valueOf()
-      const endValue = dayjs(end.date)
-        .hour(end.hour ?? 0)
-        .minute(end.minute ?? 0)
-        .second(0)
-        .millisecond(0)
-        .valueOf()
-      const daysValue = selectedMode === 'iterate' && days.length ? days : undefined
-
-      updateTime(
-        todo,
-        { start: startValue, end: endValue, days: daysValue },
-        cookies[COOKIE_DEVICE_ID]
-      )
-      close()
-    }
+    updateTime(
+      todo,
+      {
+        start: dayjs(start.date)
+          .hour(start.hour ?? 0)
+          .minute(start.minute ?? 0)
+          .second(0)
+          .millisecond(0)
+          .valueOf(),
+        end: dayjs(end.date)
+          .hour(end.hour ?? 0)
+          .minute(end.minute ?? 0)
+          .second(0)
+          .millisecond(0)
+          .valueOf(),
+        days: days.length ? days : undefined,
+      },
+      cookies[COOKIE_DEVICE_ID]
+    )
+    close()
   }
 
   useEffect(() => {
     if (isShow) initStates()
   }, [initStates, isShow])
 
+  useEffect(() => {
+    console.log(start)
+  }, [start])
+
   return (
     <>
+      <DatePickerModal
+        isShow={!!searchParams.get('date')}
+        selectedDate={searchParams.get('date') === 'start' ? start.date : end.date}
+        close={close}
+        validRange={{ start: searchParams.get('date') === 'start' ? undefined : start.date }}
+        select={setDate}
+      />
+      <TimePickerModal
+        isShow={!!searchParams.get('hour')}
+        initialHour={searchParams.get('hour') === 'start' ? start.hour : end.hour}
+        initialMinute={searchParams.get('hour') === 'start' ? start.minute : end.minute}
+        close={close}
+        select={setTime}
+      />
       <UIModal
         open={isShow}
         close={() => close()}
         header={() => <span>시간 설정</span>}
         content={() => (
           <div className='select-none'>
-            {/* Breadcrumb */}
-            <div className='flex items-center gap-[6px] | text-[13px] | mb-[24px]'>
-              <button
-                className={etcUtil.classNames(['opacity-100', { 'opacity-50': step !== 'select' }])}
-                onClick={() => setStep('select')}>
-                1. 모드선택
-              </button>
-              {step !== 'select' && (
-                <div className='w-[16px] border-t-[3px] border-dotted border-slate-200 dark:border-zinc-600'></div>
-              )}
-              {step === 'plan' && <p>2. 기간설정</p>}
-              {step === 'iterate' && <p>2. 반복설정</p>}
+            <div className='mt-[12px] | flex justify-center gap-[4px] | bg-slate-100 dark:bg-zinc-600 rounded-lg | py-[8px]'>
+              <p className='flex items-center gap-[4px] | text-[12px] text-center font-[700] tracking-tight'>
+                <If condition={!days.length}>
+                  <Then>
+                    <button
+                      type='button'
+                      className='underline'
+                      onClick={() => {
+                        const urlParams = new URLSearchParams(searchParams.toString())
+                        router.push(`?${decodeURIComponent(urlParams.toString())}&date=start`, {
+                          scroll: false,
+                        })
+                      }}>
+                      {dayjs(start.date).format('YY.MM.DD')}
+                    </button>
+                  </Then>
+                </If>
+                <button
+                  type='button'
+                  className='underline'
+                  onClick={() => {
+                    const urlParams = new URLSearchParams(searchParams.toString())
+                    router.push(`?${decodeURIComponent(urlParams.toString())}&hour=start`, {
+                      scroll: false,
+                    })
+                  }}>
+                  {(start?.hour ?? 0) < 11 ? 'AM' : 'PM'}&nbsp;
+                  {`${start.hour}`.padStart(2, '0')}:{`${start.minute}`.padStart(2, '0')}
+                </button>
+              </p>
+              <p> ~ </p>
+              <p className='flex items-center gap-[4px] | text-[12px] text-center font-[700] tracking-tight'>
+                <If condition={!days.length}>
+                  <Then>
+                    <button
+                      type='button'
+                      className='underline'
+                      onClick={() => {
+                        const urlParams = new URLSearchParams(searchParams.toString())
+                        router.push(`?${decodeURIComponent(urlParams.toString())}&date=end`, {
+                          scroll: false,
+                        })
+                      }}>
+                      {dayjs(end.date).format('YY.MM.DD')}
+                    </button>
+                  </Then>
+                </If>
+                <button
+                  type='button'
+                  className='underline'
+                  onClick={() => {
+                    const urlParams = new URLSearchParams(searchParams.toString())
+                    router.push(`?${decodeURIComponent(urlParams.toString())}&hour=end`, {
+                      scroll: false,
+                    })
+                  }}>
+                  {(end?.hour ?? 0) < 11 ? 'AM' : 'PM'}&nbsp;
+                  {`${end.hour}`.padStart(2, '0')}:{`${end.minute}`.padStart(2, '0')}
+                </button>
+              </p>
             </div>
-            {/* Breadcrumb */}
 
-            {step === 'select' ? (
-              <SelectContent
-                selectedMode={selectedMode}
-                setSelectedMode={setSelectedMode}
-              />
-            ) : (
-              <>
-                <Tabs
-                  mode={mode}
-                  setMode={setMode}
-                />
-                <TimePicker
-                  key={`time-picker-${mode}`}
-                  initialHour={mode === 'start' ? start.hour : end.hour}
-                  initialMinute={mode === 'start' ? start.minute : end.minute}
-                  changeHour={(index) => {
-                    if (mode === 'start') setStart((prev) => ({ ...prev, hour: index }))
-                    else setEnd((prev) => ({ ...prev, hour: index }))
-                  }}
-                  changeMinute={(index) => {
-                    if (mode === 'start') setStart((prev) => ({ ...prev, minute: index }))
-                    else setEnd((prev) => ({ ...prev, minute: index }))
-                  }}
-                />
-
-                <div className='flex flex-col gap-[8px] | text-[13px] | mb-[24px] pb-[24px] | border-b border-slate-200 dark:border-zinc-600'>
-                  {step === 'plan' ? (
-                    <PlanContent
-                      todo={todo}
-                      date={mode === 'start' ? start.date : end.date}
-                    />
-                  ) : (
-                    <IterateContent
-                      mode={mode}
-                      start={start}
-                      end={end}
-                      days={days}
-                      toggleWeekDays={toggleWeekDays}
-                    />
-                  )}
-                </div>
-                {selectedMode !== 'reset' && (
-                  <ResultTexts
-                    selectedMode={selectedMode}
-                    start={start}
-                    end={end}
-                    days={days}
-                  />
-                )}
-              </>
-            )}
+            <div className='flex items-center | mt-[18px] pt-[6px] | border-t border-dashed border-slate-200 dark:border-zinc-600'>
+              {WEEK_DAYS.map((item) => (
+                <button
+                  className='w-full | text-[13px]'
+                  key={item.value}
+                  type='button'
+                  onClick={() => {
+                    setDays((prev) => {
+                      if (prev.includes(item.value))
+                        return prev.filter((child) => child != item.value)
+                      else return [...prev, item.value]
+                    })
+                  }}>
+                  <span
+                    className={etcUtil.classNames([
+                      'w-[30px] aspect-square | mx-auto | rounded-full | flex items-center justify-center',
+                      {
+                        'bg-indigo-500 text-white': days?.includes(item.value),
+                      },
+                    ])}>
+                    {item.name}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
         ok={() => (
-          <button
-            className='rounded-md bg-indigo-500 py-[12px]'
-            onClick={handleSelect}>
-            <p className='text-white text-[15px] font-[700]'>선택하기</p>
-          </button>
+          <div className='flex gap-[4px]'>
+            <button
+              className='w-full | rounded-md bg-indigo-500 py-[12px]'
+              onClick={handleSelect}>
+              <p className='text-white text-[15px] font-[700]'>설정하기</p>
+            </button>
+            <button
+              className='flex items-center justify-center | shrink-0 w-[50px] | border border-zinc-700 rounded-md'
+              onClick={() => {
+                if (todo)
+                  updateTime(
+                    todo,
+                    { start: undefined, end: undefined, days: undefined },
+                    cookies[COOKIE_DEVICE_ID]
+                  )
+                close()
+              }}>
+              <Icon name='delete' />
+            </button>
+          </div>
         )}
         cancel={() => (
           <button
             className='rounded-md bg-gray-200 dark:bg-zinc-700 text-[15px] py-[12px]'
-            onClick={() => {
-              if (step === 'select') close()
-              else setStep('select')
-            }}>
+            onClick={() => close()}>
             <p className='text-[15px]'>취소하기</p>
           </button>
         )}
       />
-      <DatePickerModal
-        key={`date-${mode}`}
-        isShow={!!searchParams.get('date')}
-        selectedDate={mode === 'start' ? start.date : end.date}
-        close={close}
-        validRange={{ start: mode === 'start' ? undefined : start.date }}
-        select={setDate}
-      />
     </>
-  )
-}
-
-function Tabs({
-  mode,
-  setMode,
-}: {
-  mode?: 'start' | 'end'
-  setMode: (value: 'start' | 'end') => void
-}): ReactNode {
-  const tabs: { name: string; value: 'start' | 'end' }[] = [
-    { name: '시작시간', value: 'start' },
-    { name: '종료시간', value: 'end' },
-  ]
-
-  return (
-    <div className='w-fit | flex gap-[4px] | text-[14px] | mx-auto mb-[12px] p-[4px] | rounded-lg bg-slate-100 dark:bg-zinc-700'>
-      {tabs.map((item) => (
-        <button
-          key={item.value}
-          type='button'
-          className={etcUtil.classNames('font-[700] | py-[3px] px-[12px] | rounded-lg', {
-            'bg-indigo-500 shadow-lg | text-white': mode === item.value,
-          })}
-          onClick={() => setMode(item.value)}>
-          {item.name}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-function SelectContent({
-  selectedMode,
-  setSelectedMode,
-}: {
-  selectedMode: 'plan' | 'iterate' | 'reset'
-  setSelectedMode: (value: 'plan' | 'iterate' | 'reset') => void
-}): ReactNode {
-  const stepCards: StepCard[] = [
-    {
-      title: '기간 설정',
-      desc: '시작과 종료의 날짜 및 시간을 정합니다.',
-      caption: 'N일 N시 N분 ~ N일 N시 N분',
-      value: 'plan',
-    },
-    {
-      title: '반복 설정',
-      desc: '매 주 선택한 요일의 시간을 정합니다.',
-      caption: '매주 N요일, N요일 N시 N분 ~ N시 N분',
-      value: 'iterate',
-    },
-    {
-      title: '초기화',
-      desc: '설정을 초기화 합니다.',
-      caption: '주의! 초기화된 설정은 복구할 수 없습니다.',
-      value: 'reset',
-    },
-  ]
-
-  return (
-    <>
-      <div className='flex flex-col | gap-[12px]'>
-        {stepCards.map((card) => (
-          <button
-            key={card.value}
-            className={etcUtil.classNames([
-              'leading-[140%] | border border-slate-200 dark:border-zinc-600 rounded-lg | py-[8px]',
-              { 'bg-slate-100 dark:bg-zinc-700': selectedMode === card.value },
-            ])}
-            onClick={() => setSelectedMode(card.value)}>
-            <p className='text-[16px] font-[700]'>{card.title}</p>
-            <p className='text-[13px]'>{card.desc}</p>
-            <p className='text-[12px] opacity-50'>{card.caption}</p>
-          </button>
-        ))}
-      </div>
-    </>
-  )
-}
-
-function PlanContent({ todo, date }: { todo?: Todo; date?: Date }): ReactNode {
-  const dateUtil = useDateUtil()
-  return (
-    <div className='flex items-center justify-between'>
-      <p>날짜</p>
-      <div className='flex items-center gap-[8px]'>
-        {date && <p>{dateUtil.parseOnlyDate(date?.getTime())}</p>}
-        <Link
-          href={`?time=${todo?.id}&date=true`}
-          type='button'>
-          <Icon
-            name='calendar'
-            className='text-[20px]'
-          />
-        </Link>
-      </div>
-    </div>
-  )
-}
-
-function IterateContent({
-  mode,
-  days,
-  toggleWeekDays,
-}: {
-  mode: 'start' | 'end'
-  start: TimeState
-  end: TimeState
-  days: WeekDay[]
-  toggleWeekDays: (value: WeekDay) => void
-}): ReactNode {
-  return (
-    <div className='flex items-center'>
-      {WEEK_DAYS.map((item) => (
-        <button
-          className='w-full | text-[15px]'
-          key={item.value}
-          type='button'
-          onClick={() => toggleWeekDays(item.value)}>
-          <span
-            className={etcUtil.classNames([
-              'w-[30px] aspect-square | mx-auto | rounded-full | flex items-center justify-center',
-              {
-                'bg-indigo-500 text-white':
-                  mode === 'start' ? days?.includes(item.value) : days?.includes(item.value),
-              },
-            ])}>
-            {item.name}
-          </span>
-        </button>
-      ))}
-    </div>
-  )
-}
-
-function ResultTexts({
-  selectedMode,
-  start,
-  end,
-  days,
-}: {
-  selectedMode: 'plan' | 'iterate'
-  start: TimeState
-  end: TimeState
-  days: WeekDay[]
-}): ReactNode {
-  const dateUtil = useDateUtil()
-
-  const startHour = `${start.hour}`.padStart(2, '0')
-  const startMinute = `${start.minute}`.padStart(2, '0')
-  const endHour = `${end.hour}`.padStart(2, '0')
-  const endMinute = `${end.minute}`.padStart(2, '0')
-
-  const daysValue = days.length === 7 ? '매일' : days.map((day) => WEEK_DAYS_NAME[day]).join(',')
-
-  const startDate = dateUtil.parseDate(
-    dayjs(start.date)
-      .hour(start.hour ?? 0)
-      .minute(start.minute ?? 0)
-      .second(0)
-      .millisecond(0)
-      .valueOf()
-  )
-  const endDate = dateUtil.parseDate(
-    dayjs(end.date)
-      .hour(end.hour ?? 0)
-      .minute(end.minute ?? 0)
-      .second(0)
-      .millisecond(0)
-      .valueOf()
-  )
-
-  return (
-    <div className='bg-slate-100 dark:bg-zinc-600 rounded-lg | py-[8px]'>
-      {selectedMode === 'plan' ? (
-        <p className='text-[12px] text-center font-[700]'>
-          {end.date ? `${startDate} ~ ${endDate}` : '종료일을 선택하세요.'}
-        </p>
-      ) : (
-        <p className='text-[12px] text-center font-[700]'>
-          {days.length ? (
-            <span>
-              {days.length < 7 && '매주'} {daysValue} / {startHour}:{startMinute}~{endHour}:
-              {endMinute}
-            </span>
-          ) : (
-            '요일을 선택하세요.'
-          )}
-        </p>
-      )}
-    </div>
   )
 }

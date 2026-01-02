@@ -1,5 +1,6 @@
 'use client'
 
+import type { EmblaCarouselType } from 'embla-carousel'
 import useEmblaCarousel from 'embla-carousel-react'
 import {
   createContext,
@@ -27,7 +28,7 @@ interface Props {
 }
 
 export type UICarouselHandle = {
-  scrollTo: (index: number) => void
+  scrollTo: (index: number, jump?: boolean) => void
 }
 
 const CarouselContext = createContext<{
@@ -114,14 +115,13 @@ export default forwardRef<UICarouselHandle, PropsWithChildren<Props>>(function U
   useEffect(() => {
     if (!scrollSnap) return
 
-    emblaApi?.on('select', (event) => {
+    const handleSelect = (event: EmblaCarouselType) => {
       const index = event.selectedScrollSnap() || 0
       change?.(index)
-    })
-
-    emblaApi?.on('pointerUp', (api) => {
-      const snaps: number[] = api.scrollSnapList()
-      const progress: number = api.scrollProgress()
+    }
+    const handlePointerUp = (event: EmblaCarouselType) => {
+      const snaps: number[] = event.scrollSnapList()
+      const progress: number = event.scrollProgress()
       let nearest = 0,
         best = Infinity
       snaps.forEach((p, i) => {
@@ -131,14 +131,20 @@ export default forwardRef<UICarouselHandle, PropsWithChildren<Props>>(function U
           nearest = i
         }
       })
-      api.scrollTo(nearest)
-    })
+      event.scrollTo(nearest)
+    }
+    emblaApi?.on('select', handleSelect)
+    emblaApi?.on('pointerUp', handlePointerUp)
+    return () => {
+      emblaApi?.off('select', handleSelect)
+      emblaApi?.off('pointerUp', handlePointerUp)
+    }
   }, [emblaApi, scrollSnap, change])
 
   useImperativeHandle(
     ref,
     () => ({
-      scrollTo: (index: number) => emblaApi?.scrollTo(index),
+      scrollTo: (index: number, jump?: boolean) => emblaApi?.scrollTo(index, jump),
     }),
     [emblaApi]
   )

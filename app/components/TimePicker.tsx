@@ -6,22 +6,32 @@ import UICarousel, { UICarouselHandle, UICarouselSlide } from './UICarousel'
 interface Props {
   initialHour?: number
   initialMinute?: number
-  changeHour: (index: number) => void
-  changeMinute: (index: number) => void
+  changeHour?: (index: number) => void
+  changeMinute?: (index: number) => void
 }
 
-export default function TimePicker(props: Props) {
+export default function TimePicker({
+  initialHour,
+  initialMinute,
+  changeHour,
+  changeMinute,
+}: Props) {
   const amCarousel = useRef<UICarouselHandle>(null)
+  const hourCarousel = useRef<UICarouselHandle>(null)
+  const minuteCarousel = useRef<UICarouselHandle>(null)
 
   useEffect(() => {
     setTimeout(() => {
-      const index = (props.initialHour ?? 0) < 12 ? 0 : 1
+      const index = (initialHour ?? 0) < 12 ? 0 : 1
       amCarousel.current?.scrollTo(index)
+
+      hourCarousel.current?.scrollTo(initialHour ?? 0, true)
+      minuteCarousel.current?.scrollTo((initialMinute ?? 0) / 5, true)
     }, 100)
-  }, [props.initialHour])
+  }, [initialHour, initialMinute, minuteCarousel, hourCarousel])
 
   return (
-    <div className='relative | flex | mb-[32px]'>
+    <div className='select-none relative | flex | mb-[32px]'>
       <div className='w-full h-[40px] | absolute top-[40px] | border-y border-gray-300 dark:border-zinc-600 border-dashed'></div>
       <UICarousel
         ref={amCarousel}
@@ -32,13 +42,13 @@ export default function TimePicker(props: Props) {
           <UICarouselSlide
             key={item}
             className='h-[40px] | flex items-center justify-center'>
-            <span className='text-[18px]'>{item}</span>
+            <span className='text-[16px]'>{item}</span>
           </UICarouselSlide>
         ))}
       </UICarousel>
       <UICarousel
+        ref={hourCarousel}
         className='w-full h-[120px]'
-        startIndex={props.initialHour ?? 0}
         hideDots
         loop
         dragFree
@@ -46,7 +56,7 @@ export default function TimePicker(props: Props) {
         vertical
         perview={3}
         change={(index) => {
-          props.changeHour(index)
+          changeHour?.(index)
           if (index < 12) amCarousel.current?.scrollTo(0)
           else amCarousel.current?.scrollTo(1)
         }}>
@@ -54,25 +64,25 @@ export default function TimePicker(props: Props) {
           <UICarouselSlide
             key={index}
             className='h-[40px] | flex items-center justify-center'>
-            <span className='text-[18px]'>{`${index}`.padStart(2, '0')}</span>
+            <span className='text-[16px]'>{`${index}`.padStart(2, '0')}</span>
           </UICarouselSlide>
         ))}
       </UICarousel>
       <UICarousel
+        ref={minuteCarousel}
         className='w-full h-[120px]'
-        startIndex={props.initialMinute ?? 0}
         hideDots
         loop
         dragFree
         scrollSnap
         vertical
         perview={3}
-        change={props.changeMinute}>
-        {Array.from({ length: 60 }).map((_, index) => (
+        change={changeMinute}>
+        {Array.from({ length: 12 }).map((_, index) => (
           <UICarouselSlide
             key={index}
             className='h-[40px] | flex items-center justify-center'>
-            <span className='text-[18px]'>{`${index}`.padStart(2, '0')}</span>
+            <span className='text-[16px]'>{`${index * 5}`.padStart(2, '0')}</span>
           </UICarouselSlide>
         ))}
       </UICarousel>

@@ -18,16 +18,16 @@ export function PermissionNotificationDetector() {
   const setIsSubscribedPush = useThemeStore((state) => state.setIsSubscribedPush)
 
   useEffect(() => {
-    navigator.serviceWorker.register('/sw.js', {
+    navigator.serviceWorker?.register('/sw.js', {
       scope: '/',
       updateViaCache: 'none',
     })
 
-    Notification.requestPermission().then(async (state) => {
-      if (state === 'granted') {
-        const deviceId = cookies[COOKIE_DEVICE_ID] || etcUtil.generateUniqueId()
+    if (Notification.permission === 'default') {
+      Notification.requestPermission().then(async (state) => {
+        if (state === 'granted') {
+          const deviceId = cookies[COOKIE_DEVICE_ID] || etcUtil.generateUniqueId()
 
-        if (!deviceId) {
           const registrations = await navigator.serviceWorker.getRegistrations()
           for (const registration of registrations) {
             const pushSubscription = await registration.pushManager.subscribe({
@@ -47,8 +47,8 @@ export function PermissionNotificationDetector() {
             }
           }
         }
-      }
-    })
+      })
+    }
 
     let status: PermissionStatus
     const permissionChangeHandler = (): void => {

@@ -7,15 +7,16 @@ import dayjs from 'dayjs'
 import { useRef, useState } from 'react'
 
 type Props = {
+  initialDate?: Date
   value?: { start?: number; end?: number }
   validRange?: { start?: Date; end?: Date }
   select?: (date: Date) => void
 }
 
-export default function TodosDatePicker(props: Props) {
+export default function TodosDatePicker({ initialDate, validRange, select }: Props) {
   const calendarRef = useRef<FullCalendar>(null)
 
-  const [selectedDate, setSelectedDate] = useState<Date>()
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(initialDate)
 
   return (
     <div className='date-picker'>
@@ -34,10 +35,10 @@ export default function TodosDatePicker(props: Props) {
             left: 'title',
             right: 'prev,next',
           }}
-          validRange={props.validRange}
+          validRange={validRange}
           dateClick={({ date }) => {
             setSelectedDate(date)
-            props.select?.(date)
+            select?.(date)
           }}
           dayCellClassNames={(arg) => {
             const day = dayjs(arg.date).startOf('day')
