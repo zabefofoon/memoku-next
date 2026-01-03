@@ -72,7 +72,7 @@ export function TodoCard({
         type='button'
         className={etcUtil.classNames([
           'expand-hitbox | flex items-center gap-[4px]',
-          display !== 'grid' ? 'w-[120px] shrink-0' : 'w-fit',
+          display !== 'grid' ? 'w-[100px] shrink-0' : 'w-fit',
         ])}
         onClick={(event) => {
           event.preventDefault()
@@ -93,7 +93,7 @@ export function TodoCard({
           }}
         />
 
-        <p className='text-[11px] text-gray-600 dark:text-zinc-400 leading-[100%]'>
+        <p className='w-full | tracking-tight text-left text-[11px] text-gray-600 dark:text-zinc-400 leading-[100%]'>
           {tag?.label ?? 'MEMO'}
         </p>
       </button>

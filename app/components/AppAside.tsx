@@ -152,8 +152,9 @@ export function AppAside(props: Props) {
 
               <If condition={!isExpand}>
                 <Then>
-                  <div className='hover-item | min-w-[40px] | absolute top-1/2 right-0 -translate-y-1/2 translate-x-[52px]'>
-                    <p className='py-[3px] px-[8px] | whitespace-nowrap bg-white dark:bg-zinc-700 rounded-lg shadow-lg | text-center text-[13px] text-gray-600'>
+                  <div className='hover-item | min-w-[40px] | absolute top-1/2 left-full -translate-y-1/2 translate-x-[12px]'>
+                    <div className='bg-white dark:bg-zinc-700 | absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 | w-[8px] aspect-square rotate-[45deg] bg-red-100'></div>
+                    <p className='py-[8px] px-[8px] | whitespace-nowrap bg-white dark:bg-zinc-700 rounded-lg shadow-lg | text-center text-[13px] text-gray-600 dark:text-zinc-200'>
                       {menu.name}
                     </p>
                   </div>
