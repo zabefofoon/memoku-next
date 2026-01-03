@@ -1,10 +1,10 @@
 export async function POST(req: Request) {
-  const { subscription, device_id } = await req.json()
+  const { subscription, device_id, timezone } = await req.json()
 
   return fetch(`${process.env.ALARM_API_SERVER}/memoku-alarm/subscribe`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ subscription: subscription, device_id: device_id }),
+    body: JSON.stringify({ subscription, device_id, timezone }),
   })
 }
 
