@@ -8,6 +8,7 @@ import packageJson from '../../package.json'
 
 import { AGE_1_YEAR, COOKIE_EXPAND, COOKIE_THEME } from '@/const'
 import { useState } from 'react'
+import { If, Then } from 'react-if'
 import { useAuthStore } from '../stores/auth.store'
 import { useSheetStore } from '../stores/sheet.store'
 import { useThemeStore } from '../stores/theme.store'
@@ -42,14 +43,6 @@ const menus = [
     divided: false,
     icon: 'setting',
     activeIcon: 'setting-active',
-    induce: false,
-  },
-  {
-    href: '/notifications',
-    name: '알림',
-    divided: false,
-    icon: 'notification',
-    activeIcon: 'notification-active',
     induce: false,
   },
   {
@@ -108,7 +101,7 @@ export function AppAside(props: Props) {
   return (
     <aside
       className={etcUtil.classNames([
-        'relative | hidden lg:flex flex-col | sticky top-[24px] | h-[calc(100dvh-48px)] | bg-white dark:bg-zinc-800 | shadow-lg rounded-l-2xl rounded-b-2xl | transition-[width]',
+        'relative z-10 | hidden lg:flex flex-col | sticky top-[24px] | h-[calc(100dvh-48px)] | bg-white dark:bg-zinc-800 | shadow-lg rounded-l-2xl rounded-b-2xl | transition-[width]',
         isExpand ? 'w-[240px]' : 'w-[62px]',
       ])}>
       <button
@@ -131,6 +124,7 @@ export function AppAside(props: Props) {
           <div
             key={menu.href}
             className={etcUtil.classNames([
+              'aside-item',
               {
                 'border-t border-gray-100 dark:border-zinc-600 | mt-[12px] pt-[12px]': menu.divided,
               },
@@ -155,45 +149,62 @@ export function AppAside(props: Props) {
               {menu.induce && (
                 <div className='absolute w-[4px] top-[10px] left-[16px] | aspect-square rounded-full | bg-red-500'></div>
               )}
+
+              <If condition={!isExpand}>
+                <Then>
+                  <div className='hover-item | min-w-[40px] | absolute top-1/2 right-0 -translate-y-1/2 translate-x-[52px]'>
+                    <p className='py-[3px] px-[8px] | whitespace-nowrap bg-white dark:bg-zinc-700 rounded-lg shadow-lg | text-center text-[13px] text-gray-600'>
+                      {menu.name}
+                    </p>
+                  </div>
+                </Then>
+              </If>
             </Link>
           </div>
         ))}
       </nav>
       <div className='mt-auto'>
-        {memberInfo && (
-          <div className='border border-gray-100 dark:border-zinc-700 rounded-xl shadow-sm | flex items-center gap-[8px] | py-[12px] px-[12px] mx-[4px]'>
-            <img
-              className='rounded-full | w-[32px] aspect-square'
-              src={memberInfo.picture ?? ''}
-              alt={memberInfo.email}
-            />
-            <div className='flex flex-col gap-[2px] | overflow-hidden | leading-[100%]'>
-              <p className='text-[13px] truncate'>{memberInfo?.email}</p>
-              <div className='flex'>
-                <Icon name='logout' />
-                <button
-                  className='text-[12px]'
-                  onClick={logout}>
-                  로그아웃
-                </button>
+        <If condition={memberInfo != null}>
+          <Then>
+            {() => (
+              <div className='border border-gray-100 dark:border-zinc-700 rounded-xl shadow-sm | flex items-center gap-[8px] | py-[12px] px-[12px] mx-[4px]'>
+                <img
+                  className='rounded-full | w-[32px] aspect-square'
+                  src={memberInfo?.picture ?? ''}
+                  alt={memberInfo?.email}
+                />
+                <div className='flex flex-col gap-[2px] | overflow-hidden | leading-[100%]'>
+                  <p className='text-[13px] truncate'>{memberInfo?.email}</p>
+                  <div className='flex'>
+                    <Icon name='logout' />
+                    <button
+                      className='text-[12px]'
+                      onClick={logout}>
+                      로그아웃
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            )}
+          </Then>
+        </If>
         <div
           className={etcUtil.classNames([
             'flex items-center justify-between | px-[8px] py-[12px]',
             { 'flex-col': !isExpand },
           ])}>
           <div className='flex items-center gap-[6px] flex-wrap'>
-            {!memberInfo && (
-              <Link
-                href='/api/auth/google'
-                prefetch={false}
-                className='mx-auto | w-[32px] aspect-square | flex items-center justify-center | rounded-full bg-white dark:bg-zinc-700 shadow-sm shadow-black/30 dark:shadow-black/60'>
-                <Icon name='google' />
-              </Link>
-            )}
+            <If condition={!memberInfo}>
+              <Then>
+                <Link
+                  href='/api/auth/google'
+                  prefetch={false}
+                  className='mx-auto | w-[32px] aspect-square | flex items-center justify-center | rounded-full bg-white dark:bg-zinc-700 shadow-sm shadow-black/30 dark:shadow-black/60'>
+                  <Icon name='google' />
+                </Link>
+              </Then>
+            </If>
+
             <UIToggle
               id='다크모드'
               onIcon='moon'

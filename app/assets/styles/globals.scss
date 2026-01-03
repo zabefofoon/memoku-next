@@ -352,3 +352,14 @@ button {
     }
   }
 }
+
+.aside-item {
+  .hover-item {
+    display: none;
+  }
+  &:hover {
+    .hover-item {
+      display: block;
+    }
+  }
+}
