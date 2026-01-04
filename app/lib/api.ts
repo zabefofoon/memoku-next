@@ -1,6 +1,9 @@
 import { RegistAlarmParams } from '../models/Alarm'
 
 export const api = {
+  postAuthGoogleLogout() {
+    return fetch('/api/auth/google/logout', { method: 'POST' })
+  },
   postSheetGoogleTodo(
     fileId: string,
     searchParams: {

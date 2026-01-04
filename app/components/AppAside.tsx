@@ -9,6 +9,7 @@ import packageJson from '../../package.json'
 import { AGE_1_YEAR, COOKIE_EXPAND, COOKIE_THEME } from '@/const'
 import { useState } from 'react'
 import { If, Then } from 'react-if'
+import { api } from '../lib/api'
 import { useAuthStore } from '../stores/auth.store'
 import { useSheetStore } from '../stores/sheet.store'
 import { Icon } from './Icon'
@@ -78,7 +79,7 @@ export function AppAside(props: Props) {
   }
 
   const logout = async (): Promise<void> => {
-    await fetch('/api/auth/google/logout', { method: 'POST' })
+    await api.postAuthGoogleLogout()
     setMemberInfo()
     setFileId('')
   }
@@ -153,7 +154,7 @@ export function AppAside(props: Props) {
         <If condition={memberInfo != null}>
           <Then>
             {() => (
-              <div className='border border-gray-100 dark:border-zinc-700 rounded-xl shadow-sm | flex items-center gap-[8px] | py-[12px] px-[12px] mx-[4px]'>
+              <div className='flex items-center gap-[8px] | px-[12px]'>
                 <img
                   className='rounded-full | w-[32px] aspect-square'
                   src={memberInfo?.picture ?? ''}

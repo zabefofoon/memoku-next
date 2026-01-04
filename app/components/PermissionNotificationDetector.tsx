@@ -16,6 +16,7 @@ export function PermissionNotificationDetector() {
 
   const setNotificationPermission = useThemeStore((s) => s.setNotificationPermission)
   const setIsSubscribedPush = useThemeStore((state) => state.setIsSubscribedPush)
+  const deviceId = cookies[COOKIE_DEVICE_ID] || etcUtil.generateUniqueId()
 
   useEffect(() => {
     navigator.serviceWorker?.register('/sw.js', {
@@ -26,8 +27,6 @@ export function PermissionNotificationDetector() {
     if (Notification.permission === 'default') {
       Notification.requestPermission().then(async (state) => {
         if (state === 'granted') {
-          const deviceId = cookies[COOKIE_DEVICE_ID] || etcUtil.generateUniqueId()
-
           const registrations = await navigator.serviceWorker.getRegistrations()
           for (const registration of registrations) {
             const pushSubscription = await registration.pushManager.subscribe({
@@ -71,7 +70,7 @@ export function PermissionNotificationDetector() {
       status?.removeEventListener('change', permissionChangeHandler)
       document.removeEventListener('visibilitychange', handleVisibilitychange)
     }
-  }, [cookies, setCookie, setIsSubscribedPush, setNotificationPermission])
+  }, [deviceId, setCookie, setIsSubscribedPush, setNotificationPermission])
 
   useEffect(() => {
     const value = cookies[COOKIE_PUSH_SUBSCRIBED] ?? false

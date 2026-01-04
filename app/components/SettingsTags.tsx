@@ -140,7 +140,7 @@ export default function SettingsTags() {
           ))}
           <Link
             href='?tag=new'
-            className='pl-[12px] pr-[6px] | border border-dashed rounded-full border-slate-400 dark:border-zinc-600 | flex items-center justify-center gap-[4px]'>
+            className='pl-[12px] pr-[6px] py-[6px] | border border-dashed rounded-full border-slate-400 dark:border-zinc-600 | flex items-center justify-center gap-[4px]'>
             <p className='text-[12px] text-gray-600 dark:text-gray-200'>새 태그</p>
             <Icon name='plus' />
           </Link>

@@ -1,4 +1,5 @@
 import SettingsNotification from '@/app/components/SettingsNotification'
+import SettingsSync from '@/app/components/SettingsSync'
 import SettingsTags from '@/app/components/SettingsTags'
 import SettingsTheme from '@/app/components/SettingsTheme'
 
@@ -13,6 +14,7 @@ export default async function Settings() {
         <SettingsTags />
         <SettingsTheme />
         <SettingsNotification />
+        <SettingsSync />
       </div>
     </div>
   )
