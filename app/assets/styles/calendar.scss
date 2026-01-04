@@ -74,6 +74,14 @@
     }
 
     .fc-daygrid-block-event {
+      .fc-event-title {
+        font-size: 10px;
+        letter-spacing: -0.03em;
+
+        @media (min-width: 640px) {
+          font-size: 12px;
+        }
+      }
       .fc-event-time,
       .fc-event-title {
         padding: 0;

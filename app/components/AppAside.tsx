@@ -11,9 +11,7 @@ import { useState } from 'react'
 import { If, Then } from 'react-if'
 import { useAuthStore } from '../stores/auth.store'
 import { useSheetStore } from '../stores/sheet.store'
-import { useThemeStore } from '../stores/theme.store'
 import { Icon } from './Icon'
-import UIToggle from './UIToggle'
 
 interface Props {
   isExpand: boolean
@@ -65,8 +63,6 @@ const menus = [
 
 export function AppAside(props: Props) {
   const setFileId = useSheetStore((state) => state.setFileId)
-  const isDarkMode = useThemeStore((state) => state.isDarkMode)
-  const setIsDarkMode = useThemeStore((state) => state.setIsDarkMode)
   const pathname = usePathname()
   const [_, setCookie, removeCookie] = useCookies([COOKIE_THEME, COOKIE_EXPAND])
 
@@ -74,17 +70,6 @@ export function AppAside(props: Props) {
 
   const memberInfo = useAuthStore((s) => s.memberInfo)
   const setMemberInfo = useAuthStore((s) => s.setMemberInfo)
-
-  const toggleDarkMode = (value: boolean): void => {
-    setIsDarkMode(value)
-    if (value) {
-      document.documentElement.classList.add('dark')
-      setCookie(COOKIE_THEME, 'dark', { maxAge: AGE_1_YEAR, path: '/', sameSite: 'lax' })
-    } else {
-      document.documentElement.classList.remove('dark')
-      removeCookie(COOKIE_THEME, { path: '/' })
-    }
-  }
 
   const toggleExpandAside = (): void => {
     setIsExpand(!isExpand)
@@ -174,17 +159,21 @@ export function AppAside(props: Props) {
                   src={memberInfo?.picture ?? ''}
                   alt={memberInfo?.email}
                 />
-                <div className='flex flex-col gap-[2px] | overflow-hidden | leading-[100%]'>
-                  <p className='text-[13px] truncate'>{memberInfo?.email}</p>
-                  <div className='flex'>
-                    <Icon name='logout' />
-                    <button
-                      className='text-[12px]'
-                      onClick={logout}>
-                      로그아웃
-                    </button>
-                  </div>
-                </div>
+                <If condition={isExpand}>
+                  <Then>
+                    <div className='flex flex-col gap-[2px] | overflow-hidden | leading-[100%]'>
+                      <p className='text-[13px] truncate'>{memberInfo?.email}</p>
+                      <div className='flex'>
+                        <Icon name='logout' />
+                        <button
+                          className='text-[12px]'
+                          onClick={logout}>
+                          로그아웃
+                        </button>
+                      </div>
+                    </div>
+                  </Then>
+                </If>
               </div>
             )}
           </Then>
@@ -205,14 +194,6 @@ export function AppAside(props: Props) {
                 </Link>
               </Then>
             </If>
-
-            <UIToggle
-              id='다크모드'
-              onIcon='moon'
-              offIcon='sun'
-              checked={isDarkMode}
-              toggle={toggleDarkMode}
-            />
           </div>
           <span className='text-[13px]'>v{packageJson.version}</span>
         </div>

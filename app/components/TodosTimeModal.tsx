@@ -117,10 +117,6 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
     if (isShow) initStates()
   }, [initStates, isShow])
 
-  useEffect(() => {
-    console.log(start)
-  }, [start])
-
   return (
     <>
       <DatePickerModal
