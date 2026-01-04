@@ -2,6 +2,7 @@
 @use './calendar';
 @use './datepicker';
 @use './carousel';
+@plugin "@tailwindcss/typography";
 
 /* stylelint-disable-next-line scss/at-rule-no-unknown */
 @custom-variant dark (&:where(.dark *));

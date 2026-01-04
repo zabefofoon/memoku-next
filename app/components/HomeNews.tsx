@@ -13,7 +13,7 @@ export default function HomeNews() {
           <div className='w-full | absolute bottom-0 text-white bg-black/30 | p-[12px]'>
             <p className='text-[14px]'>홈 화면에 MEMOKU를 추가하세요.</p>
             <p className='text-[12px] opacity-80 | mt-[4px]'>
-              브라우저 상단에서 홈화면에 설치하기를 누르면, iOS/Android 모두 앱처럼 사용할 수
+              브라우저 상단에서 홈화면에 설치하기를 누르면, Pc와 Mobile 모두 앱처럼 사용할 수
               있습니다.
             </p>
             <p className='text-[12px] opacity-80 | mt-[4px] | flex items-center'>

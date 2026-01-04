@@ -73,6 +73,7 @@ export default function AppBottomAppBar() {
   }, [])
 
   if (pathname.match(/\/todos\//gi)) return null
+  if (pathname.match(/\/news\//gi)) return null
 
   return (
     <div
