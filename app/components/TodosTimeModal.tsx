@@ -236,7 +236,7 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
               <p className='text-white text-[15px] font-[700]'>설정하기</p>
             </button>
             <button
-              className='flex items-center justify-center | shrink-0 w-[50px] | border border-zinc-700 rounded-md'
+              className='flex items-center justify-center | shrink-0 w-[50px] | border border-gray-200 dark:border-zinc-700 rounded-md'
               onClick={() => {
                 if (todo)
                   updateTime(
