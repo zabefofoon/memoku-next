@@ -1,10 +1,13 @@
+import { Link } from '@/app/components/Link'
 import { Icon } from './Icon'
 
 export default function HomeNews() {
   return (
     <div className='order-2 sm:order-0 flex-1 min-w-[260px] shrink-0 | flex flex-col gap-[12px]'>
       <div className='emboss-sheet | w-full h-full'>
-        <div className='relative rounded-lg overflow-hidden | w-full h-full'>
+        <Link
+          href={`/news/${decodeURI('홈+화면에+추가하기')}`}
+          className='relative rounded-lg overflow-hidden | w-full h-full'>
           <img
             className='w-full aspect-square object-cover'
             src='https://hopxvfhalrmkomnxznpf.supabase.co/storage/v1/object/public/memoku-bucket/public/RMZofdzDyN.jpg'
@@ -24,7 +27,7 @@ export default function HomeNews() {
               />
             </p>
           </div>
-        </div>
+        </Link>
       </div>
     </div>
   )
