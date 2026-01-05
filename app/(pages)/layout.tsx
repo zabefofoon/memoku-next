@@ -1,3 +1,4 @@
+import { GoogleAnalytics } from '@next/third-parties/google'
 import type { Metadata } from 'next'
 import { Noto_Sans_KR } from 'next/font/google'
 
@@ -73,6 +74,7 @@ export default async function RootLayout(props: LayoutProps<'/'>) {
               </div>
             </EnsureProviders>
           </EnsureAuth>
+          <GoogleAnalytics gaId='G-R5C8GX5QQN' />
         </body>
       </html>
     </ViewTransitions>
