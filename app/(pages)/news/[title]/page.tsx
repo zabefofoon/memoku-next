@@ -52,7 +52,7 @@ export default async function NewsDetail({ params }: PageProps) {
     <article className='w-full h-full | px-[16px] sm:px-0 mt-[16px] sm:mt-0 flex flex-col items-start gap-[16px]'>
       <BackButton title='News' />
 
-      <section className='max-w-full prose prose-sm dark:text-zinc-200'>
+      <section className='max-w-full prose prose-sm dark:prose-invert'>
         <MDXRemote source={entry.content} />
       </section>
     </article>
