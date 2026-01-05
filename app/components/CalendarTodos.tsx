@@ -1,5 +1,7 @@
+'use client'
+
 import dayjs from 'dayjs'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { If, Then } from 'react-if'
 import { todosDB } from '../lib/todos.db'
@@ -10,10 +12,10 @@ import UIBottomSheet from './UIBottomSheet'
 
 interface Props {
   isShow?: boolean
-  close: () => void
 }
 
-export function CalendarTodos({ isShow = false, close }: Props) {
+export function CalendarTodos({ isShow = false }: Props) {
+  const router = useRouter()
   const screenSize = useThemeStore((s) => s.screenSize)
   const searchParams = useSearchParams()
 
@@ -36,7 +38,7 @@ export function CalendarTodos({ isShow = false, close }: Props) {
       containerClass='sm:max-w-[50dvw]'
       header={() => <span>하위 일 목록</span>}
       open={isShow}
-      close={() => close()}
+      close={() => router.back()}
       content={() => (
         <div className='flex flex-col gap-[6px] sm:gap-[0] | pt-[12px]'>
           <If condition={todos != null}>

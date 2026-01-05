@@ -1,5 +1,6 @@
 'use client'
 
+import { DarkModeButton } from '@/app/components/DarkModeButton'
 import { Icon } from '@/app/components/Icon'
 import TodosCards from '@/app/components/TodosCards'
 import TodosCardsNextWeek from '@/app/components/TodosCardsNextWeek'
@@ -171,9 +172,14 @@ export default function Todos() {
           if (todoTagQuery) changeTag(todoTagQuery, tag, () => router.back())
         }}
       />
-      <div className='px-[16px] sm:px-0 mt-[16px] sm:mt-0'>
-        <h1 className='text-[20px] opacity-80'>Todos</h1>
-        <p className='text-[16px] opacity-50'>할 일을 정리해보세요.</p>
+      <div className='flex justify-between items-start | px-[16px] sm:px-0 mt-[16px] sm:mt-0'>
+        <div>
+          <h1 className='text-[20px] opacity-80'>Todos</h1>
+          <p className='text-[16px] opacity-50'>할 일을 정리해보세요.</p>
+        </div>
+        <div>
+          <DarkModeButton />
+        </div>
       </div>
       <div className='w-full h-full | flex flex-col | sm:overflow-hidden'>
         <div
