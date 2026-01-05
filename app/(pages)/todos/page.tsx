@@ -49,7 +49,7 @@ export default function Todos() {
   const total = useTodosPageStore((state) => state.total)
   const isTodosNextLoading = useTodosPageStore((state) => state.isTodosNextLoading)
   const page = useTodosPageStore((state) => state.page)
-
+  const saveTodosQuries = useThemeStore((state) => state.saveTodosQuries)
   const [isShow, setIsShow] = useState(true)
 
   const searchQuery = searchParams.get('searchText')
@@ -136,6 +136,10 @@ export default function Todos() {
       observer.disconnect()
     }
   }, [isTodosLoading, isTodosNextLoading, loadTodos, page, setPage])
+
+  useEffect(() => {
+    saveTodosQuries(`?sort=${sortQuery ?? ''}&status=${statusQuery ?? ''}&tags=${tagsQuery ?? ''}`)
+  }, [saveTodosQuries, sortQuery, statusQuery, tagsQuery])
 
   return (
     <div className='h-full | flex flex-col'>

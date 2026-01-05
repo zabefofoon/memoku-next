@@ -4,6 +4,7 @@ import etcUtil from '@/app/utils/etc.util'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useThemeStore } from '../stores/theme.store'
 import FloatingButtons from './FloatingButtons'
 import { Icon } from './Icon'
 
@@ -45,6 +46,7 @@ const menus = [
 
 export default function AppBottomAppBar() {
   const pathname = usePathname()
+  const savedTodosQueries = useThemeStore((state) => state.savedTodosQueries)
   const [isShow, setIsShow] = useState(true)
 
   useEffect(() => {
@@ -89,7 +91,7 @@ export default function AppBottomAppBar() {
         }}>
         {menus.map((menu) => (
           <Link
-            href={menu.href}
+            href={`${menu.href}${menu.href === '/todos' ? (savedTodosQueries ?? '') : ''}`}
             key={menu.href}
             className='w-full | p-[6px]'
             replace>

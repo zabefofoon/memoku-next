@@ -12,6 +12,7 @@ import { If, Then } from 'react-if'
 import { api } from '../lib/api'
 import { useAuthStore } from '../stores/auth.store'
 import { useSheetStore } from '../stores/sheet.store'
+import { useThemeStore } from '../stores/theme.store'
 import { Icon } from './Icon'
 
 interface Props {
@@ -64,6 +65,7 @@ const menus = [
 
 export function AppAside(props: Props) {
   const setFileId = useSheetStore((state) => state.setFileId)
+  const savedTodosQueries = useThemeStore((state) => state.savedTodosQueries)
   const pathname = usePathname()
   const [_, setCookie, removeCookie] = useCookies([COOKIE_THEME, COOKIE_EXPAND])
 
@@ -116,7 +118,7 @@ export function AppAside(props: Props) {
               },
             ])}>
             <Link
-              href={menu.href}
+              href={`${menu.href}${menu.href === '/todos' ? (savedTodosQueries ?? '') : ''}`}
               aria-current={pathname === menu.href ? 'page' : undefined}
               className={etcUtil.classNames([
                 'relative | flex items-center gap-[6px] | py-[12px] px-[16px] mx-[4px] | rounded-full hover:bg-slate-50 hover:dark:bg-zinc-700/50',

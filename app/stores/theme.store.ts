@@ -5,6 +5,9 @@ interface TagsStore {
   isDarkMode: boolean
   notificationPermission?: NotificationPermission
   isSubscribedPush: boolean
+  savedTodosQueries: string | undefined
+
+  saveTodosQuries: (savedTodosQueries?: string) => void
   setIsDarkMode: (value: boolean) => void
   setScreenSize: (screenSize: 'mobile' | 'desktop') => void
   setNotificationPermission: (notificationPermission: NotificationPermission) => void
@@ -17,6 +20,10 @@ export const useThemeStore = create<TagsStore>((set) => {
     isDarkMode: false,
     permission: undefined,
     isSubscribedPush: false,
+    savedTodosQueries: undefined,
+    saveTodosQuries: (savedTodosQueries?: string): void => {
+      set({ savedTodosQueries })
+    },
     setIsDarkMode: (isDarkMode: boolean): void => {
       set({ isDarkMode })
     },
