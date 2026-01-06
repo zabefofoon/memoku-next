@@ -97,10 +97,7 @@ export const getNewsBySlug = async (slug: string, locale?: string) => {
     const meta = normalizeMeta(data, filename, resolvedLocale)
 
     if (meta.slug === slug) {
-      return {
-        ...meta,
-        content,
-      } satisfies NewsEntry
+      return { ...meta, content } satisfies NewsEntry
     }
   }
 

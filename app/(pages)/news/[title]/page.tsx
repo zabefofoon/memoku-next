@@ -47,14 +47,18 @@ export default async function NewsDetail({ params }: PageProps) {
 
   const entry = await getNewsBySlug(decodeURIComponent(title), 'ko')
   if (!entry) notFound()
-
   return (
-    <article className='w-full h-full | px-[16px] sm:px-0 mt-[16px] sm:mt-0 pb-[40px] flex flex-col items-start gap-[16px]'>
-      <BackButton title={entry.title} />
-
-      <section className='w-full max-w-full prose prose-sm dark:prose-invert'>
-        <MDXRemote source={entry.content} />
-      </section>
+    <article className='w-full h-[calc(100dvh-4px)] overflow-hidden | flex flex-col'>
+      <div className='p-[16px] sm:p-0'>
+        <BackButton title={entry.title} />
+      </div>
+      <div className='px-[16px] pb-[32px] sm:p-0 sm:mt-[24px] | h-full flex-1 overflow-hidden'>
+        <div className='emboss-sheet | p-[16px] pr-[8px] | w-full h-full'>
+          <section className='pr-[8px] pb-[40px] | h-full max-w-full overflow-y-scroll | prose prose-sm dark:prose-invert'>
+            <MDXRemote source={entry.content} />
+          </section>
+        </div>
+      </div>
     </article>
   )
 }

@@ -14,7 +14,7 @@ export function BackButton({ title }: Props) {
       onClick={() => history.back()}>
       <Icon
         name='chevron-left'
-        className='text-[20px] sm:text-[24px]'
+        className='text-[24px]'
       />
       <p className='text-[18px] sm:text-[20px] truncate'>{title}</p>
     </button>

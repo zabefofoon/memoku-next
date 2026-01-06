@@ -16,7 +16,7 @@ export default async function News() {
           <DarkModeButton />
         </div>
       </div>
-      <div className='mt-[16px] px-[16px] sm:px-0 | grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-x-[8px] gap-y-[12px]'>
+      <div className='mt-[16px] px-[16px] sm:px-0 | grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-x-[6px] gap-y-[12px]'>
         {newsList.map((item) => {
           const href = `/news/${encodeURI(item.slug)}`
           const cover = item.cover
@@ -24,7 +24,7 @@ export default async function News() {
           return (
             <figure
               key={item.slug}
-              className='emboss-sheet | p-[12px] | w-full | flex flex-col'>
+              className='emboss-sheet | p-[10px] | w-full | flex flex-col'>
               <Link
                 href={href}
                 className='flex flex-col'>
@@ -33,7 +33,7 @@ export default async function News() {
                   src={cover}
                   alt={item.title}
                 />
-                <div className='my-[12px]'>
+                <div className='mt-[12px]'>
                   <p className='truncate text-[13px] sm:text-[14px] tracking-tight'>{item.title}</p>
                   {item.summary ? (
                     <p className='line-2 mt-[6px] | text-[11px] sm:text-[12px] tracking-tight opacity-60'>
