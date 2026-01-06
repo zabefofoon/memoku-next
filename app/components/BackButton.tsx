@@ -10,7 +10,7 @@ export function BackButton({ title }: Props) {
   return (
     <button
       type='button'
-      className='opacity-80 | flex items-center | max-w-[300px] | -translate-x-[8px]'
+      className='opacity-80 | flex items-center | max-w-[600px] | -translate-x-[8px]'
       onClick={() => history.back()}>
       <Icon
         name='chevron-left'

@@ -10,7 +10,7 @@ export default async function Settings() {
         <h1 className='text-[20px] opacity-80'>설정</h1>
         <p className='text-[16px] opacity-50'>앱 설정을 해보세요.</p>
       </div>
-      <div className='flex flex-col gap-[12px]'>
+      <div className='flex flex-col gap-[4px]'>
         <SettingsTags />
         <SettingsTheme />
         <SettingsNotification />

@@ -49,10 +49,10 @@ export default async function NewsDetail({ params }: PageProps) {
   if (!entry) notFound()
 
   return (
-    <article className='w-full h-full | px-[16px] sm:px-0 mt-[16px] sm:mt-0 flex flex-col items-start gap-[16px]'>
-      <BackButton title='News' />
+    <article className='w-full h-full | px-[16px] sm:px-0 mt-[16px] sm:mt-0 pb-[40px] flex flex-col items-start gap-[16px]'>
+      <BackButton title={entry.title} />
 
-      <section className='max-w-full prose prose-sm dark:prose-invert'>
+      <section className='w-full max-w-full prose prose-sm dark:prose-invert'>
         <MDXRemote source={entry.content} />
       </section>
     </article>
