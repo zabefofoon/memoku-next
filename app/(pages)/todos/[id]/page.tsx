@@ -12,7 +12,7 @@ import { useTodosDetailStore } from '@/app/stores/todosDetail.store'
 import etcUtil from '@/app/utils/etc.util'
 import Link from 'next/link'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useLayoutEffect } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { Else, If, Then } from 'react-if'
 
 export default function TodosDetail() {
@@ -37,6 +37,9 @@ export default function TodosDetail() {
   const setParentTodo = useTodosDetailStore((s) => s.setParentTodo)
   const setImages = useTodosDetailStore((s) => s.setImages)
 
+  const randomizeIndex = useRef<number>(0)
+  const guideTexts = ['텍스트는 자동으로 저장 됩니다.', '*첫 줄에서 줄바꿈을 하면, 제목이 됩니다.']
+
   useLayoutEffect(() => {
     setIsLoading(true)
   }, [setIsLoading])
@@ -50,6 +53,8 @@ export default function TodosDetail() {
   }, [setChildTodo, setParentTodo, setImages])
 
   useEffect(() => {
+    randomizeIndex.current = Math.floor(Math.random() * 2)
+
     loadTodo(params.id as string).then((todo) => {
       if (todo) loadImages(todo)
     })
@@ -106,7 +111,7 @@ export default function TodosDetail() {
             </p>
           </button>
           <p className='text-[13px] sm:text-[15px] opacity-50 | hidden sm:block'>
-            모든 글은 자동으로 저장 됩니다.
+            {guideTexts[randomizeIndex.current]}
           </p>
         </div>
         <If condition={todo.parentId != null}>

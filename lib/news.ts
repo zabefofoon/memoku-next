@@ -1,11 +1,11 @@
+import matter from 'gray-matter'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import matter from 'gray-matter'
 
 export type NewsMeta = {
   title: string
   slug: string
-  date?: string
+  date?: number
   summary?: string
   cover?: string
   locale?: string
@@ -41,7 +41,7 @@ const normalizeMeta = (
   return {
     title,
     slug,
-    date: typeof data.date === 'string' ? data.date : undefined,
+    date: new Date(data.date as Date).getTime(),
     summary: typeof data.summary === 'string' ? data.summary : undefined,
     cover: typeof data.cover === 'string' ? data.cover : undefined,
     locale,

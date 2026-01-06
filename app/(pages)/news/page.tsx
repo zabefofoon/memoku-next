@@ -16,7 +16,7 @@ export default async function News() {
           <DarkModeButton />
         </div>
       </div>
-      <div className='mt-[16px] px-[16px] sm:px-0 | grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-x-[8px] gap-y-[12px]'>
+      <div className='mt-[16px] px-[16px] sm:px-0 | grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-x-[8px] gap-y-[12px]'>
         {newsList.map((item) => {
           const href = `/news/${encodeURI(item.slug)}`
           const cover = item.cover

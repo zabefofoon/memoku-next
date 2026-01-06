@@ -131,6 +131,7 @@ export function TodoCard({
         {/* 상태 */}
         <div
           className={etcUtil.classNames([
+            'm-[2px]',
             display !== 'grid' ? 'w-[120px] shrink-0 | flex' : 'shrink-0',
           ])}>
           <button
