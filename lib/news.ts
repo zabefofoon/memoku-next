@@ -9,6 +9,7 @@ export type NewsMeta = {
   summary?: string
   cover?: string
   locale?: string
+  top?: string
 }
 
 export type NewsEntry = NewsMeta & {
@@ -45,6 +46,7 @@ const normalizeMeta = (
     summary: typeof data.summary === 'string' ? data.summary : undefined,
     cover: typeof data.cover === 'string' ? data.cover : undefined,
     locale,
+    top: typeof data.top === 'string' ? data.top : undefined,
   }
 }
 
