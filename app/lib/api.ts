@@ -88,7 +88,7 @@ export const api = {
       body: JSON.stringify({
         subscription,
         device_id,
-        timezone: 'America/New_York',
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       }),
     })
   },
