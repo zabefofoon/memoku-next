@@ -18,19 +18,16 @@ export default async function News() {
       </div>
       <div className='mt-[16px] px-[16px] sm:px-0 | grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-x-[6px] gap-y-[12px]'>
         {newsList.map((item) => {
-          const href = `/news/${encodeURI(item.slug)}`
-          const cover = item.cover
-
           return (
             <figure
               key={item.slug}
               className='emboss-sheet | p-[10px] | w-full | flex flex-col'>
               <Link
-                href={href}
+                href={`/news/${encodeURI(item.slug)}`}
                 className='flex flex-col'>
                 <img
                   className='rounded-xl | aspect-square'
-                  src={cover}
+                  src={item.cover}
                   alt={item.title}
                 />
                 <div className='mt-[12px]'>

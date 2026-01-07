@@ -1,6 +1,7 @@
 'use client'
 
 import type { EmblaCarouselType } from 'embla-carousel'
+import Autoplay, { AutoplayType } from 'embla-carousel-autoplay'
 import useEmblaCarousel from 'embla-carousel-react'
 import {
   createContext,
@@ -24,6 +25,7 @@ interface Props {
   vertical?: boolean
   scrollSnap?: boolean
   className?: string
+  autoplay?: boolean
   change?: (index: number) => void
 }
 
@@ -52,15 +54,33 @@ export default forwardRef<UICarouselHandle, PropsWithChildren<Props>>(function U
     className,
     change,
     children,
+    autoplay,
   }: PropsWithChildren<Props>,
   ref: React.Ref<UICarouselHandle>
 ) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: loop ?? false,
-    dragFree: dragFree ?? false,
-    startIndex: startIndex ?? 0,
-    axis: vertical ? 'y' : 'x',
-  })
+  const getPlugins = (): AutoplayType[] => {
+    const result: AutoplayType[] = []
+
+    if (autoplay)
+      result.push(
+        Autoplay({
+          stopOnInteraction: false,
+          delay: 4000,
+        })
+      )
+
+    return result
+  }
+
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    {
+      loop: loop ?? false,
+      dragFree: dragFree ?? false,
+      startIndex: startIndex ?? 0,
+      axis: vertical ? 'y' : 'x',
+    },
+    getPlugins()
+  )
 
   const dotsNode = useRef<HTMLDivElement>(null)
 

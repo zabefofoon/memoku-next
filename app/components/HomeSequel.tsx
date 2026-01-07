@@ -1,3 +1,5 @@
+'use client'
+
 import { CreatedSeriesPoint, todosDB } from '@/app/lib/todos.db'
 import dayjs from 'dayjs'
 import { ReactElement, useCallback, useEffect, useState } from 'react'
