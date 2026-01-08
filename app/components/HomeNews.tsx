@@ -15,7 +15,7 @@ export default async function HomeNews() {
           {newsList.map((item) => (
             <UICarouselSlide key={item.title}>
               <Link
-                href={`/news/${encodeURI(item.slug)}`}
+                href={`/app/guides/${encodeURI(item.slug)}`}
                 className='relative rounded-lg overflow-hidden | w-full h-full'>
                 <img
                   className='w-full aspect-square object-cover'

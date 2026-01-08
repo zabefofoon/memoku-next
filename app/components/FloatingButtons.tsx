@@ -12,7 +12,7 @@ export default function FloatingButtons() {
 
   const createTodo = async (): Promise<void> => {
     const res = await todosDB.postDescription('')
-    router.push(`/todos/${res.id}`)
+    router.push(`/app/todos/${res.id}`)
   }
 
   return (

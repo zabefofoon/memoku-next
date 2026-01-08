@@ -15,7 +15,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { Else, If, Then } from 'react-if'
 
-export default function TodosDetail() {
+export default function TodosDetailClient() {
   const router = useRouter()
   const params = useParams()
   const searchParams = useSearchParams()
@@ -118,7 +118,7 @@ export default function TodosDetail() {
           <Then>
             <div className='emboss-sheet | mb-[12px]'>
               <Link
-                href={`/todos/${todo.parentId}`}
+                href={`/app/todos/${todo.parentId}`}
                 replace
                 className='px-[8px] py-[12px] | text-[13px] | flex gap-[12px]'>
                 <p className='shrink-0 | flex items-center | opacity-70'>
@@ -145,7 +145,7 @@ export default function TodosDetail() {
           <Then>
             <div className='emboss-sheet | mt-[12px]'>
               <Link
-                href={`/todos/${childTodo?.id}`}
+                href={`/app/todos/${childTodo?.id}`}
                 replace
                 className='px-[8px] py-[12px] | text-[13px] | flex gap-[12px]'>
                 <p className='shrink-0 | flex items-center | opacity-70'>
@@ -163,7 +163,7 @@ export default function TodosDetail() {
             <button
               className='flex items-center justify-center | shadow-lg bg-indigo-500 | text-white | pl-[12px] pr-[20px] py-[12px] mt-[12px] mx-auto | w-full sm:w-fit | rounded-2xl'
               type='button'
-              onClick={() => addChildren((id) => router.replace(`/todos/${id}`))}>
+              onClick={() => addChildren((id) => router.replace(`/app/todos/${id}`))}>
               <Icon
                 name='chevron-down'
                 className='text-[20px]'

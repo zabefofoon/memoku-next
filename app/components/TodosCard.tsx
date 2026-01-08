@@ -56,7 +56,7 @@ export function TodoCard({
         { 'flex flex-col p-[16px]': display === 'grid' },
       ])}
       data-prevent={todo.childId && !hideChildren}
-      href={`/todos/${todo.id}`}
+      href={`/app/todos/${todo.id}`}
       saveScrollTargets={['bottomsheet-scroll-el']}
       onClick={(event) => {
         if (todo.childId && !hideChildren) {
@@ -228,7 +228,9 @@ export function TodoCard({
                 <Else>
                   <button
                     className='flex items-center | text-gray-400 dark:text-zinc-400'
-                    onClick={() => addChildren(todo).then(({ id }) => router.push(`/todos/${id}`))}>
+                    onClick={() =>
+                      addChildren(todo).then(({ id }) => router.push(`/app/todos/${id}`))
+                    }>
                     <Icon
                       name='plus'
                       className='text-[16px]'
@@ -337,7 +339,7 @@ export function TodoCard({
                       event.stopPropagation()
                       event.preventDefault()
 
-                      toggle(false, () => router.push(`/todos/${todo.id}`, { scroll: false }))
+                      toggle(false, () => router.push(`/app/todos/${todo.id}`, { scroll: false }))
                     }}>
                     <Icon
                       name='edit'

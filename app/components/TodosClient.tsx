@@ -25,7 +25,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useCookies } from 'react-cookie'
 import { Else, If, Then } from 'react-if'
 
-export default function Todos() {
+export function TodosClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [cookieDisplay, setCookie] = useCookies([COOKIE_DISPLAY])
@@ -115,7 +115,7 @@ export default function Todos() {
 
   useEffect(() => {
     const { prevPathname, setPrevPathname } = useScrollStore.getState()
-    const shouldRestore = /^\/todos\/[^/]+$/.test(prevPathname)
+    const shouldRestore = /^\/app\/todos\/[^/]+$/.test(prevPathname)
 
     if (!shouldRestore) setPage(0, loadTodos)
     else {
@@ -237,7 +237,7 @@ export default function Todos() {
             <button
               type='button'
               className='ml-auto | hidden sm:flex items-center | bg-indigo-500 dark:bg-indigo-600 rounded-lg | px-[8px] py-[6px] | text-white'
-              onClick={() => createTodo().then((todo) => router.push(`/todos/${todo.id}`))}>
+              onClick={() => createTodo().then((todo) => router.push(`/app/todos/${todo.id}`))}>
               <Icon
                 name='plus'
                 className='text-[20px]'

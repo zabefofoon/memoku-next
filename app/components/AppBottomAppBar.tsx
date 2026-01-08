@@ -9,9 +9,16 @@ import FloatingButtons from './FloatingButtons'
 import { Icon } from './Icon'
 
 const menus = [
-  { href: '/', name: '홈', divided: false, icon: 'home', activeIcon: 'home-active', induce: false },
   {
-    href: '/todos',
+    href: '/app',
+    name: '홈',
+    divided: false,
+    icon: 'home',
+    activeIcon: 'home-active',
+    induce: false,
+  },
+  {
+    href: '/app/todos',
     name: '할일',
     divided: false,
     icon: 'todos',
@@ -19,7 +26,7 @@ const menus = [
     induce: false,
   },
   {
-    href: '/calendar',
+    href: '/app/calendar',
     name: '달력',
     divided: false,
     icon: 'calendar',
@@ -27,15 +34,15 @@ const menus = [
     induce: false,
   },
   {
-    href: '/news',
-    name: '소식',
+    href: '/app/guides',
+    name: '가이드',
     divided: true,
     icon: 'news',
     activeIcon: 'news-active',
     induce: true,
   },
   {
-    href: '/settings',
+    href: '/app/settings',
     name: '설정',
     divided: false,
     icon: 'setting',
@@ -74,8 +81,8 @@ export default function AppBottomAppBar() {
     }
   }, [])
 
-  if (pathname.match(/\/todos\//gi)) return null
-  if (pathname.match(/\/news\//gi)) return null
+  if (pathname.match(/\/app\/todos\//gi)) return null
+  if (pathname.match(/\/app\/guides\//gi)) return null
 
   return (
     <div

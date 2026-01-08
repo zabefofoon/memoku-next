@@ -104,7 +104,7 @@ export function PermissionNotificationDetector() {
   useEffect(() => {
     const moveToQuery = params.get('move-to')
     if (moveToQuery) {
-      router.replace('/', { scroll: false })
+      router.replace('/app', { scroll: false })
       etcUtil.sleep(300).then(() => router.push(moveToQuery, { scroll: false }))
     }
 

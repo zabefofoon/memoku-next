@@ -1,6 +1,11 @@
 import { DarkModeButton } from '@/app/components/DarkModeButton'
 import { Link } from '@/app/components/Link'
 import { getNewsList } from '@/lib/news'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: '달력',
+}
 
 export default async function News() {
   const newsList = await getNewsList({ locale: 'ko' })
@@ -9,7 +14,7 @@ export default async function News() {
     <div className='h-full | flex flex-col'>
       <div className='flex justify-between items-start | px-[16px] sm:px-0 mt-[16px] sm:mt-0'>
         <div>
-          <h1 className='text-[20px] opacity-80'>News</h1>
+          <h1 className='text-[20px] opacity-80'>Guides</h1>
           <p className='text-[16px] opacity-50'>Check the latest updates from Memoku.</p>
         </div>
         <div>
@@ -23,7 +28,7 @@ export default async function News() {
               key={item.slug}
               className='emboss-sheet | p-[10px] | w-full | flex flex-col'>
               <Link
-                href={`/news/${encodeURI(item.slug)}`}
+                href={`/app/guides/${encodeURI(item.slug)}`}
                 className='flex flex-col'>
                 <img
                   className='rounded-xl | aspect-square'

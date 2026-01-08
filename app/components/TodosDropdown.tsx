@@ -47,7 +47,7 @@ export function TodosDropdown(props: Props) {
           )}
           {!props.hideEdit && (
             <Link
-              href={`/todos/${props.todo.id}`}
+              href={`/app/todos/${props.todo.id}`}
               className='px-[6px] py-[4px] | flex items-center justify-start gap-[6px] | hover:bg-slate-50 hover:dark:bg-zinc-600'>
               <Icon
                 name='edit'

@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Memoku',
     short_name: 'Memoku',
     description: 'Personal task manager',
-    start_url: '/', // basePath 쓰면 그에 맞춰 변경
+    start_url: '/app', // basePath 쓰면 그에 맞춰 변경
     display: 'standalone',
     background_color: '#f3f4f6',
     theme_color: 'white',

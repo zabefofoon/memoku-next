@@ -49,7 +49,7 @@ export default function HomeTags() {
         {data.map((item) => (
           <Link
             key={item.id}
-            href={`/todos?tags=${item.id}`}
+            href={`/app/todos?tags=${item.id}`}
             className='flex items-center gap-[6px] | border-t border-slate-100 dark:border-zinc-600 last:border-b | py-[4px]'>
             <div className='w-full | flex items-center justify-between'>
               <div className='expand-hitbox | flex items-center gap-[4px]'>

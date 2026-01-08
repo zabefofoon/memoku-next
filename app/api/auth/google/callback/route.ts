@@ -59,10 +59,10 @@ export async function GET(req: Request) {
       } catch {}
     }
 
-    return NextResponse.redirect(`${process.env.APP_ORIGIN}/`, { status: 303 })
+    return NextResponse.redirect(`${process.env.APP_ORIGIN}/app`, { status: 303 })
   } catch {
     return NextResponse.redirect(
-      `${process.env.APP_ORIGIN}/?err=${encodeURIComponent('oauth_error')}`,
+      `${process.env.APP_ORIGIN}/app/?err=${encodeURIComponent('oauth_error')}`,
       { status: 303 }
     )
   }

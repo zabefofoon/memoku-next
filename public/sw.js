@@ -66,7 +66,7 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close()
 
   const id = event.notification.data?.todo_id
-  const path = id ? `/?move-to=${`/todos/${id}`}` : '/'
+  const path = id ? `/?move-to=${`/app/todos/${id}`}` : '/'
 
   event.waitUntil(
     (async () => {
@@ -78,7 +78,7 @@ self.addEventListener('notificationclick', (event) => {
       })
 
       for (const client of windowClients) {
-        const path = id ? `/todos/${id}` : '/'
+        const path = id ? `/app/todos/${id}` : '/'
         client.postMessage({ type: 'NAVIGATE', path })
         if ('focus' in client) return client.focus()
       }

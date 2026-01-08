@@ -51,7 +51,7 @@ export default function HomeCalendar() {
     })
   }
   const handleEventClick = (arg: EventClickArg) => {
-    router.push(`/todos/${arg.event.id}`)
+    router.push(`/app/todos/${arg.event.id}`)
   }
 
   const handleDatesSet = async (arg: DatesSetArg) => {

@@ -2,6 +2,11 @@ import SettingsNotification from '@/app/components/SettingsNotification'
 import SettingsSync from '@/app/components/SettingsSync'
 import SettingsTags from '@/app/components/SettingsTags'
 import SettingsTheme from '@/app/components/SettingsTheme'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: '설정',
+}
 
 export default async function Settings() {
   return (

@@ -51,13 +51,13 @@ export default function HomeTody() {
                 <button
                   type='button'
                   className='text-gray-600 dark:text-zinc-400 text-[14px] | flex items-center | underline | w-fit | mt-[2px]'
-                  onClick={() => createTodo().then((todo) => router.push(`/todos/${todo.id}`))}>
+                  onClick={() => createTodo().then((todo) => router.push(`/app/todos/${todo.id}`))}>
                   추가하기
                   <Icon name='chevron-right' />
                 </button>
               </Then>
               <Else>
-                <Link href={`/todos/${todo?.id}`}>
+                <Link href={`/app/todos/${todo?.id}`}>
                   <div className='flex items-center gap-[16px] | text-gray-600 dark:text-zinc-500'>
                     <p className=''>{todo?.description?.slice(0, 40)?.split(/\n/)[0]}</p>
                   </div>

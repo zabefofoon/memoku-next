@@ -59,7 +59,7 @@ export default function PageCalendar() {
         scroll: false,
       })
     } else {
-      router.push(`/todos/${arg.event.id}`)
+      router.push(`/app/todos/${arg.event.id}`)
     }
   }
 

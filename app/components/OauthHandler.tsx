@@ -14,7 +14,7 @@ export default function OauthHandler(props: Props) {
 
   useEffect(() => {
     setMemberInfo(props.memberInfo)
-    router.replace('/')
+    router.replace('/app')
   }, [router, props.memberInfo, setMemberInfo])
 
   return null

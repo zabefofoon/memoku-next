@@ -20,9 +20,16 @@ interface Props {
 }
 
 const menus = [
-  { href: '/', name: '홈', divided: false, icon: 'home', activeIcon: 'home-active', induce: false },
   {
-    href: '/todos',
+    href: '/app',
+    name: '홈',
+    divided: false,
+    icon: 'home',
+    activeIcon: 'home-active',
+    induce: false,
+  },
+  {
+    href: '/app/todos',
     name: '할일',
     divided: false,
     icon: 'todos',
@@ -30,7 +37,7 @@ const menus = [
     induce: false,
   },
   {
-    href: '/calendar',
+    href: '/app/calendar',
     name: '달력',
     divided: false,
     icon: 'calendar',
@@ -38,7 +45,7 @@ const menus = [
     induce: false,
   },
   {
-    href: '/settings',
+    href: '/app/settings',
     name: '설정',
     divided: false,
     icon: 'setting',
@@ -46,15 +53,15 @@ const menus = [
     induce: false,
   },
   {
-    href: '/news',
-    name: '소식',
+    href: '/app/guides',
+    name: '가이드',
     divided: true,
     icon: 'news',
     activeIcon: 'news-active',
     induce: true,
   },
   {
-    href: '/intro',
+    href: '/',
     name: '소개',
     divided: false,
     icon: 'help',
@@ -118,7 +125,7 @@ export function AppAside(props: Props) {
               },
             ])}>
             <Link
-              href={`${menu.href}${menu.href === '/todos' ? (savedTodosQueries ?? '') : ''}`}
+              href={`${menu.href}${menu.href === '/app/todos' ? (savedTodosQueries ?? '') : ''}`}
               aria-current={pathname === menu.href ? 'page' : undefined}
               className={etcUtil.classNames([
                 'relative | flex items-center gap-[6px] | py-[12px] px-[16px] mx-[4px] | rounded-full hover:bg-slate-50 hover:dark:bg-zinc-700/50',
