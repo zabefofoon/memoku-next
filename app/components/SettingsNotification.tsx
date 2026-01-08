@@ -30,24 +30,24 @@ export default function SettingsTags() {
           applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
         })
 
-        setCookie(COOKIE_PUSH_SUBSCRIBED, true, { maxAge: AGE_1_YEAR })
+        setCookie(COOKIE_PUSH_SUBSCRIBED, true, { maxAge: AGE_1_YEAR, path: '/' })
         setIsSubscribedPush(true)
 
         try {
           await api.postAlarmSubscribe(pushSubscription, deviceId)
-          setCookie(COOKIE_DEVICE_ID, deviceId, { maxAge: AGE_1_YEAR })
+          setCookie(COOKIE_DEVICE_ID, deviceId, { maxAge: AGE_1_YEAR, path: '/' })
         } catch {
-          setCookie(COOKIE_PUSH_SUBSCRIBED, false, { maxAge: AGE_1_YEAR })
+          setCookie(COOKIE_PUSH_SUBSCRIBED, false, { maxAge: AGE_1_YEAR, path: '/' })
           setIsSubscribedPush(false)
         }
       }
     } else {
-      setCookie(COOKIE_PUSH_SUBSCRIBED, false, { maxAge: AGE_1_YEAR })
+      setCookie(COOKIE_PUSH_SUBSCRIBED, false, { maxAge: AGE_1_YEAR, path: '/' })
       setIsSubscribedPush(false)
       try {
         await api.deleteAlarmSubscribe(cookies[COOKIE_DEVICE_ID])
       } catch {
-        setCookie(COOKIE_PUSH_SUBSCRIBED, true, { maxAge: AGE_1_YEAR })
+        setCookie(COOKIE_PUSH_SUBSCRIBED, true, { maxAge: AGE_1_YEAR, path: '/' })
         setIsSubscribedPush(true)
       }
     }

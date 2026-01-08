@@ -201,9 +201,7 @@ export function TodosClient() {
                 setCookie(
                   COOKIE_DISPLAY,
                   cookieDisplay[COOKIE_DISPLAY] === 'grid' ? 'row' : 'grid',
-                  {
-                    maxAge: AGE_1_YEAR,
-                  }
+                  { maxAge: AGE_1_YEAR, path: '/' }
                 )
               }>
               <If condition={cookieDisplay[COOKIE_DISPLAY] === 'grid'}>

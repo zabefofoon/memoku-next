@@ -1,3 +1,5 @@
+import { cookies } from 'next/headers'
+
 export async function POST(req: Request) {
   const { subscription, device_id, timezone } = await req.json()
 
@@ -5,6 +7,18 @@ export async function POST(req: Request) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({ subscription, device_id, timezone }),
+  })
+}
+
+export async function PUT(req: Request) {
+  const cookieStore = await cookies()
+  const { subscription } = await req.json()
+  const device_id = cookieStore.get('x-device-id')?.value
+
+  return fetch(`${process.env.ALARM_API_SERVER}/memoku-alarm/subscribe`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ subscription, device_id }),
   })
 }
 

@@ -87,3 +87,25 @@ self.addEventListener('notificationclick', (event) => {
     })()
   )
 })
+
+self.addEventListener('pushsubscriptionchange', async (event) => {
+  event.waitUntil(
+    (async () => {
+      const applicationServerKey =
+        'BBruLKWbU02bYDafBPVn_W5sOO1PKaqxZLKET4kj0cV18VKFcXTnIXUoyuPHFElKX_7XOZ_x02T-CotVNO_4n8E'
+
+      const subscription = await self.registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey,
+      })
+
+      // 서버에 새 subscription 전송
+      await fetch('/api/alarm/subscribe', {
+        method: 'put',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription }),
+      })
+    })()
+  )
+})
