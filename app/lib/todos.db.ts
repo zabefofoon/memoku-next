@@ -337,7 +337,7 @@ export const todosDB = {
   getTodosDateRange: async (start: Date, end: Date): Promise<Todo[]> => {
     const startTs = start.getTime()
     const endTs = end.getTime()
-
+    const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
     return db.transaction('r', db.todos, async () => {
       const [byCreated, byOverlap, byDays] = await Promise.all([
         db.todos.where('created').between(startTs, endTs, true, true).toArray(),
@@ -346,7 +346,15 @@ export const todosDB = {
           .belowOrEqual(endTs)
           .and((t) => typeof t.end === 'number' && t.end >= startTs)
           .toArray(),
-        db.todos.filter((t) => Array.isArray(t.days) && t.days.length > 0).toArray(),
+        db.todos
+          .filter((t) => {
+            return (
+              Array.isArray(t.days) &&
+              t.days.length > 0 &&
+              t.days.includes(days[start.getDay()] as WeekDay)
+            )
+          })
+          .toArray(),
       ])
 
       const map = new Map<string, Todo>()
