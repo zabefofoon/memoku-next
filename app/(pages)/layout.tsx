@@ -28,7 +28,6 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: LayoutProps<'/app'>) {
   const cookieStore = await cookies()
   const isDarkMode = cookieStore.get(COOKIE_THEME)?.value === 'dark'
-  const accessToken = cookieStore.get('x-google-access-token')?.value ?? ''
   const refreshToken = cookieStore.get('x-google-refresh-token')?.value ?? ''
 
   return (
@@ -55,9 +54,7 @@ export default async function RootLayout({ children }: LayoutProps<'/app'>) {
         </head>
         <body
           className={`${notoSansKr.className} antialiased | h-full | text-slate-800 dark:text-white/95 | bg-white dark:bg-zinc-900`}>
-          <EnsureAuth
-            accessToken={accessToken}
-            refreshToken={refreshToken}>
+          <EnsureAuth refreshToken={refreshToken}>
             <EnsureProviders isDarkMode={isDarkMode}>
               <PermissionNotificationDetector />
               {children}

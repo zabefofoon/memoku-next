@@ -1,6 +1,7 @@
 'use client'
 
-import { PropsWithChildren, useCallback, useEffect, useState } from 'react'
+import { PropsWithChildren, useEffect, useState } from 'react'
+import { api } from '../lib/api'
 import { todosDB } from '../lib/todos.db'
 import { Tag, Todo } from '../models/Todo'
 import { useAuthStore } from '../stores/auth.store'
@@ -9,144 +10,51 @@ import { useTagsStore } from '../stores/tags.store'
 import UISpinner from './UISpinner'
 
 interface Props {
-  accessToken: string
   refreshToken: string
 }
 
-export default function EnsureAuth(props: PropsWithChildren<Props>) {
-  const setMemberInfo = useAuthStore((state) => state.setMemberInfo)
-  const setImageFolderId = useSheetStore((state) => state.setImageFolderId)
-  const setFileId = useSheetStore((state) => state.setFileId)
-  const getAllDirtyTags = useTagsStore((state) => state.getAllDirtyTags)
-  const updateIndex = useTagsStore((state) => state.updateIndex)
-  const updateDirties = useTagsStore((state) => state.updateDirties)
-  const getMetas = useTagsStore((state) => state.getMetas)
-  const deleteTags = useTagsStore((state) => state.deleteTags)
-  const addNewTagBulk = useTagsStore((state) => state.addNewTagBulk)
-  const initTags = useTagsStore((state) => state.initTags)
-
+export default function EnsureAuth({ refreshToken, children }: PropsWithChildren<Props>) {
   const [isAuthed, setIsAuthed] = useState<boolean>(false)
 
-  const loadGoogleMe = useCallback(async (): Promise<void> => {
-    const res = await fetch(`/api/auth/google/me`, {
-      method: 'GET',
-      credentials: 'include',
-    })
-    const result = await res.json()
-    if (result.ok) setMemberInfo(result)
-  }, [setMemberInfo])
+  useEffect(() => {
+    const { setMemberInfo } = useAuthStore.getState()
+    const { setImageFolderId, setFileId } = useSheetStore.getState()
+    const {
+      updateIndex,
+      updateDirties,
+      initTags,
+      addNewTagBulk,
+      deleteTags,
+      getMetas,
+      getAllDirtyTags,
+    } = useTagsStore.getState()
 
-  const loadSheetId = useCallback(async (): Promise<string> => {
-    const res = await fetch(`/api/sheet/google/sheetId`, {
-      method: 'GET',
-      credentials: 'include',
-    })
-    const result = await res.json()
-    if (result.ok) setFileId(result.fileId)
-
-    return result.fileId
-  }, [setFileId])
-
-  const pushDirties = async (fileId: string): Promise<void> => {
-    const todos = await todosDB.getAllDirtyTodos()
-
-    if (todos.length === 0) return
-
-    const chunkSize = 200
-    for (let i = 0; i < todos.length; i += chunkSize) {
-      const chunk = todos.slice(i, i + chunkSize)
-
-      const res = await fetch('/api/sheet/google/bulk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileId, todos: chunk }),
-      })
+    const loadGoogleMe = async (): Promise<void> => {
+      const res = await api.getAuthGoogleMe()
       const result = await res.json()
-      if (res.ok) {
-        const ids = chunk.map(({ id }) => id).filter((id): id is string => Boolean(id))
-        ids.forEach(
-          (id, index) => result.indexes?.[index] && todosDB.updateIndex(id, result.indexes[index])
-        )
-        todosDB.updateDirties(ids, false)
-      } else break
-    }
-  }
-
-  const loadRemoteMetaRows = async (
-    fileId: string
-  ): Promise<{ id: string; modified: number; index: number; deleted?: string }[]> => {
-    const chunkSize = 1000
-    let start = 2
-    const allMetas: { id: string; modified: number; index: number }[] = []
-
-    while (true) {
-      const end = start + chunkSize - 1
-      const res = await fetch(`/api/sheet/google/meta?fileId=${fileId}&start=${start}&end=${end}`, {
-        method: 'GET',
-      })
-      const result = await res.json()
-
-      if (!result.metas?.length) break
-
-      allMetas.push(...result.metas)
-
-      // 더 이상 데이터가 없으면 종료
-      if (result.metas.length < chunkSize) break
-      start += chunkSize
+      if (result.ok) setMemberInfo(result)
     }
 
-    return allMetas
-  }
-
-  const loadLocalMetaRows = async (): Promise<{ id: string; modified?: number }[]> => {
-    return await todosDB.getMetas()
-  }
-
-  const loadNewOrUpdated = async (
-    fileId: string,
-    meta: { id: string; index: number }[]
-  ): Promise<Todo[]> => {
-    if (meta.length === 0) return []
-
-    const chunkSize = 200
-    const allTodos: Todo[] = []
-
-    for (let i = 0; i < meta.length; i += chunkSize) {
-      const chunk = meta.slice(i, i + chunkSize)
-
-      const res = await fetch(`/api/sheet/google/meta`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileId, meta: chunk }),
-      })
-
+    const loadSheetId = async (): Promise<string> => {
+      const res = await api.getSheetGoogleSheetId()
       const result = await res.json()
-      if (result.ok && result.todos?.length) {
-        allTodos.push(...result.todos.map((todo: Todo) => ({ ...todo, dirty: false })))
-      } else {
-        console.warn(`Chunk ${i / chunkSize + 1} failed`)
-        break
-      }
+      if (result.ok) setFileId(result.fileId)
+
+      return result.fileId
     }
 
-    return allTodos
-  }
+    const loadLocalMetaRows = async (): Promise<{ id: string; modified?: number }[]> => {
+      return await todosDB.getMetas()
+    }
 
-  const loadImageFoderId = async (): Promise<string> => {
-    const res = await fetch('/api/upload/google/image')
-    const result = await res.json()
-    return result.folderId
-  }
+    const loadLocalMetaTagRows = async (): Promise<{ id: string; modified?: number }[]> => {
+      return await getMetas()
+    }
 
-  const pushDirtyTags = useCallback(
-    async (fileId: string) => {
+    const pushDirtyTags = async (fileId: string) => {
       const tags = await getAllDirtyTags()
       if (tags.length === 0) return
-
-      const res = await fetch('/api/sheet/google/bulk/tags', {
-        method: 'POST',
-        body: JSON.stringify({ fileId, tags }),
-      })
+      const res = await api.postSheetGoogleBulkTags(fileId, tags)
       const result = await res.json()
       if (res.ok) {
         const ids = tags.map(({ id }) => id).filter((id): id is string => Boolean(id))
@@ -155,49 +63,106 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
         )
         updateDirties(ids, false)
       }
-    },
-    [getAllDirtyTags, updateDirties, updateIndex]
-  )
+    }
 
-  const loadRemoteMetaTagRows = async (
-    fileId: string
-  ): Promise<{ id: string; modified: number; index: number; deleted?: string }[]> => {
-    const res = await fetch(`/api/sheet/google/meta/tags?fileId=${fileId}`, {
-      method: 'GET',
-    })
-    const result = await res.json()
-    return result.metas
-  }
+    const pushDirties = async (fileId: string): Promise<void> => {
+      const todos = await todosDB.getAllDirtyTodos()
 
-  const loadLocalMetaTagRows = useCallback(async (): Promise<
-    { id: string; modified?: number }[]
-  > => {
-    return await getMetas()
-  }, [getMetas])
+      if (todos.length === 0) return
 
-  const loadNewOrUpdatedTags = async (
-    fileId: string,
-    meta: { id: string; index: number }[]
-  ): Promise<Tag[]> => {
-    if (meta.length === 0) return []
+      const chunkSize = 200
+      for (let i = 0; i < todos.length; i += chunkSize) {
+        const chunk = todos.slice(i, i + chunkSize)
+        const res = await api.postSheetGoogleBulk(fileId, chunk)
+        const result = await res.json()
+        if (res.ok) {
+          const ids = chunk.map(({ id }) => id).filter((id): id is string => Boolean(id))
+          ids.forEach(
+            (id, index) => result.indexes?.[index] && todosDB.updateIndex(id, result.indexes[index])
+          )
+          todosDB.updateDirties(ids, false)
+        } else break
+      }
+    }
 
-    const res = await fetch(`/api/sheet/google/meta/tags`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileId, meta }),
-    })
+    const loadRemoteMetaRows = async (
+      fileId: string
+    ): Promise<{ id: string; modified: number; index: number; deleted?: string }[]> => {
+      const chunkSize = 1000
+      let start = 2
+      const allMetas: { id: string; modified: number; index: number }[] = []
 
-    const result = await res.json()
-    return result.tags?.map((todo: Todo) => ({ ...todo, dirty: false })) ?? []
-  }
+      while (true) {
+        const end = start + chunkSize - 1
+        const res = await api.getSheetGoogleMeta(fileId, start, end)
+        const result = await res.json()
 
-  useEffect(() => {
-    if (!props.refreshToken) setIsAuthed(true)
+        if (!result.metas?.length) break
+
+        allMetas.push(...result.metas)
+
+        // 더 이상 데이터가 없으면 종료
+        if (result.metas.length < chunkSize) break
+        start += chunkSize
+      }
+
+      return allMetas
+    }
+
+    const loadNewOrUpdated = async (
+      fileId: string,
+      meta: { id: string; index: number }[]
+    ): Promise<Todo[]> => {
+      if (meta.length === 0) return []
+
+      const chunkSize = 200
+      const allTodos: Todo[] = []
+
+      for (let i = 0; i < meta.length; i += chunkSize) {
+        const chunk = meta.slice(i, i + chunkSize)
+        const res = await api.postSheetGoogleMeta(fileId, chunk)
+        const result = await res.json()
+        if (result.ok && result.todos?.length) {
+          allTodos.push(...result.todos.map((todo: Todo) => ({ ...todo, dirty: false })))
+        } else {
+          console.warn(`Chunk ${i / chunkSize + 1} failed`)
+          break
+        }
+      }
+
+      return allTodos
+    }
+
+    const loadImageFoderId = async (): Promise<string> => {
+      const res = await api.getUploadGoogleImage()
+      const result = await res.json()
+      return result.folderId
+    }
+
+    const loadRemoteMetaTagRows = async (
+      fileId: string
+    ): Promise<{ id: string; modified: number; index: number; deleted?: string }[]> => {
+      const res = await api.getSheetGoogleMetaTags(fileId)
+      const result = await res.json()
+      return result.metas
+    }
+
+    const loadNewOrUpdatedTags = async (
+      fileId: string,
+      meta: { id: string; index: number }[]
+    ): Promise<Tag[]> => {
+      if (meta.length === 0) return []
+      const res = await api.postSheetGoogleMetaTags(fileId, meta)
+      const result = await res.json()
+      return result.tags?.map((tag: Tag) => ({ ...tag, dirty: false })) ?? []
+    }
+
+    if (!refreshToken) setIsAuthed(true)
     else {
       loadGoogleMe().then(() =>
         loadSheetId().then((fileId) => {
           if (fileId) {
-            loadImageFoderId().then((folderId) => setImageFolderId(folderId) ?? '')
+            loadImageFoderId().then((folderId) => setImageFolderId(folderId))
 
             pushDirtyTags(fileId).then(() => {
               loadRemoteMetaTagRows(fileId).then((remoteMeta) => {
@@ -246,17 +211,7 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
         })
       )
     }
-  }, [
-    addNewTagBulk,
-    deleteTags,
-    initTags,
-    loadGoogleMe,
-    loadLocalMetaTagRows,
-    loadSheetId,
-    props.refreshToken,
-    pushDirtyTags,
-    setImageFolderId,
-  ])
+  }, [refreshToken])
 
   if (!isAuthed)
     return (
@@ -268,13 +223,5 @@ export default function EnsureAuth(props: PropsWithChildren<Props>) {
       </div>
     )
 
-  return (
-    <div
-      className='h-full'
-      style={{
-        display: isAuthed ? 'block' : 'hidden',
-      }}>
-      {props.children}
-    </div>
-  )
+  return <div className='h-full'>{children}</div>
 }
