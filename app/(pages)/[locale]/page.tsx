@@ -1,7 +1,7 @@
 import { Icon } from '@/app/components/Icon'
+import { Link } from '@/app/components/Link'
 import { Metadata } from 'next'
-import Link from 'next/link'
-import { DarkModeButton } from '../components/DarkModeButton'
+import { DarkModeButton } from '../../components/DarkModeButton'
 
 export const metadata: Metadata = {
   title: 'Memoku | 심플한 할 일 관리',

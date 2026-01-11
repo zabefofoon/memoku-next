@@ -1,10 +1,10 @@
 'use client'
 
+import { Link } from '@/app/components/Link'
 import { todosDB } from '@/app/lib/todos.db'
 import { Todo } from '@/app/models/Todo'
 import { useTagsStore } from '@/app/stores/tags.store'
 import { TAG_COLORS } from '@/const'
-import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { Icon } from './Icon'
 

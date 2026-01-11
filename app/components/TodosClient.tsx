@@ -19,7 +19,6 @@ import { useScrollStore } from '@/app/stores/scroll.store'
 import { useThemeStore } from '@/app/stores/theme.store'
 import { useTodosPageStore } from '@/app/stores/todosPage.store'
 import { AGE_1_YEAR, COOKIE_DISPLAY } from '@/const'
-import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useCookies } from 'react-cookie'
@@ -219,10 +218,15 @@ export function TodosClient() {
                 </Else>
               </If>
             </button>
-            <Link
-              href={{ query: { ...Object.fromEntries(searchParams), filter: 'true' } }}
+            <button
               className='shrink-0 flex items-center gap-[12px] ml-auto sm:ml-0'
-              scroll={false}>
+              onClick={() => {
+                const urlParams = new URLSearchParams(location.search)
+                urlParams.append('filter', 'true')
+                router.push(`?${decodeURIComponent(urlParams.toString())}`, {
+                  scroll: false,
+                })
+              }}>
               <Icon
                 name='filter'
                 className='text-[20px]'
@@ -231,7 +235,7 @@ export function TodosClient() {
                 name='chevron-down'
                 className='ml-[-16px] | text-[16px]'
               />
-            </Link>
+            </button>
             <button
               type='button'
               className='ml-auto | hidden sm:flex items-center | bg-indigo-500 dark:bg-indigo-600 rounded-lg | px-[8px] py-[6px] | text-white'

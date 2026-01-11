@@ -1,16 +1,16 @@
 'use client'
-
-import NextLink, { type LinkProps as NextLinkProps } from 'next/link'
+import { Link as NextLink } from '@/i18n/navigation'
+import { type LinkProps as NextLinkProps } from 'next/link'
 import { usePathname } from 'next/navigation'
-import { PropsWithChildren, useCallback } from 'react'
+import { type AnchorHTMLAttributes, PropsWithChildren, useCallback } from 'react'
 import { useTransitionRouter } from '../hooks/useTransitionRouter'
 import { SavedScrollTarget, useScrollStore } from '../stores/scroll.store'
 
-interface LinkProps extends NextLinkProps {
-  onClick?: React.MouseEventHandler<HTMLAnchorElement>
-  scroll?: boolean
-  className?: string
+interface LinkProps
+  extends NextLinkProps,
+    Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'children'> {
   saveScrollTargets?: string[]
+  locale?: string
 }
 
 export function Link({
@@ -21,6 +21,7 @@ export function Link({
   className,
   onClick,
   saveScrollTargets,
+  locale,
   ...rest
 }: PropsWithChildren<LinkProps>) {
   const saveScroll = useScrollStore((s) => s.saveScroll)
@@ -64,6 +65,7 @@ export function Link({
   return (
     <NextLink
       {...rest}
+      locale={locale}
       className={className}
       href={href}
       as={as}

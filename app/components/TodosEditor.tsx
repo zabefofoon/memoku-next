@@ -1,5 +1,5 @@
 import { STATUS_MAP, TAG_COLORS } from '@/const'
-import Link from 'next/link'
+
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ClipboardEvent, MouseEvent, useEffect, useRef, useState } from 'react'
 import { If, Then } from 'react-if'
@@ -41,22 +41,36 @@ export default function TodosEditor() {
       <div className='absolute top-[8px] right-[8px] | flex gap-[8px]'>
         <If condition={todo?.id}>
           <Then>
-            <Link
-              href={`?time=${todo?.id}}`}
-              className='neu-button !p-[4px]'>
+            <button
+              type='button'
+              className='neu-button !p-[4px]'
+              onClick={() => {
+                const urlParams = new URLSearchParams(location.search)
+                urlParams.append('time', todo?.id ?? '')
+                router.push(`?${decodeURIComponent(urlParams.toString())}`, {
+                  scroll: false,
+                })
+              }}>
               <Icon
                 name='alarm'
                 className='expand-hitbox | text-[16px]'
               />
-            </Link>
-            <Link
-              href={`?deleteModal=${todo?.id}`}
-              className='neu-button !p-[4px]'>
+            </button>
+            <button
+              type='button'
+              className='neu-button !p-[4px]'
+              onClick={() => {
+                const urlParams = new URLSearchParams(location.search)
+                urlParams.append('deleteModal', todo?.id ?? '')
+                router.push(`?${decodeURIComponent(urlParams.toString())}`, {
+                  scroll: false,
+                })
+              }}>
               <Icon
                 name='delete'
                 className='expand-hitbox | text-[16px]'
               />
-            </Link>
+            </button>
           </Then>
         </If>
       </div>

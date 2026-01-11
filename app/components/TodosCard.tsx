@@ -1,3 +1,4 @@
+import { Link } from '@/app/components/Link'
 import { STATUS_MAP, TAG_COLORS } from '@/const'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { MouseEvent, useState } from 'react'
@@ -8,7 +9,6 @@ import { useThemeStore } from '../stores/theme.store'
 import { useTodosPageStore } from '../stores/todosPage.store'
 import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
-import { Link } from './Link'
 import TodoTimeText from './TodoTimeText'
 import UIDropdown from './UIDropdown'
 

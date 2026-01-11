@@ -1,7 +1,7 @@
 'use client'
 
+import { Link } from '@/app/components/Link'
 import etcUtil from '@/app/utils/etc.util'
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCookies } from 'react-cookie'
 import packageJson from '../../package.json'

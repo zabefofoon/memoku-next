@@ -17,6 +17,7 @@ import dayjs from 'dayjs'
 import debounce from 'lodash.debounce'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { PointerEvent, TouchEvent, useEffect, useRef, useState } from 'react'
+import { useTransitionRouter } from '../hooks/useTransitionRouter'
 import { useThemeStore } from '../stores/theme.store'
 
 export default function PageCalendar() {
@@ -26,6 +27,7 @@ export default function PageCalendar() {
   const isDarkMode = useThemeStore((state) => state.isDarkMode)
   const getTagsById = useTagsStore((state) => state.getTagsById)
   const router = useRouter()
+  const transitionRouter = useTransitionRouter()
 
   const calendarRef = useRef<FullCalendar>(null)
 
@@ -50,7 +52,8 @@ export default function PageCalendar() {
 
     const dayCell = arg.el.closest('.fc-daygrid-day') as HTMLElement
     const hasMore = !!dayCell?.querySelector('.fc-daygrid-more-link')
-    if (hasMore) {
+    if (!hasMore) transitionRouter.push(`/app/todos/${arg.event.id}`, { scroll: true })
+    else {
       const start = dayjs(arg.event.start).startOf('day').valueOf()
       const end = dayjs(arg.event.start).endOf('day').valueOf()
       const urlParams = new URLSearchParams(location.search)
@@ -59,8 +62,6 @@ export default function PageCalendar() {
       router.push(`?${decodeURIComponent(urlParams.toString())}`, {
         scroll: false,
       })
-    } else {
-      router.push(`/app/todos/${arg.event.id}`)
     }
   }
 

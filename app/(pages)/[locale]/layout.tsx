@@ -1,5 +1,6 @@
-import { GoogleAnalytics } from '@next/third-parties/google'
+﻿import { GoogleAnalytics } from '@next/third-parties/google'
 import type { Metadata } from 'next'
+import { NextIntlClientProvider } from 'next-intl'
 import { Noto_Sans_KR } from 'next/font/google'
 
 import '@/app/assets/styles/globals.scss'
@@ -25,14 +26,14 @@ export const metadata: Metadata = {
   description: '심플한 할 일 관리',
 }
 
-export default async function RootLayout({ children }: LayoutProps<'/app'>) {
+export default async function RootLayout({ children }: LayoutProps<'/[locale]/app'>) {
   const cookieStore = await cookies()
   const isDarkMode = cookieStore.get(COOKIE_THEME)?.value === 'dark'
   const refreshToken = cookieStore.get('x-google-refresh-token')?.value ?? ''
 
   return (
     <ViewTransitions
-      rootPages={['/app/', '/app/todos', '/app/calendar', '/app/guides', '/app/settings']}>
+      rootPages={['/', '/app', '/app/todos', '/app/calendar', '/app/guides', '/app/settings']}>
       <ScrollRestorer />
       <html
         lang='en'
@@ -54,12 +55,14 @@ export default async function RootLayout({ children }: LayoutProps<'/app'>) {
         </head>
         <body
           className={`${notoSansKr.className} antialiased | h-full | text-slate-800 dark:text-white/95 | bg-white dark:bg-zinc-900`}>
-          <EnsureAuth refreshToken={refreshToken}>
-            <EnsureProviders isDarkMode={isDarkMode}>
-              <PermissionNotificationDetector />
-              {children}
-            </EnsureProviders>
-          </EnsureAuth>
+          <NextIntlClientProvider>
+            <EnsureAuth refreshToken={refreshToken}>
+              <EnsureProviders isDarkMode={isDarkMode}>
+                <PermissionNotificationDetector />
+                {children}
+              </EnsureProviders>
+            </EnsureAuth>
+          </NextIntlClientProvider>
           <GoogleAnalytics gaId='G-R5C8GX5QQN' />
         </body>
       </html>

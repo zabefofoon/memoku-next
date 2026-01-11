@@ -1,7 +1,9 @@
 'use client'
 
+import { Link } from '@/app/components/Link'
+
 import { produce } from 'immer'
-import Link from 'next/link'
+
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import PhotoSwipeLightbox from 'photoswipe/lightbox'
 import 'photoswipe/style.css'

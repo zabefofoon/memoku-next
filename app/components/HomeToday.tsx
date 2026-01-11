@@ -1,5 +1,6 @@
 'use client'
 
+import { Link } from '@/app/components/Link'
 import { STATUS_MAP, TAG_COLORS } from '@/const'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -9,7 +10,7 @@ import { Todo } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
 import { useTodosPageStore } from '../stores/todosPage.store'
 import { Icon } from './Icon'
-import { Link } from './Link'
+
 import TodoTimeText from './TodoTimeText'
 import UISpinner from './UISpinner'
 

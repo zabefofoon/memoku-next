@@ -1,7 +1,7 @@
 'use client'
 
+import { Link } from '@/app/components/Link'
 import { TAG_COLORS } from '@/const'
-import Link from 'next/link'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
