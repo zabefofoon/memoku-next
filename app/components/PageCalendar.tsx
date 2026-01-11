@@ -5,6 +5,7 @@ import { useTagsStore } from '@/app/stores/tags.store'
 import { CALENDAR_REPEAT, TAG_COLORS } from '@/const'
 import {
   DatesSetArg,
+  EventApi,
   EventClickArg,
   EventSourceInput,
   MoreLinkAction,
@@ -141,6 +142,18 @@ export default function PageCalendar() {
           plugins={[dayGridPlugin, timeGridPlugin]}
           initialView='dayGridMonth'
           events={events}
+          eventOrder={(a, b) => {
+            const ea = a as unknown as EventApi
+            const eb = b as unknown as EventApi
+
+            const aHasDays =
+              Array.isArray(ea.extendedProps?.days) && ea.extendedProps.days.length > 0 ? 1 : 0
+            const bHasDays =
+              Array.isArray(eb.extendedProps?.days) && eb.extendedProps.days.length > 0 ? 1 : 0
+
+            if (aHasDays !== bHasDays) return aHasDays - bHasDays
+            return 0
+          }}
           headerToolbar={{
             left: 'title',
             center: '',
