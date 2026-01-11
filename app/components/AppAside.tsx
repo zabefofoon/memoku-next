@@ -106,7 +106,7 @@ export function AppAside(props: Props) {
         <Icon name='expand' />
       </button>
       <Link
-        href='/'
+        href='/app'
         className='px-[20px] py-[12px] | flex items-center gap-[6px]'>
         <Icon
           name='logo'

@@ -104,7 +104,7 @@ self.addEventListener('pushsubscriptionchange', async (event) => {
         method: 'put',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subscription }),
+        body: JSON.stringify({ subscription: subscription.toJson() }),
       })
     })()
   )

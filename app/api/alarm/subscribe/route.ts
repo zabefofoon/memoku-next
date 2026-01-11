@@ -1,3 +1,4 @@
+import { COOKIE_DEVICE_ID } from '@/const'
 import { cookies } from 'next/headers'
 
 export async function POST(req: Request) {
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   const cookieStore = await cookies()
   const { subscription } = await req.json()
-  const device_id = cookieStore.get('x-device-id')?.value
+  const device_id = cookieStore.get(COOKIE_DEVICE_ID)?.value
 
   return fetch(`${process.env.ALARM_API_SERVER}/memoku-alarm/subscribe`, {
     method: 'PUT',

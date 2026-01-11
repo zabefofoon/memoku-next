@@ -10,15 +10,18 @@ import TodosTimeModal from '@/app/components/TodosTimeModal'
 import UISpinner from '@/app/components/UISpinner'
 import { useTodosDetailStore } from '@/app/stores/todosDetail.store'
 import etcUtil from '@/app/utils/etc.util'
+import { COOKIE_DEVICE_ID } from '@/const'
 import Link from 'next/link'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useCookies } from 'react-cookie'
 import { Else, If, Then } from 'react-if'
 
 export default function TodosDetailClient() {
   const router = useRouter()
   const params = useParams()
   const searchParams = useSearchParams()
+  const [cookies] = useCookies()
 
   const todo = useTodosDetailStore((s) => s.todo)
   const changeTagInStore = useTodosDetailStore((s) => s.changeTag)
@@ -79,7 +82,7 @@ export default function TodosDetailClient() {
           isShow={!!searchParams.get('deleteModal')}
           close={router.back}
           done={() =>
-            deleteTodo(() => {
+            deleteTodo(cookies[COOKIE_DEVICE_ID], () => {
               router.back()
               etcUtil.sleep(250).then(router.back)
             })

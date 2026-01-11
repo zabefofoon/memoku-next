@@ -42,7 +42,7 @@ interface TodosDetailStore {
   deleteImageAll: () => Promise<void>
   deleteImage(image: string, cb?: () => void): Promise<void>
   addImages(files: Blob[]): Promise<void>
-  deleteTodo(cb?: () => void): Promise<void>
+  deleteTodo(device_id: string, cb?: () => void): Promise<void>
   loadTodo(id: string): Promise<Todo>
 }
 
@@ -582,7 +582,7 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
       ])
     }
   },
-  async deleteTodo(cb?: () => void): Promise<void> {
+  async deleteTodo(device_id: string, cb?: () => void): Promise<void> {
     const { fileId } = useSheetStore.getState()
     const { setTodos, setTodayTodos, setThisWeekTodos, setNextWeekTodos, setChildren } =
       useTodosPageStore.getState()
@@ -643,6 +643,8 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
     setThisWeekTodos(undefined)
     setNextWeekTodos(undefined)
     setChildren(undefined)
+
+    api.registAlarm({ todo_id: todo.id, device_id })
 
     cb?.()
   },
