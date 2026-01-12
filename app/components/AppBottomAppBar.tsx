@@ -2,8 +2,12 @@
 
 import { Link } from '@/app/components/Link'
 import etcUtil from '@/app/utils/etc.util'
+import { COOKIE_LANGUAGE } from '@/const'
+import { getPathname } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useCookies } from 'react-cookie'
 import { useThemeStore } from '../stores/theme.store'
 import FloatingButtons from './FloatingButtons'
 import { Icon } from './Icon'
@@ -11,7 +15,7 @@ import { Icon } from './Icon'
 const menus = [
   {
     href: '/app',
-    name: '홈',
+    name: 'Menu.Home',
     divided: false,
     icon: 'home',
     activeIcon: 'home-active',
@@ -19,7 +23,7 @@ const menus = [
   },
   {
     href: '/app/todos',
-    name: '할일',
+    name: 'Menu.Todos',
     divided: false,
     icon: 'todos',
     activeIcon: 'todos-active',
@@ -27,7 +31,7 @@ const menus = [
   },
   {
     href: '/app/calendar',
-    name: '달력',
+    name: 'Menu.Calendar',
     divided: false,
     icon: 'calendar',
     activeIcon: 'calendar-active',
@@ -35,7 +39,7 @@ const menus = [
   },
   {
     href: '/app/guides',
-    name: '가이드',
+    name: 'Menu.Guide',
     divided: true,
     icon: 'news',
     activeIcon: 'news-active',
@@ -43,7 +47,7 @@ const menus = [
   },
   {
     href: '/app/settings',
-    name: '설정',
+    name: 'Menu.Settings',
     divided: false,
     icon: 'setting',
     activeIcon: 'setting-active',
@@ -52,7 +56,9 @@ const menus = [
 ]
 
 export default function AppBottomAppBar() {
+  const t = useTranslations()
   const pathname = usePathname()
+  const [cookies] = useCookies()
   const savedTodosQueries = useThemeStore((state) => state.savedTodosQueries)
   const [isShow, setIsShow] = useState(true)
 
@@ -105,16 +111,23 @@ export default function AppBottomAppBar() {
             <div
               className={etcUtil.classNames([
                 'relative | flex flex-col items-center justify-center rounded-full | p-[6px]',
-                { 'bg-indigo-500 text-white': pathname === menu.href },
+                {
+                  'bg-indigo-500 text-white':
+                    pathname === getPathname({ href: menu.href, locale: cookies[COOKIE_LANGUAGE] }),
+                },
               ])}>
               {menu.induce && (
                 <div className='absolute w-[4px] top-[4px] left-[16px] | aspect-square rounded-full'></div>
               )}
               <Icon
-                name={pathname === menu.href ? menu.activeIcon : menu.icon}
+                name={
+                  pathname === getPathname({ href: menu.href, locale: cookies[COOKIE_LANGUAGE] })
+                    ? menu.activeIcon
+                    : menu.icon
+                }
                 className='text-[24px]'
               />
-              <span className='text-[10px]'>{menu.name}</span>
+              <span className='text-[10px] tracking-tight whitespace-nowrap'>{t(menu.name)}</span>
             </div>
           </Link>
         ))}

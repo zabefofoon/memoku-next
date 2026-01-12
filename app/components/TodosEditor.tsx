@@ -1,5 +1,6 @@
 import { STATUS_MAP, TAG_COLORS } from '@/const'
 
+import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ClipboardEvent, MouseEvent, useEffect, useRef, useState } from 'react'
 import { If, Then } from 'react-if'
@@ -10,6 +11,7 @@ import { Icon } from './Icon'
 import TodoTimeText from './TodoTimeText'
 
 export default function TodosEditor() {
+  const t = useTranslations()
   const router = useRouter()
   const searchParams = useSearchParams()
   const getTagsById = useTagsStore((s) => s.getTagsById)
@@ -105,12 +107,13 @@ export default function TodosEditor() {
           }}
           onClick={() => {
             const urlParams = new URLSearchParams(searchParams.toString())
-            router.push(`?${decodeURIComponent(urlParams.toString())}&todoStatus=${todo?.id}`, {
+            urlParams.append('todoStatus', todo?.id ?? '')
+            router.push(`?${decodeURIComponent(urlParams.toString())}`, {
               scroll: false,
             })
           }}>
           <Icon name={STATUS_MAP[todo?.status ?? 'created']?.icon} />
-          <p>{STATUS_MAP[todo?.status ?? 'created']?.label}</p>
+          <p>{t(`General.${todo?.status ?? 'created'}`)}</p>
         </button>
       </div>
       <textarea

@@ -1,5 +1,6 @@
 import { WEEK_DAYS_NAME } from '@/const'
 import dayjs from 'dayjs'
+import { useTranslations } from 'next-intl'
 import { MouseEvent } from 'react'
 import { Case, Else, If, Switch, Then } from 'react-if'
 import { Todo } from '../models/Todo'
@@ -17,6 +18,7 @@ export default function TodoTimeText({
   hideTime = false,
   onClick,
 }: Props) {
+  const t = useTranslations()
   const now = Date.now()
   const start = todo.start ?? 0
   const end = todo.end ?? 0
@@ -38,12 +40,13 @@ export default function TodoTimeText({
             <If condition={!todo.start && !todo.end}>
               <Then>
                 <p className='text-[11px] text-gray-400'>
-                  {dayjs(todo.created).format('YY/MM/DD')} 생성
+                  {t('Todo.Created', { date: dayjs(todo.created).format(t('General.YMD')) })}
                 </p>
               </Then>
               <Else>
                 <p className='text-[11px] text-gray-400'>
-                  {dayjs(todo.start).format('YY/MM/DD')} ~ {dayjs(todo.end).format('YY/MM/DD')}
+                  {dayjs(todo.start).format(t('General.YMD'))} ~{' '}
+                  {dayjs(todo.end).format(t('General.YMD'))}
                 </p>
               </Else>
             </If>
@@ -56,7 +59,7 @@ export default function TodoTimeText({
                 <p className='text-[11px]'>⏰</p>
                 <p className='text-[11px]'>
                   {todo.days && todo.days.length === 7
-                    ? '매일'
+                    ? t('Todo.AllDays')
                     : todo.days?.map((day) => WEEK_DAYS_NAME[day]).join(',')}
                 </p>
               </div>
@@ -83,17 +86,23 @@ export default function TodoTimeText({
                       <Switch>
                         <Case condition={isBeforeRemainedTime}>
                           <span className='text-gray-600 dark:text-zinc-400 font-[600]'>
-                            {etcUtil.formatDuration(start - now, 'until')} 후 시작
+                            {t('Todo.TimeUntil', {
+                              time: etcUtil.formatDuration(start - now, 'until'),
+                            })}
                           </span>
                         </Case>
                         <Case condition={isInprogressRemainedTime}>
                           <span className='text-indigo-500 font-[600]'>
-                            {etcUtil.formatDuration(end - now, 'left')} 남음
+                            {t('Todo.TimeLeft', {
+                              time: etcUtil.formatDuration(end - now, 'left'),
+                            })}
                           </span>
                         </Case>
                         <Case condition={isAfterRemainedTime}>
                           <span className='text-red-500 font-[600]'>
-                            {etcUtil.formatDuration(now - end, 'passed')} 초과
+                            {t('Todo.TimePassed', {
+                              time: etcUtil.formatDuration(now - end, 'passed'),
+                            })}
                           </span>
                         </Case>
                       </Switch>
@@ -109,7 +118,7 @@ export default function TodoTimeText({
                   <div className='flex items-center gap-[3px] '>
                     <div className='w-[3px] aspect-square bg-gray-300 rounded-full'></div>
                     <p className='text-[11px] text-gray-600 dark:text-zinc-400'>
-                      {dayjs(todo.created).format(timeFormat)} 생성
+                      {t('Todo.Created', { date: dayjs(todo.created).format(timeFormat) })}
                     </p>
                   </div>
                 </Then>

@@ -5,6 +5,7 @@ import { todosDB } from '@/app/lib/todos.db'
 import { Todo } from '@/app/models/Todo'
 import { useTagsStore } from '@/app/stores/tags.store'
 import { TAG_COLORS } from '@/const'
+import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
 import { Icon } from './Icon'
 
@@ -16,6 +17,7 @@ interface Group {
 
 export default function HomeTags() {
   const tagsMap = useTagsStore((state) => state.tagsMap)
+  const t = useTranslations('General')
 
   const [todos, setTodos] = useState<Todo[]>()
 
@@ -68,8 +70,8 @@ export default function HomeTags() {
                 </p>
               </div>
               <p className='text-[12px] font-[700]'>
-                <span>{item.undoneCount}개</span>/
-                <span className='opacity-50'>{item.totalCount}개</span>
+                <span>{t('Unit', { n: item.undoneCount })}</span>/
+                <span className='opacity-50'>{t('Unit', { n: item.totalCount })}</span>
               </p>
             </div>
           </Link>

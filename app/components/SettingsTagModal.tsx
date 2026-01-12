@@ -1,6 +1,7 @@
 'use client'
 
 import { TAG_COLORS } from '@/const'
+import { useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useTagsStore } from '../stores/tags.store'
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function SettingsTagModal({ isShow = false, done, close }: Props) {
+  const t = useTranslations()
   const searchParams = useSearchParams()
   const getTagsById = useTagsStore((s) => s.getTagsById)
 
@@ -32,22 +34,22 @@ export function SettingsTagModal({ isShow = false, done, close }: Props) {
 
   return (
     <UIModal
-      header={() => <span>태그 설정</span>}
+      header={() => <span>{t('Settings.TagSetting')}</span>}
       open={isShow}
       close={() => close()}
       content={() => (
         <div className='flex flex-col | gap-[12px] | pb-[2px]'>
           <label className='flex items-center'>
-            <span className='w-[100px] | text-[15px]'>이름</span>
+            <span className='w-[100px] | text-[15px]'>{t('Settings.Name')}</span>
             <input
               className='border border-gray-300 dark:border-zinc-600 rounded-lg | py-[4px] px-[8px]'
-              placeholder='태그 이름'
+              placeholder={t('Settings.Name')}
               value={tagName}
               onInput={(event) => setTagName(event.currentTarget.value)}
             />
           </label>
           <div className='flex items-start'>
-            <span className='w-[100px] | text-[15px] | py-[8px]'>색</span>
+            <span className='w-[100px] | text-[15px] | py-[8px]'>{t('Settings.TagColor')}</span>
             <div className='flex flex-wrap gap-[6px] max-w-[240px]'>
               {Object.entries(TAG_COLORS).map(([key, value]) => (
                 <div
@@ -80,14 +82,14 @@ export function SettingsTagModal({ isShow = false, done, close }: Props) {
           onClick={() =>
             tagName && selectedColor && done({ label: tagName, color: selectedColor })
           }>
-          <p className='text-white text-[15px] font-[700]'>설정하기</p>
+          <p className='text-white text-[15px] font-[700]'>{t('Todo.PeriodModalDone')}</p>
         </button>
       )}
       cancel={() => (
         <button
           className='rounded-md bg-gray-200 dark:bg-zinc-700 text-[15px] py-[12px]'
           onClick={() => close()}>
-          <p className='text-[15px]'>취소하기</p>
+          <p className='text-[15px]'>{t('Todo.PeriodModalCancel')}</p>
         </button>
       )}
     />

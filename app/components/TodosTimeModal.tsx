@@ -2,6 +2,7 @@
 
 import { COOKIE_DEVICE_ID, WEEK_DAYS } from '@/const'
 import dayjs from 'dayjs'
+import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
@@ -31,6 +32,7 @@ interface TimeState {
 }
 
 export default function TodosTimeModal({ isShow = false, todo, updateTime, close }: Props) {
+  const t = useTranslations()
   const [cookies] = useCookies()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -136,7 +138,7 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
       <UIModal
         open={isShow}
         close={() => close()}
-        header={() => <span>시간 설정</span>}
+        header={() => <span>{t('Todo.PeriodModalTitle')}</span>}
         content={() => (
           <div className='select-none'>
             <div className='mt-[12px] | flex justify-center gap-[4px] | bg-slate-100 dark:bg-zinc-600 rounded-lg | py-[8px]'>
@@ -148,7 +150,8 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
                       className='underline'
                       onClick={() => {
                         const urlParams = new URLSearchParams(searchParams.toString())
-                        router.push(`?${decodeURIComponent(urlParams.toString())}&date=start`, {
+                        urlParams.append('date', 'start')
+                        router.push(`?${decodeURIComponent(urlParams.toString())}`, {
                           scroll: false,
                         })
                       }}>
@@ -161,7 +164,8 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
                   className='underline'
                   onClick={() => {
                     const urlParams = new URLSearchParams(searchParams.toString())
-                    router.push(`?${decodeURIComponent(urlParams.toString())}&hour=start`, {
+                    urlParams.append('hour', 'start')
+                    router.push(`?${decodeURIComponent(urlParams.toString())}`, {
                       scroll: false,
                     })
                   }}>
@@ -178,7 +182,8 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
                       className='underline'
                       onClick={() => {
                         const urlParams = new URLSearchParams(searchParams.toString())
-                        router.push(`?${decodeURIComponent(urlParams.toString())}&date=end`, {
+                        urlParams.append('date', 'end')
+                        router.push(`?${decodeURIComponent(urlParams.toString())}`, {
                           scroll: false,
                         })
                       }}>
@@ -191,7 +196,8 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
                   className='underline'
                   onClick={() => {
                     const urlParams = new URLSearchParams(searchParams.toString())
-                    router.push(`?${decodeURIComponent(urlParams.toString())}&hour=end`, {
+                    urlParams.append('hour', 'end')
+                    router.push(`?${decodeURIComponent(urlParams.toString())}`, {
                       scroll: false,
                     })
                   }}>
@@ -233,7 +239,7 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
             <button
               className='w-full | rounded-md bg-indigo-500 py-[12px]'
               onClick={handleSelect}>
-              <p className='text-white text-[15px] font-[700]'>설정하기</p>
+              <p className='text-white text-[15px] font-[700]'>{t('Todo.PeriodModalDone')}</p>
             </button>
             <button
               className='flex items-center justify-center | shrink-0 w-[50px] | border border-gray-200 dark:border-zinc-700 rounded-md'
@@ -254,7 +260,7 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
           <button
             className='rounded-md bg-gray-200 dark:bg-zinc-700 text-[15px] py-[12px]'
             onClick={() => close()}>
-            <p className='text-[15px]'>취소하기</p>
+            <p className='text-[15px]'>{t('Todo.PeriodModalCancel')}</p>
           </button>
         )}
       />

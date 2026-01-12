@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { If, Then } from 'react-if'
 import { api } from '../lib/api'
@@ -10,6 +11,7 @@ import UIToggle from './UIToggle'
 export default function SettingSync() {
   const router = useRouter()
 
+  const t = useTranslations()
   const fileId = useSheetStore((s) => s.fileId)
   const setFileId = useSheetStore((s) => s.setFileId)
   const memberInfo = useAuthStore((s) => s.memberInfo)
@@ -28,7 +30,7 @@ export default function SettingSync() {
     <div className='emboss-sheet | p-[16px]'>
       <div className='flex items-center sm:items-start justify-between sm:justify-start gap-[12px] lg:gap-[24px]'>
         <p className='truncate text-[14px] font-[700] | shrink-0 | lg:py-[8px] | sm:w-[100px]'>
-          구글연동
+          {t('Settings.Notification')}
           <If condition={memberInfo?.email}>
             <Then>
               <span className='sm:hidden ml-[4px] | text-[12px] tracking-tight !font-[400] opacity-60'>

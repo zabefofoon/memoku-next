@@ -1,6 +1,7 @@
 'use client'
 
 import { FILTER_STATUS, STATUS_MAP, TAG_COLORS } from '@/const'
+import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Tag, Todo } from '../models/Todo'
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function TodosFilters(props: Props) {
+  const t = useTranslations()
   const router = useRouter()
 
   const isDarkMode = useThemeStore((s) => s.isDarkMode)
@@ -45,7 +47,7 @@ export function TodosFilters(props: Props) {
 
   return (
     <UIBottomSheet
-      header={() => <span>필터</span>}
+      header={() => <span>{t('Todo.Filter')}</span>}
       open={props.isShow ?? false}
       close={() => props.close()}
       content={() => (
@@ -53,7 +55,7 @@ export function TodosFilters(props: Props) {
           <div className='flex flex-col gap-[4px]'>
             <p className='flex items-center gap-[2px] | text-gray-500 text-[13px]'>
               <Icon name='run' />
-              <span>상태</span>
+              <span>{t('Todo.Status')}</span>
             </p>
             <div className='flex items-center gap-[8px] flex-wrap | text-[14px] | px-[8px]'>
               {FILTER_STATUS.map((item) => (
@@ -76,7 +78,7 @@ export function TodosFilters(props: Props) {
                     )
                   }>
                   <Icon name={item.icon} />
-                  <p>{item.label}</p>
+                  <p>{t(`General.${item.value}`)}</p>
                 </button>
               ))}
             </div>
@@ -84,7 +86,7 @@ export function TodosFilters(props: Props) {
           <div className='flex flex-col gap-[4px]'>
             <p className='flex items-center gap-[2px] | text-gray-500 text-[13px]'>
               <Icon name='tag' />
-              <span>태그</span>
+              <span>{t('Todo.Tag')}</span>
             </p>
             <div className='flex flex-wrap gap-[6px] | px-[8px]'>
               {tags.map((tag) => (
@@ -121,7 +123,7 @@ export function TodosFilters(props: Props) {
         <button
           className='rounded-md bg-indigo-500 py-[12px]'
           onClick={apply}>
-          <p className='text-white text-[15px] font-[700]'>적용하기</p>
+          <p className='text-white text-[15px] font-[700]'>{t('Todo.Apply')}</p>
         </button>
       )}
     />

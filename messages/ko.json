@@ -1,5 +1,95 @@
 {
+  "Menu": {
+    "Home": "홈",
+    "Todos": "할일",
+    "TodosDetail": "할일 상세",
+    "Calendar": "달력",
+    "Settings": "설정",
+    "Guide": "가이드",
+    "Intro": "소개"
+  },
+  "General": {
+    "Unit": "{n}개",
+    "created": "생성됨",
+    "inprogress": "진행중",
+    "done": "완료됨",
+    "hold": "중단됨",
+    "YMD": "YY/MM/DD",
+    "EmptyData": "데이터가 없습니다",
+    "All": "전체",
+    "Search": "검색",
+    "Logout": "로그아웃"
+  },
   "Home": {
-    "test": "테스트"
+    "PageTitle": "Welcome to Memoku!",
+    "PageDesc": "할 일을 체계적으로 관리해보세요!",
+    "TodayTodoLabel": "오늘 할 일",
+    "TodayTodoEmpty": "오늘 할 일을 추가해보세요.",
+    "TodayTodoAdd": "추가하기",
+    "HomeNewsMore": "더 보기",
+    "HomeRecentLabel": "최근 수정",
+    "HomeSequelLabel": "주간 활동"
+  },
+  "Todo": {
+    "Created": "{date} 생성",
+    "AllDays": "매일",
+    "TimeUntil": "{time} 후 시작",
+    "TimeLeft": "{time} 남음",
+    "TimePassed": "{time} 초과",
+    "SeeChildren": "하위 일 더 보기",
+    "AddChildren": "하위 일 추가",
+    "ChildrenList": "하위 일 목록",
+    "ChangeStatus": "상태변경",
+    "ChangeTag": "태그변경",
+    "SetPeriod": "일정설정",
+    "EditContent": "내용수정",
+    "TodayTodos": "오늘 할 일",
+    "ThisWeekTodos": "이번주 할 일",
+    "NextWeekTodos": "다음주 할 일",
+    "PageTitle": "할일 목록",
+    "PageDesc": "할 일을 정리해보세요.",
+    "AddTodo": "추가하기",
+    "Upper": "상위",
+    "Lower": "하위",
+    "EditPlaceholder": "내용을 입력하세요.",
+    "Guide": ["텍스트는 자동으로 저장 됩니다.", "첫 줄에서 줄바꿈을 하면, 제목이 됩니다."],
+    "Filter": "필터",
+    "Status": "상태",
+    "Tag": "태그",
+    "Apply": "적용하기",
+    "Uploading": "업로드 중",
+    "AddImage": "이미지 추가",
+    "StatusModalTitle": "상태 변경",
+    "StatusModalDone": "선택하기",
+    "TagModalTitle": "태그 변경",
+    "TagModalDone": "선택하기",
+    "DatePickerTitle": "날짜 설정",
+    "PeriodModalTitle": "시간 설정",
+    "TimeModalTitle": "시간 설정",
+    "PeriodModalDone": "설정하기",
+    "PeriodModalCancel": "취소하기"
+  },
+  "Settings": {
+    "PageTitle": "설정",
+    "PageDesc": "앱 설정을 해보세요.",
+    "Tag": "태그",
+    "TagNew": "새 태그",
+    "TagSetting": "태그설정",
+    "TagColor": "색상",
+    "Name": "이름",
+    "DarkMode": "다크모드",
+    "Notification": "알림설정",
+    "Google": "구글연동",
+    "Language": "언어"
+  },
+  "Guide": {
+    "PageTitle": "가이드",
+    "PageDesc": "메모쿠의 사용법을 알아보세요."
+  },
+  "Delete": {
+    "Title": "주의!",
+    "Phrase": "삭제된 데이터는 복구할 수 없습니다.\n진행하시겠습니까?",
+    "Do": "삭제하기",
+    "Cancel": "취소하기"
   }
 }

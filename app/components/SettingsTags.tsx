@@ -3,6 +3,7 @@
 import { Link } from '@/app/components/Link'
 import { TAG_COLORS } from '@/const'
 
+import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
@@ -14,6 +15,7 @@ import { SettingsTagModal } from './SettingsTagModal'
 import { TodosDeleteModal } from './TodosDeleteModal'
 
 export default function SettingsTags() {
+  const t = useTranslations()
   const router = useRouter()
   const initTags = useTagsStore((s) => s.initTags)
   const allTags = useTagsStore((s) => s.tags)
@@ -100,7 +102,9 @@ export default function SettingsTags() {
         done={handleTagDone}
       />
       <div className='flex items-start flex-col lg:flex-row gap-[12px] lg:gap-[24px]'>
-        <p className='text-[14px] font-[700] | shrink-0 | lg:py-[8px] | w-[100px]'>태그</p>
+        <p className='text-[14px] font-[700] | shrink-0 | lg:py-[8px] | w-[100px]'>
+          {t('Settings.Tag')}
+        </p>
 
         <div className='flex flex-wrap gap-[8px] | my-auto'>
           {tags?.map((tag) => (
@@ -113,7 +117,8 @@ export default function SettingsTags() {
                 event.stopPropagation()
 
                 const urlParams = new URLSearchParams(searchParams.toString())
-                router.push(`?${decodeURIComponent(urlParams.toString())}&tag=${tag.id}`, {
+                urlParams.append('tag', tag.id)
+                router.push(`?${decodeURIComponent(urlParams.toString())}`, {
                   scroll: false,
                 })
               }}>
@@ -141,7 +146,7 @@ export default function SettingsTags() {
           <Link
             href='?tag=new'
             className='pl-[12px] pr-[6px] py-[6px] | border border-dashed rounded-full border-slate-400 dark:border-zinc-600 | flex items-center justify-center gap-[4px]'>
-            <p className='text-[12px] text-gray-600 dark:text-gray-200'>새 태그</p>
+            <p className='text-[12px] text-gray-600 dark:text-gray-200'>{t('Settings.TagNew')}</p>
             <Icon name='plus' />
           </Link>
         </div>

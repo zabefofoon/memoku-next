@@ -1,11 +1,13 @@
 'use client'
 
 import { AGE_1_YEAR, COOKIE_EXPAND, COOKIE_THEME } from '@/const'
+import { useTranslations } from 'next-intl'
 import { useCookies } from 'react-cookie'
 import { useThemeStore } from '../stores/theme.store'
 import UIToggle from './UIToggle'
 
 export default function SettingsTags() {
+  const t = useTranslations()
   const [_, setCookie, removeCookie] = useCookies([COOKIE_THEME, COOKIE_EXPAND])
   const isDarkMode = useThemeStore((state) => state.isDarkMode)
   const setIsDarkMode = useThemeStore((state) => state.setIsDarkMode)
@@ -24,7 +26,9 @@ export default function SettingsTags() {
   return (
     <div className='emboss-sheet | p-[16px]'>
       <div className='flex items-center sm:items-start justify-between sm:justify-start gap-[12px] lg:gap-[24px]'>
-        <p className='text-[14px] font-[700] | shrink-0 | lg:py-[8px] | w-[100px]'>다크모드</p>
+        <p className='text-[14px] font-[700] | shrink-0 | lg:py-[8px] | w-[100px]'>
+          {t('Settings.DarkMode')}
+        </p>
         <div className='flex items-center gap-[6px] flex-wrap'>
           <UIToggle
             id='다크모드'

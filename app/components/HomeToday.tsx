@@ -11,6 +11,7 @@ import { useTagsStore } from '../stores/tags.store'
 import { useTodosPageStore } from '../stores/todosPage.store'
 import { Icon } from './Icon'
 
+import { useTranslations } from 'next-intl'
 import TodoTimeText from './TodoTimeText'
 import UISpinner from './UISpinner'
 
@@ -20,6 +21,7 @@ export default function HomeTody() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const getTagsById = useTagsStore((s) => s.getTagsById)
   const createTodo = useTodosPageStore((state) => state.createTodo)
+  const t = useTranslations('Home')
 
   const todo = todos?.todos[0]
   const tag = getTagsById(todo?.tagId)
@@ -44,16 +46,16 @@ export default function HomeTody() {
           </div>
         </Then>
         <Else>
-          <h3 className='rounded-full | font-[700]'>오늘 할 일</h3>
+          <h3 className='rounded-full | font-[700]'>{t('TodayTodoLabel')}</h3>
           <div className='mt-[6px] | flex flex-col gap-[4px]'>
             <If condition={!todos?.total}>
               <Then>
-                <p className='text-gray-600 dark:text-zinc-400'>오늘 할 일을 추가해보세요.</p>
+                <p className='text-gray-600 dark:text-zinc-400'>{t('TodayTodoEmpty')}</p>
                 <button
                   type='button'
                   className='text-gray-600 dark:text-zinc-400 text-[14px] | flex items-center | underline | w-fit | mt-[2px]'
                   onClick={() => createTodo().then((todo) => router.push(`/app/todos/${todo.id}`))}>
-                  추가하기
+                  {t('TodayTodoAdd')}
                   <Icon name='chevron-right' />
                 </button>
               </Then>

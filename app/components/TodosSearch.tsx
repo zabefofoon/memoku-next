@@ -1,6 +1,7 @@
 'use client'
 
 import debounce from 'lodash.debounce'
+import { useTranslations } from 'next-intl'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { If, Then } from 'react-if'
@@ -10,6 +11,7 @@ export default function TodosSearch() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const t = useTranslations()
 
   const searchTextQuery = searchParams.get('searchText') ?? ''
 
@@ -50,7 +52,7 @@ export default function TodosSearch() {
 
   return (
     <label className='search | w-full sm:w-fit flex items-center | border-b border-gray-300 dark:border-zinc-600 has-focus:border-indigo-500 | pr-[8px]'>
-      <span className='sr-only'>검색</span>
+      <span className='sr-only'>{t('General.Search')}</span>
       <button
         type='button'
         className='pl-[8px]'
@@ -64,7 +66,7 @@ export default function TodosSearch() {
       <input
         ref={inputEl}
         type='text'
-        placeholder='검색'
+        placeholder={t('General.Search')}
         className='min-w-[120px] w-full max-w-[200px] py-[4px] pl-[4px] outline-0'
         onChange={(event) => {
           setValue(event.target.value)
@@ -80,7 +82,6 @@ export default function TodosSearch() {
               setValue('')
               updateQuery('')
             }}
-            aria-label='검색어 지우기'
             className='ml-auto'>
             <Icon
               name='close'

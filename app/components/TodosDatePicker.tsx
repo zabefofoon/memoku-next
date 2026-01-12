@@ -1,10 +1,12 @@
 'use client'
 
+import { COOKIE_LANGUAGE } from '@/const'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import FullCalendar from '@fullcalendar/react'
 import dayjs from 'dayjs'
 import { useRef, useState } from 'react'
+import { useCookies } from 'react-cookie'
 
 type Props = {
   initialDate?: Date
@@ -15,7 +17,7 @@ type Props = {
 
 export default function TodosDatePicker({ initialDate, validRange, select }: Props) {
   const calendarRef = useRef<FullCalendar>(null)
-
+  const [cookies] = useCookies()
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(initialDate)
 
   return (
@@ -24,6 +26,7 @@ export default function TodosDatePicker({ initialDate, validRange, select }: Pro
         <FullCalendar
           viewClassNames='mb-[6px]'
           ref={calendarRef}
+          locale={cookies[COOKIE_LANGUAGE]}
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView='dayGridMonth'
           selectable={false}

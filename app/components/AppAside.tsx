@@ -6,7 +6,9 @@ import { usePathname } from 'next/navigation'
 import { useCookies } from 'react-cookie'
 import packageJson from '../../package.json'
 
-import { AGE_1_YEAR, COOKIE_EXPAND, COOKIE_THEME } from '@/const'
+import { AGE_1_YEAR, COOKIE_EXPAND, COOKIE_LANGUAGE, COOKIE_THEME } from '@/const'
+import { getPathname } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { If, Then } from 'react-if'
 import { api } from '../lib/api'
@@ -22,7 +24,7 @@ interface Props {
 const menus = [
   {
     href: '/app',
-    name: '홈',
+    name: 'Menu.Home',
     divided: false,
     icon: 'home',
     activeIcon: 'home-active',
@@ -30,7 +32,7 @@ const menus = [
   },
   {
     href: '/app/todos',
-    name: '할일',
+    name: 'Menu.Todos',
     divided: false,
     icon: 'todos',
     activeIcon: 'todos-active',
@@ -38,7 +40,7 @@ const menus = [
   },
   {
     href: '/app/calendar',
-    name: '달력',
+    name: 'Menu.Calendar',
     divided: false,
     icon: 'calendar',
     activeIcon: 'calendar-active',
@@ -46,7 +48,7 @@ const menus = [
   },
   {
     href: '/app/settings',
-    name: '설정',
+    name: 'Menu.Settings',
     divided: false,
     icon: 'setting',
     activeIcon: 'setting-active',
@@ -54,7 +56,7 @@ const menus = [
   },
   {
     href: '/app/guides',
-    name: '가이드',
+    name: 'Menu.Guide',
     divided: true,
     icon: 'news',
     activeIcon: 'news-active',
@@ -62,7 +64,7 @@ const menus = [
   },
   {
     href: '/',
-    name: '소개',
+    name: 'Menu.Intro',
     divided: false,
     icon: 'help',
     activeIcon: 'help-active',
@@ -71,10 +73,15 @@ const menus = [
 ]
 
 export function AppAside(props: Props) {
+  const t = useTranslations()
   const setFileId = useSheetStore((state) => state.setFileId)
   const savedTodosQueries = useThemeStore((state) => state.savedTodosQueries)
   const pathname = usePathname()
-  const [_, setCookie, removeCookie] = useCookies([COOKIE_THEME, COOKIE_EXPAND])
+  const [cookies, setCookie, removeCookie] = useCookies([
+    COOKIE_LANGUAGE,
+    COOKIE_THEME,
+    COOKIE_EXPAND,
+  ])
 
   const [isExpand, setIsExpand] = useState<boolean>(props.isExpand)
 
@@ -126,20 +133,28 @@ export function AppAside(props: Props) {
             ])}>
             <Link
               href={`${menu.href}${menu.href === '/app/todos' ? (savedTodosQueries ?? '') : ''}`}
-              aria-current={pathname === menu.href ? 'page' : undefined}
+              aria-current={
+                pathname === getPathname({ href: menu.href, locale: cookies[COOKIE_LANGUAGE] })
+                  ? 'page'
+                  : undefined
+              }
               className={etcUtil.classNames([
                 'relative | flex items-center gap-[6px] | py-[12px] px-[16px] mx-[4px] | rounded-full hover:bg-slate-50 hover:dark:bg-zinc-700/50',
                 {
                   'text-white | bg-indigo-500 dark:bg-indigo-600 hover:bg-indigo-500 hover:dark:bg-indigo-600':
-                    pathname === menu.href,
+                    pathname === getPathname({ href: menu.href, locale: cookies[COOKIE_LANGUAGE] }),
                 },
               ])}>
               <Icon
-                name={pathname === menu.href ? menu.activeIcon : menu.icon}
+                name={
+                  pathname === getPathname({ href: menu.href, locale: cookies[COOKIE_LANGUAGE] })
+                    ? menu.activeIcon
+                    : menu.icon
+                }
                 className='text-[20px]'
               />
               {isExpand && (
-                <span className='text-[14px] align-top whitespace-nowrap'>{menu.name}</span>
+                <span className='text-[14px] align-top whitespace-nowrap'>{t(menu.name)}</span>
               )}
               {menu.induce && (
                 <div className='absolute w-[4px] top-[10px] left-[16px] | aspect-square rounded-full | bg-red-500'></div>
@@ -178,7 +193,7 @@ export function AppAside(props: Props) {
                         <button
                           className='text-[12px]'
                           onClick={logout}>
-                          로그아웃
+                          {t('General.Logout')}
                         </button>
                       </div>
                     </div>

@@ -8,12 +8,16 @@ import HomeTitle from '@/app/components/HomeTitle'
 import HomeToday from '@/app/components/HomeToday'
 import HomeTotal from '@/app/components/HomeTotal'
 import { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 
-export const metadata: Metadata = {
-  title: '홈',
+export async function generateMetadata({ params }: PageProps<'/[locale]/app'>): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale })
+  return {
+    title: t('Menu.Home'),
+  }
 }
-
-export default async function Home({ searchParams }: PageProps<'/app'>) {
+export default async function Home({ searchParams }: PageProps<'/[locale]/app'>) {
   const search = await searchParams
 
   return (

@@ -1,0 +1,98 @@
+{
+  "Menu": {
+    "Home": "Início",
+    "Todos": "Tarefas",
+    "TodosDetail": "Detalhes da tarefa",
+    "Calendar": "Calendário",
+    "Settings": "Configurações",
+    "Guide": "Guia",
+    "Intro": "Introdução"
+  },
+  "General": {
+    "Unit": "{n} itens",
+    "created": "Criado",
+    "inprogress": "Em andamento",
+    "done": "Concluído",
+    "hold": "Em pausa",
+    "YMD": "AA/MM/DD",
+    "EmptyData": "Não há dados",
+    "All": "Tudo",
+    "Search": "Pesquisar",
+    "Logout": "Sair"
+  },
+  "Home": {
+    "PageTitle": "Bem-vindo ao Memoku!",
+    "PageDesc": "Gerencie suas tarefas de forma organizada!",
+    "TodayTodoLabel": "Tarefas de hoje",
+    "TodayTodoEmpty": "Adicione uma tarefa para hoje.",
+    "TodayTodoAdd": "Adicionar",
+    "HomeNewsMore": "Ver mais",
+    "HomeRecentLabel": "Atualizações recentes",
+    "HomeSequelLabel": "Atividade semanal"
+  },
+  "Todo": {
+    "Created": "Criado em {date}",
+    "AllDays": "Todos os dias",
+    "TimeUntil": "Começa em {time}",
+    "TimeLeft": "Faltam {time}",
+    "TimePassed": "{time} em atraso",
+    "SeeChildren": "Ver mais subtarefas",
+    "AddChildren": "Adicionar subtarefa",
+    "ChildrenList": "Lista de subtarefas",
+    "ChangeStatus": "Alterar status",
+    "ChangeTag": "Alterar tag",
+    "SetPeriod": "Definir agenda",
+    "EditContent": "Editar conteúdo",
+    "TodayTodos": "Tarefas de hoje",
+    "ThisWeekTodos": "Tarefas desta semana",
+    "NextWeekTodos": "Tarefas da próxima semana",
+    "PageTitle": "Lista de tarefas",
+    "PageDesc": "Organize suas tarefas.",
+    "AddTodo": "Adicionar",
+    "Upper": "Superior",
+    "Lower": "Inferior",
+    "EditPlaceholder": "Digite o conteúdo.",
+    "Guide": [
+      "O texto é salvo automaticamente.",
+      "Ao inserir uma quebra de linha na primeira linha, ela vira o título."
+    ],
+    "Filter": "Filtro",
+    "Status": "Status",
+    "Tag": "Tag",
+    "Apply": "Aplicar",
+    "Uploading": "Enviando",
+    "AddImage": "Adicionar imagem",
+    "StatusModalTitle": "Alterar status",
+    "StatusModalDone": "Selecionar",
+    "TagModalTitle": "Alterar tag",
+    "TagModalDone": "Selecionar",
+    "DatePickerTitle": "Definir data",
+    "PeriodModalTitle": "Definir horário",
+    "TimeModalTitle": "Definir horário",
+    "PeriodModalDone": "Definir",
+    "PeriodModalCancel": "Cancelar"
+  },
+  "Settings": {
+    "PageTitle": "Configurações",
+    "PageDesc": "Configure as opções do app.",
+    "Tag": "Tags",
+    "TagNew": "Nova tag",
+    "TagSetting": "Configurar tags",
+    "TagColor": "Cor",
+    "Name": "Nome",
+    "DarkMode": "Modo escuro",
+    "Notification": "Configurações de notificações",
+    "Google": "Sincronização com Google",
+    "Language": "Idioma"
+  },
+  "Guide": {
+    "PageTitle": "Guia",
+    "PageDesc": "Aprenda como usar o Memoku."
+  },
+  "Delete": {
+    "Title": "Atenção!",
+    "Phrase": "Os dados excluídos não podem ser recuperados.\nDeseja continuar?",
+    "Do": "Excluir",
+    "Cancel": "Cancelar"
+  }
+}

@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 import TimePicker from './TimePicker'
 import UIModal from './UIModal'
@@ -19,6 +20,7 @@ export default function TimePickerModal({
   select,
   close,
 }: Props) {
+  const t = useTranslations()
   const [initialTime, setInitialTime] = useState({ hour: 0, minute: 0 })
   const selectedHour = useRef<number>(0)
   const selectedMinute = useRef<number>(0)
@@ -36,7 +38,7 @@ export default function TimePickerModal({
   return (
     <UIModal
       open={isShow}
-      header={() => <span>시간 설정</span>}
+      header={() => <span>{t('Todo.TimeModalTitle')}</span>}
       content={() => (
         <div className='max-w-[360px]'>
           <TimePicker
@@ -56,14 +58,14 @@ export default function TimePickerModal({
         <button
           className='rounded-md bg-indigo-500 py-[12px]'
           onClick={() => select(selectedHour.current, selectedMinute.current)}>
-          <p className='text-white text-[15px] font-[700]'>선택하기</p>
+          <p className='text-white text-[15px] font-[700]'>{t('Todo.TagModalDone')}</p>
         </button>
       )}
       cancel={() => (
         <button
           className='rounded-md bg-gray-200 dark:bg-zinc-700 text-[15px] py-[12px]'
           onClick={() => close()}>
-          <p className='text-[15px]'>취소하기</p>
+          <p className='text-[15px]'>{t('Todo.PeriodModalCancel')}</p>
         </button>
       )}
     />

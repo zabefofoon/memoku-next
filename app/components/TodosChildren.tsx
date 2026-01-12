@@ -2,6 +2,7 @@
 
 import { AGE_1_YEAR, COOKIE_CHILDREN_STATUS, FILTER_STATUS, STATUS_COLORS } from '@/const'
 import { produce } from 'immer'
+import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
@@ -22,6 +23,7 @@ interface Props {
 
 export function TodosChildren({ isShow, close }: Props) {
   const [cookies, setCookie] = useCookies()
+  const t = useTranslations()
   const router = useRouter()
   const addChildren = useTodosPageStore((s) => s.addChildren)
   const childrenRoot = useTodosPageStore((s) => s.childrenRoot)
@@ -83,7 +85,7 @@ export function TodosChildren({ isShow, close }: Props) {
   return (
     <UIBottomSheet
       containerClass='sm:max-w-[50dvw]'
-      header={() => <span>하위 일 목록</span>}
+      header={() => <span>{t('Todo.ChildrenList')}</span>}
       filters={() => (
         <div className='flex gap-[6px] | text-[12px]'>
           {FILTER_STATUS.map((status) => (
@@ -153,7 +155,7 @@ export function TodosChildren({ isShow, close }: Props) {
               const target = children?.at(-1) || childrenRoot
               if (target) addChildren(target).then(({ id }) => router.push(`/app/todos/${id}`))
             }}>
-            <p className='text-white text-[15px] font-[700]'>하위 일 추가하기</p>
+            <p className='text-white text-[15px] font-[700]'>{t('Todo.AddChildren')}</p>
           </button>
         </div>
       )}

@@ -1,6 +1,7 @@
 'use client'
 
 import dayjs from 'dayjs'
+import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { If, Then } from 'react-if'
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function CalendarTodos({ isShow = false }: Props) {
+  const t = useTranslations()
   const router = useRouter()
   const screenSize = useThemeStore((s) => s.screenSize)
   const searchParams = useSearchParams()
@@ -36,7 +38,7 @@ export function CalendarTodos({ isShow = false }: Props) {
   return (
     <UIBottomSheet
       containerClass='sm:max-w-[50dvw]'
-      header={() => <span>하위 일 목록</span>}
+      header={() => <span>{t('Todo.ChildrenList')}</span>}
       open={isShow}
       close={() => router.back()}
       content={() => (

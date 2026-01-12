@@ -1,11 +1,15 @@
 import { Link } from '@/app/components/Link'
+import { COOKIE_LANGUAGE } from '@/const'
 import { getNewsList } from '@/lib/news'
+import { getTranslations } from 'next-intl/server'
+import { cookies } from 'next/headers'
 import { Icon } from './Icon'
 import UICarousel, { UICarouselSlide } from './UICarousel'
 
 export default async function HomeNews() {
-  const newsList = await getNewsList({ locale: 'ko' })
-
+  const cookieStore = await cookies()
+  const newsList = await getNewsList({ locale: cookieStore.get(COOKIE_LANGUAGE)?.value ?? 'en' })
+  const t = await getTranslations('Home')
   return (
     <div className='order-2 sm:order-0 | aspect-square flex-1 min-w-[260px] shrink-0 | flex flex-col gap-[12px]'>
       <div className='emboss-sheet | w-full h-full'>
@@ -26,7 +30,7 @@ export default async function HomeNews() {
                   <p className='text-[14px]'>{item.title}</p>
                   <p className='text-[12px] opacity-80 | mt-[4px]'>{item.summary}</p>
                   <p className='text-[12px] opacity-80 | mt-[4px] | flex items-center'>
-                    <span className='underline'>더 보기</span>
+                    <span className='underline'>{t('HomeNewsMore')}</span>
                     <Icon
                       name='chevron-right'
                       className='text-[16px]'

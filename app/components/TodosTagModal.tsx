@@ -1,6 +1,7 @@
 'use client'
 
 import { TAG_COLORS } from '@/const'
+import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { Tag } from '../models/Todo'
 import { useTagsStore } from '../stores/tags.store'
@@ -16,7 +17,7 @@ interface Props {
 
 export function TodosTagModal({ isShow = false, select, close }: Props) {
   const tags = useTagsStore((s) => s.tags)
-
+  const t = useTranslations()
   const [selectedTag, setSelectedTag] = useState<Tag>()
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export function TodosTagModal({ isShow = false, select, close }: Props) {
 
   return (
     <UIBottomSheet
-      header={() => <span>태그변경</span>}
+      header={() => <span>{t('Todo.TagModalTitle')}</span>}
       open={isShow}
       close={() => close()}
       content={() => (
@@ -56,7 +57,7 @@ export function TodosTagModal({ isShow = false, select, close }: Props) {
         <button
           className='rounded-md bg-indigo-500 py-[12px]'
           onClick={() => selectedTag && select(selectedTag)}>
-          <p className='text-white text-[15px] font-[700]'>선택하기</p>
+          <p className='text-white text-[15px] font-[700]'>{t('Todo.TagModalDone')}</p>
         </button>
       )}
     />

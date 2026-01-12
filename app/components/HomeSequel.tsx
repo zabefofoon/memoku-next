@@ -1,6 +1,7 @@
 'use client'
 
 import { CreatedSeriesPoint, todosDB } from '@/app/lib/todos.db'
+import { useTranslations } from 'next-intl'
 import dynamic from 'next/dynamic'
 import { useCallback, useEffect, useState } from 'react'
 import type { HomeSequelData } from '../models/Chart'
@@ -12,6 +13,7 @@ const HomeSequelChart = dynamic(() => import('./HomeSequelChart'), {
 
 export default function HomeSequel() {
   const [data, setData] = useState<HomeSequelData[]>()
+  const t = useTranslations('Home')
 
   const withMovingAverage = (data: CreatedSeriesPoint[], window = 7): HomeSequelData[] => {
     const arr = data.map((d) => d.created)
@@ -36,7 +38,7 @@ export default function HomeSequel() {
 
   return (
     <div className='gap-[8px] flex flex-col | shadow-md rounded-xl bg-indigo-500 dark:bg-indigo-600 | p-[16px]'>
-      <h3 className='font-[700] text-[16px] | text-white'>주간 활동</h3>
+      <h3 className='font-[700] text-[16px] | text-white'>{t('HomeSequelLabel')}</h3>
       <HomeSequelChart data={data} />
     </div>
   )

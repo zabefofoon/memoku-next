@@ -19,6 +19,7 @@ import { useScrollStore } from '@/app/stores/scroll.store'
 import { useThemeStore } from '@/app/stores/theme.store'
 import { useTodosPageStore } from '@/app/stores/todosPage.store'
 import { AGE_1_YEAR, COOKIE_DISPLAY } from '@/const'
+import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useCookies } from 'react-cookie'
@@ -28,6 +29,7 @@ export function TodosClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [cookieDisplay, setCookie] = useCookies([COOKIE_DISPLAY])
+  const t = useTranslations()
 
   const screenSize = useThemeStore((state) => state.screenSize)
   const todos = useTodosPageStore((state) => state.todos)
@@ -177,8 +179,8 @@ export function TodosClient() {
       />
       <div className='flex justify-between items-start | px-[16px] sm:px-0 mt-[16px] sm:mt-0'>
         <div>
-          <h1 className='text-[20px] opacity-80'>Todos</h1>
-          <p className='text-[16px] opacity-50'>할 일을 정리해보세요.</p>
+          <h1 className='text-[20px] opacity-80'>{t('Todo.PageTitle')}</h1>
+          <p className='text-[16px] opacity-50'>{t('Todo.PageDesc')}</p>
         </div>
         <div>
           <DarkModeButton />
@@ -244,7 +246,7 @@ export function TodosClient() {
                 name='plus'
                 className='text-[20px]'
               />
-              <p className='text-[14px]'>추가하기</p>
+              <p className='text-[14px]'>{t('Todo.AddTodo')}</p>
             </button>
           </div>
           <TodosSelectedFilters />

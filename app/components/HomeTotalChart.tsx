@@ -1,7 +1,7 @@
 import { PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer } from 'recharts'
 
 interface Props {
-  data: { key: string; name: string; value: number; fill: string }[]
+  data: { key: string; value: number; fill: string }[]
   total: number
   isDarkMode: boolean
 }

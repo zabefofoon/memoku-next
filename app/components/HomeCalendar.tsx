@@ -2,7 +2,7 @@
 
 import { todosDB } from '@/app/lib/todos.db'
 import { useTagsStore } from '@/app/stores/tags.store'
-import { CALENDAR_REPEAT, TAG_COLORS } from '@/const'
+import { CALENDAR_REPEAT, COOKIE_LANGUAGE, TAG_COLORS } from '@/const'
 import {
   DatesSetArg,
   EventApi,
@@ -124,6 +124,7 @@ export default function HomeCalendar() {
         onPointerUp={handleMouseEnd}>
         <FullCalendar
           key={`${isDarkMode}`}
+          locale={cookies[COOKIE_LANGUAGE]}
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin]}
           initialView='dayGridMonth'

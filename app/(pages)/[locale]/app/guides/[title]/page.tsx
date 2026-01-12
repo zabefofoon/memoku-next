@@ -8,6 +8,7 @@ import { MDXRemote } from 'next-mdx-remote/rsc'
 
 type PageProps = {
   params: {
+    locale: string
     title: string
   }
 }
@@ -15,9 +16,9 @@ type PageProps = {
 export const runtime = 'nodejs'
 
 export async function generateMetadata({ params }: PageProps) {
-  const { title } = await params
+  const { title, locale } = await params
 
-  const entry = await getNewsBySlug(decodeURIComponent(title), 'ko')
+  const entry = await getNewsBySlug(decodeURIComponent(title), locale)
   return !entry
     ? {}
     : {
@@ -43,9 +44,9 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function NewsDetail({ params }: PageProps) {
-  const { title } = await params
+  const { title, locale } = await params
 
-  const entry = await getNewsBySlug(decodeURIComponent(title), 'ko')
+  const entry = await getNewsBySlug(decodeURIComponent(title), locale)
   if (!entry) notFound()
   return (
     <article className='h-[calc(100dvh-4px)] sm:h-full | rounded-xl | flex flex-col'>

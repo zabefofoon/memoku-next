@@ -1,5 +1,6 @@
 import { Link } from '@/app/components/Link'
 import { STATUS_MAP, TAG_COLORS } from '@/const'
+import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { MouseEvent, useState } from 'react'
 import { Else, If, Then } from 'react-if'
@@ -22,6 +23,7 @@ export function TodoCard({
   todo: TodoWithChildren
   hideChildren?: boolean
 }) {
+  const t = useTranslations()
   const getTagsById = useTagsStore((s) => s.getTagsById)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -62,7 +64,8 @@ export function TodoCard({
         if (todo.childId && !hideChildren) {
           event.preventDefault()
           const urlParams = new URLSearchParams(searchParams.toString())
-          router.push(`?${decodeURIComponent(urlParams.toString())}&children=${todo.id}`, {
+          urlParams.append('children', todo.id)
+          router.push(`?${decodeURIComponent(urlParams.toString())}`, {
             scroll: false,
           })
         }
@@ -79,7 +82,8 @@ export function TodoCard({
           event.stopPropagation()
 
           const urlParams = new URLSearchParams(searchParams.toString())
-          router.push(`?${decodeURIComponent(urlParams.toString())}&todoTag=${todo.id}`, {
+          urlParams.append('todoTag', todo.id)
+          router.push(`?${decodeURIComponent(urlParams.toString())}`, {
             scroll: false,
           })
         }}>
@@ -157,7 +161,7 @@ export function TodoCard({
               })
             }}>
             <Icon name={STATUS_MAP[todo.status ?? 'created']?.icon} />
-            <p>{STATUS_MAP[todo.status ?? 'created']?.label}</p>
+            <p>{todo.status ? t(`General.${todo.status}`) : t('General.created')}</p>
           </button>
         </div>
         {/* 상태 */}
@@ -211,31 +215,31 @@ export function TodoCard({
                     onClick={(event) => {
                       event.preventDefault()
                       const urlParams = new URLSearchParams(searchParams.toString())
-                      router.push(
-                        `?${decodeURIComponent(urlParams.toString())}&children=${todo.id}`,
-                        {
-                          scroll: false,
-                        }
-                      )
+                      urlParams.append('children', todo.id)
+                      router.push(`?${decodeURIComponent(urlParams.toString())}`, {
+                        scroll: false,
+                      })
                     }}>
                     <Icon
                       name='chevron-down'
                       className='text-[16px]'
                     />
-                    <p className='text-[11px]'>하위 일 더 보기</p>
+                    <p className='text-[11px]'>{t('Todo.SeeChildren')}</p>
                   </button>
                 </Then>
                 <Else>
                   <button
                     className='flex items-center | text-gray-400 dark:text-zinc-400'
-                    onClick={() =>
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      event.preventDefault()
                       addChildren(todo).then(({ id }) => router.push(`/app/todos/${id}`))
-                    }>
+                    }}>
                     <Icon
                       name='plus'
                       className='text-[16px]'
                     />
-                    <p className='text-[11px]'>하위 일 추가</p>
+                    <p className='text-[11px]'>{t('Todo.AddChildren')}</p>
                   </button>
                 </Else>
               </If>
@@ -274,19 +278,17 @@ export function TodoCard({
 
                       toggle(false, () => {
                         const urlParams = new URLSearchParams(searchParams.toString())
-                        router.push(
-                          `?${decodeURIComponent(urlParams.toString())}&todoStatus=${todo.id}`,
-                          {
-                            scroll: false,
-                          }
-                        )
+                        urlParams.append('todoStatus', todo.id)
+                        router.push(`?${decodeURIComponent(urlParams.toString())}`, {
+                          scroll: false,
+                        })
                       })
                     }}>
                     <Icon
                       name='run'
                       className='text-[16px]'
                     />
-                    <p className='text-[13px]'>상태변경</p>
+                    <p className='text-[13px]'>{t('Todo.ChangeStatus')}</p>
                   </button>
                   <button
                     type='button'
@@ -297,19 +299,17 @@ export function TodoCard({
 
                       toggle(false, () => {
                         const urlParams = new URLSearchParams(searchParams.toString())
-                        router.push(
-                          `?${decodeURIComponent(urlParams.toString())}&todoTag=${todo.id}`,
-                          {
-                            scroll: false,
-                          }
-                        )
+                        urlParams.append('todoTag', todo.id)
+                        router.push(`?${decodeURIComponent(urlParams.toString())}`, {
+                          scroll: false,
+                        })
                       })
                     }}>
                     <Icon
                       name='tag'
                       className='text-[16px]'
                     />
-                    <p className='text-[13px]'>태그변경</p>
+                    <p className='text-[13px]'>{t('Todo.ChangeTag')}</p>
                   </button>
                   <button
                     type='button'
@@ -330,7 +330,7 @@ export function TodoCard({
                       name='alarm'
                       className='text-[16px]'
                     />
-                    <p className='text-[13px]'>일정설정</p>
+                    <p className='text-[13px]'>{t('Todo.SetPeriod')}</p>
                   </button>
                   <button
                     type='button'
@@ -345,7 +345,7 @@ export function TodoCard({
                       name='edit'
                       className='text-[16px]'
                     />
-                    <p className='text-[13px]'>내용수정</p>
+                    <p className='text-[13px]'>{t('Todo.EditContent')}</p>
                   </button>
                 </div>
               )}

@@ -136,7 +136,7 @@ export default function UIBottomSheet({
         onTouchCancel={handleTouchEnd}
         onTouchEnd={handleTouchEnd}>
         <button
-          aria-label='닫기'
+          type='button'
           onClick={close}
           className='fixed inset-0 bg-black/50 | w-full h-full | backdrop-blur-[2px]'
         />

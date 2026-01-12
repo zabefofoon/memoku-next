@@ -1,6 +1,7 @@
 'use client'
 
 import { FILTER_STATUS, STATUS_MAP } from '@/const'
+import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { Todo } from '../models/Todo'
 import { useThemeStore } from '../stores/theme.store'
@@ -17,6 +18,7 @@ interface Props {
 export function TodosStatusModal({ isShow, select, close }: Props) {
   const [selectedStatus, setSelectedStatus] = useState<Todo['status']>()
   const isDarkMode = useThemeStore((s) => s.isDarkMode)
+  const t = useTranslations()
 
   useEffect(() => {
     setSelectedStatus(undefined)
@@ -24,7 +26,7 @@ export function TodosStatusModal({ isShow, select, close }: Props) {
 
   return (
     <UIBottomSheet
-      header={() => <span>상태변경</span>}
+      header={() => <span>{t('Todo.StatusModalTitle')}</span>}
       open={isShow ?? false}
       close={() => close()}
       content={() => (
@@ -44,7 +46,7 @@ export function TodosStatusModal({ isShow, select, close }: Props) {
               }}
               onClick={() => setSelectedStatus(status.value)}>
               <Icon name={status.icon} />
-              <p>{status.label}</p>
+              <p>{t(`General.${status.value}`)}</p>
             </button>
           ))}
         </div>
@@ -53,7 +55,7 @@ export function TodosStatusModal({ isShow, select, close }: Props) {
         <button
           className='rounded-md bg-indigo-500 py-[12px]'
           onClick={() => selectedStatus && select?.(selectedStatus)}>
-          <p className='text-white text-[15px] font-[700]'>선택하기</p>
+          <p className='text-white text-[15px] font-[700]'>{t('Todo.StatusModalDone')}</p>
         </button>
       )}
     />

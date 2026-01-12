@@ -1,6 +1,7 @@
 'use client'
 
 import { AGE_1_YEAR, COOKIE_DEVICE_ID, COOKIE_PUSH_SUBSCRIBED } from '@/const'
+import { useTranslations } from 'next-intl'
 import { useCookies } from 'react-cookie'
 import { api } from '../lib/api'
 import { useThemeStore } from '../stores/theme.store'
@@ -9,6 +10,7 @@ import UIToggle from './UIToggle'
 
 export default function SettingsTags() {
   const [cookies, setCookie] = useCookies()
+  const t = useTranslations()
   const notificationPermission = useThemeStore((state) => state.notificationPermission)
   const isSubscribedPush = useThemeStore((state) => state.isSubscribedPush)
   const setIsSubscribedPush = useThemeStore((state) => state.setIsSubscribedPush)
@@ -56,7 +58,9 @@ export default function SettingsTags() {
   return (
     <div className='emboss-sheet | p-[16px]'>
       <div className='flex items-center sm:items-start justify-between sm:justify-start gap-[12px] lg:gap-[24px]'>
-        <p className='text-[14px] font-[700] | shrink-0 | lg:py-[8px] | w-[100px]'>알림설정</p>
+        <p className='text-[14px] font-[700] | shrink-0 | lg:py-[8px] | w-[100px]'>
+          {t('Settings.Notification')}
+        </p>
         <div className='flex items-center gap-[6px] flex-wrap'>
           <UIToggle
             id='알림설정'

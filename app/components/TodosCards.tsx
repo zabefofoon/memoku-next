@@ -1,4 +1,5 @@
 import { COOKIE_DISPLAY } from '@/const'
+import { useTranslations } from 'next-intl'
 import { useCookies } from 'react-cookie'
 import { Else, If, Then } from 'react-if'
 import { useThemeStore } from '../stores/theme.store'
@@ -9,7 +10,7 @@ import UISpinner from './UISpinner'
 
 export default function TodosCards() {
   const [cookies] = useCookies([COOKIE_DISPLAY])
-
+  const t = useTranslations()
   const screenSize = useThemeStore((s) => s.screenSize)
   const isTodosLoading = useTodosPageStore((state) => state.isTodosLoading)
   const todos = useTodosPageStore((state) => state.todos)
@@ -37,10 +38,10 @@ export default function TodosCards() {
               <Then>
                 <div>
                   <p className='px-[16px] sm:p-0 mb-[16px] | text-[15px] text-gray-600 dark:text-zinc-400'>
-                    전체
+                    {t('General.All')}
                   </p>
                   <div className='flex-1 h-full | py-[80px] px-[16px] | text-center'>
-                    <p className='text-[13px] opacity-70'>데이터가 없습니다.</p>
+                    <p className='text-[13px] opacity-70'>{t('General.EmptyData')}</p>
                   </div>
                 </div>
               </Then>
@@ -52,7 +53,7 @@ export default function TodosCards() {
           <Else>
             <div>
               <p className='px-[16px] sm:p-0 mb-[16px] | text-[15px] text-gray-600 dark:text-zinc-400'>
-                전체({total})
+                {t('General.All')}({total})
               </p>
               <div
                 className={etcUtil.classNames([

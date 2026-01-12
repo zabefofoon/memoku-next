@@ -4,6 +4,7 @@ import { Link } from '@/app/components/Link'
 
 import { produce } from 'immer'
 
+import { useTranslations } from 'next-intl'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import PhotoSwipeLightbox from 'photoswipe/lightbox'
 import 'photoswipe/style.css'
@@ -15,6 +16,7 @@ import { TodosDeleteModal } from './TodosDeleteModal'
 import UISpinner from './UISpinner'
 
 export function TodosImages() {
+  const t = useTranslations()
   const todo = useTodosDetailStore((s) => s.todo)
   const images = useTodosDetailStore((s) => s.images)
   const deleteImage = useTodosDetailStore((s) => s.deleteImage)
@@ -93,13 +95,13 @@ export function TodosImages() {
             <If condition={!!isUploading}>
               <Then>
                 <UISpinner />
-                <p className='text-[12px] sm:text-[13px] opacity-70'>업로드 중</p>
+                <p className='text-[12px] sm:text-[13px] opacity-70'>{t('Todo.Uploading')}</p>
               </Then>
               <Else>
                 <span className='bg-slate-100 dark:bg-zinc-700 | rounded-full p-[8px]'>
                   <Icon name='image' />
                 </span>
-                <p className='text-[12px] sm:text-[13px] opacity-70'>이미지 추가</p>
+                <p className='text-[12px] sm:text-[13px] opacity-70'>{t('Todo.AddImage')}</p>
               </Else>
             </If>
           </button>

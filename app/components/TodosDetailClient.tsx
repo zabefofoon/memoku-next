@@ -12,6 +12,7 @@ import UISpinner from '@/app/components/UISpinner'
 import { useTodosDetailStore } from '@/app/stores/todosDetail.store'
 import etcUtil from '@/app/utils/etc.util'
 import { COOKIE_DEVICE_ID } from '@/const'
+import { useTranslations } from 'next-intl'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useCookies } from 'react-cookie'
@@ -22,6 +23,7 @@ export default function TodosDetailClient() {
   const params = useParams()
   const searchParams = useSearchParams()
   const [cookies] = useCookies()
+  const t = useTranslations()
 
   const todo = useTodosDetailStore((s) => s.todo)
   const changeTagInStore = useTodosDetailStore((s) => s.changeTag)
@@ -41,7 +43,7 @@ export default function TodosDetailClient() {
   const setImages = useTodosDetailStore((s) => s.setImages)
 
   const randomizeIndex = useRef<number>(0)
-  const guideTexts = ['텍스트는 자동으로 저장 됩니다.', '*첫 줄에서 줄바꿈을 하면, 제목이 됩니다.']
+  const guideTexts = t.raw('Todo.Guide')
 
   useLayoutEffect(() => {
     setIsLoading(true)
@@ -56,12 +58,12 @@ export default function TodosDetailClient() {
   }, [setChildTodo, setParentTodo, setImages])
 
   useEffect(() => {
-    randomizeIndex.current = Math.floor(Math.random() * 2)
+    randomizeIndex.current = Math.floor(Math.random() * guideTexts.length)
 
     loadTodo(params.id as string).then((todo) => {
       if (todo) loadImages(todo)
     })
-  }, [loadImages, loadTodo, params.id])
+  }, [guideTexts.length, loadImages, loadTodo, params.id])
 
   if (isLoading)
     return (
@@ -110,7 +112,7 @@ export default function TodosDetailClient() {
             />
 
             <p className='text-[18px] sm:text-[20px] truncate'>
-              {text.split(/\n/)[0] || '내용을 입력하세요.'}
+              {text.split(/\n/)[0] || t('Todo.EditPlaceholder')}
             </p>
           </button>
           <p className='text-[13px] sm:text-[15px] opacity-50 | hidden sm:block'>
@@ -129,7 +131,7 @@ export default function TodosDetailClient() {
                     name='chevron-up'
                     className='text-[20px]'
                   />
-                  상위
+                  {t('Todo.Upper')}
                 </p>
                 <p className='truncate'>{parentTodo?.description?.split(/\n/)[0]}</p>
               </Link>
@@ -156,7 +158,7 @@ export default function TodosDetailClient() {
                     name='chevron-down'
                     className='text-[20px]'
                   />
-                  하위
+                  {t('Todo.Lower')}
                 </p>
                 <p className='truncate'>{childTodo?.description?.split(/\n/)[0]}</p>
               </Link>
@@ -171,7 +173,7 @@ export default function TodosDetailClient() {
                 name='chevron-down'
                 className='text-[20px]'
               />
-              <p className='text-[15px]'>하위 일 추가하기</p>
+              <p className='text-[15px]'>{t('Todo.AddChildren')}</p>
             </button>
           </Else>
         </If>

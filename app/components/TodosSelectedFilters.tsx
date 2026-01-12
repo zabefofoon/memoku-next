@@ -1,6 +1,7 @@
 'use client'
 
 import { FILTER_STATUS, STATUS_COLORS, TAG_COLORS } from '@/const'
+import { useTranslations } from 'next-intl'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCookies } from 'react-cookie'
 import { Todo } from '../models/Todo'
@@ -8,6 +9,7 @@ import { useTagsStore } from '../stores/tags.store'
 import { Icon } from './Icon'
 
 export default function TodosTagsFilter() {
+  const t = useTranslations()
   const [cookies] = useCookies()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -70,7 +72,7 @@ export default function TodosTagsFilter() {
                   name={status.icon}
                   className='text-[16px]'
                 />
-                {status.label}
+                {t(`General.${status.value}`)}
                 <Icon
                   name='close'
                   className='text-[16px]'
