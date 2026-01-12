@@ -2,12 +2,10 @@
 
 import { Link } from '@/app/components/Link'
 import etcUtil from '@/app/utils/etc.util'
-import { COOKIE_LANGUAGE } from '@/const'
 import { getPathname } from '@/i18n/navigation'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { useCookies } from 'react-cookie'
 import { useThemeStore } from '../stores/theme.store'
 import FloatingButtons from './FloatingButtons'
 import { Icon } from './Icon'
@@ -56,9 +54,9 @@ const menus = [
 ]
 
 export default function AppBottomAppBar() {
+  const locale = useLocale()
   const t = useTranslations()
   const pathname = usePathname()
-  const [cookies] = useCookies()
   const savedTodosQueries = useThemeStore((state) => state.savedTodosQueries)
   const [isShow, setIsShow] = useState(true)
 
@@ -113,7 +111,7 @@ export default function AppBottomAppBar() {
                 'relative | flex flex-col items-center justify-center rounded-full | p-[6px]',
                 {
                   'bg-indigo-500 text-white':
-                    pathname === getPathname({ href: menu.href, locale: cookies[COOKIE_LANGUAGE] }),
+                    pathname === getPathname({ href: menu.href, locale: locale ?? 'en' }),
                 },
               ])}>
               {menu.induce && (
@@ -121,7 +119,7 @@ export default function AppBottomAppBar() {
               )}
               <Icon
                 name={
-                  pathname === getPathname({ href: menu.href, locale: cookies[COOKIE_LANGUAGE] })
+                  pathname === getPathname({ href: menu.href, locale: locale ?? 'en' })
                     ? menu.activeIcon
                     : menu.icon
                 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { COOKIE_LANGUAGE } from '@/const'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useCookies } from 'react-cookie'
@@ -12,9 +12,10 @@ import { Icon } from './Icon'
 import UIDropdown from './UIDropdown'
 
 export default function SettingsLanguage() {
+  const locale = useLocale()
   const memberInfo = useAuthStore((s) => s.memberInfo)
   const router = useRouter()
-  const [cookie, setCookies] = useCookies()
+  const [_, setCookies] = useCookies()
   const [isOpen, setOpen] = useState(false)
   const t = useTranslations()
 
@@ -61,7 +62,7 @@ export default function SettingsLanguage() {
                 event.preventDefault()
                 toggle()
               }}>
-              <p className='text-[13px]'>{langMap[cookie[COOKIE_LANGUAGE]]}</p>
+              <p className='text-[13px]'>{langMap[locale]}</p>
               <Icon
                 name='chevron-down'
                 className='ml-[4px] | text-[16px]'
@@ -76,7 +77,7 @@ export default function SettingsLanguage() {
                   type='button'
                   className={etcUtil.classNames([
                     'px-[20px] py-[3px] | flex justify-center hover:bg-slate-50 hover:dark:bg-zinc-600 | text-[13px]',
-                    { 'bg-slate-50 dark:bg-zinc-600': cookie[COOKIE_LANGUAGE] === lang.key },
+                    { 'bg-slate-50 dark:bg-zinc-600': locale === lang.key },
                   ])}
                   onClick={() => toggle(false, () => changeLanguage(lang.key))}>
                   {lang.value}

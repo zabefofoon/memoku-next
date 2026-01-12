@@ -6,9 +6,9 @@ import { usePathname } from 'next/navigation'
 import { useCookies } from 'react-cookie'
 import packageJson from '../../package.json'
 
-import { AGE_1_YEAR, COOKIE_EXPAND, COOKIE_LANGUAGE, COOKIE_THEME } from '@/const'
+import { AGE_1_YEAR, COOKIE_EXPAND, COOKIE_THEME } from '@/const'
 import { getPathname } from '@/i18n/navigation'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { If, Then } from 'react-if'
 import { api } from '../lib/api'
@@ -73,15 +73,12 @@ const menus = [
 ]
 
 export function AppAside(props: Props) {
+  const locale = useLocale()
   const t = useTranslations()
   const setFileId = useSheetStore((state) => state.setFileId)
   const savedTodosQueries = useThemeStore((state) => state.savedTodosQueries)
   const pathname = usePathname()
-  const [cookies, setCookie, removeCookie] = useCookies([
-    COOKIE_LANGUAGE,
-    COOKIE_THEME,
-    COOKIE_EXPAND,
-  ])
+  const [_, setCookie, removeCookie] = useCookies([COOKIE_THEME, COOKIE_EXPAND])
 
   const [isExpand, setIsExpand] = useState<boolean>(props.isExpand)
 
@@ -134,7 +131,7 @@ export function AppAside(props: Props) {
             <Link
               href={`${menu.href}${menu.href === '/app/todos' ? (savedTodosQueries ?? '') : ''}`}
               aria-current={
-                pathname === getPathname({ href: menu.href, locale: cookies[COOKIE_LANGUAGE] })
+                pathname === getPathname({ href: menu.href, locale: locale ?? 'en' })
                   ? 'page'
                   : undefined
               }
@@ -142,12 +139,12 @@ export function AppAside(props: Props) {
                 'relative | flex items-center gap-[6px] | py-[12px] px-[16px] mx-[4px] | rounded-full hover:bg-slate-50 hover:dark:bg-zinc-700/50',
                 {
                   'text-white | bg-indigo-500 dark:bg-indigo-600 hover:bg-indigo-500 hover:dark:bg-indigo-600':
-                    pathname === getPathname({ href: menu.href, locale: cookies[COOKIE_LANGUAGE] }),
+                    pathname === getPathname({ href: menu.href, locale: locale ?? 'en' }),
                 },
               ])}>
               <Icon
                 name={
-                  pathname === getPathname({ href: menu.href, locale: cookies[COOKIE_LANGUAGE] })
+                  pathname === getPathname({ href: menu.href, locale: locale ?? 'en' })
                     ? menu.activeIcon
                     : menu.icon
                 }
