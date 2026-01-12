@@ -3,7 +3,7 @@ import { AppAside } from '@/app/components/AppAside'
 import AppBottomAppBar from '@/app/components/AppBottomAppBar'
 import { cookies } from 'next/headers'
 
-export default async function RootLayout(props: LayoutProps<'/app'>) {
+export default async function RootLayout(props: LayoutProps<'/[locale]/app'>) {
   const cookieStore = await cookies()
 
   const isExpandAside = cookieStore.get('x-expand-aside')?.value === 'true'
