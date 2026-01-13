@@ -1,10 +1,8 @@
 ﻿import { DarkModeButton } from '@/app/components/DarkModeButton'
 import { Link } from '@/app/components/Link'
-import { COOKIE_LANGUAGE } from '@/const'
 import { getNewsList } from '@/lib/news'
 import { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
-import { cookies } from 'next/headers'
 
 export async function generateMetadata({
   params,
@@ -17,9 +15,9 @@ export async function generateMetadata({
   }
 }
 
-export default async function News() {
-  const cookieStore = await cookies()
-  const newsList = await getNewsList({ locale: cookieStore.get(COOKIE_LANGUAGE)?.value ?? 'en' })
+export default async function News({ params }: PageProps<'/[locale]/app/guides'>) {
+  const { locale } = await params
+  const newsList = await getNewsList({ locale })
   const t = await getTranslations()
   return (
     <div className='h-full | flex flex-col'>

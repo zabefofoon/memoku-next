@@ -1,15 +1,14 @@
 import { Link } from '@/app/components/Link'
-import { COOKIE_LANGUAGE } from '@/const'
 import { getNewsList } from '@/lib/news'
-import { getTranslations } from 'next-intl/server'
-import { cookies } from 'next/headers'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { Icon } from './Icon'
 import UICarousel, { UICarouselSlide } from './UICarousel'
 
 export default async function HomeNews() {
-  const cookieStore = await cookies()
-  const newsList = await getNewsList({ locale: cookieStore.get(COOKIE_LANGUAGE)?.value ?? 'en' })
+  const locale = await getLocale()
+  const newsList = await getNewsList({ locale })
   const t = await getTranslations('Home')
+
   return (
     <div className='order-2 sm:order-0 | aspect-square flex-1 min-w-[260px] shrink-0 | flex flex-col gap-[12px]'>
       <div className='emboss-sheet | w-full h-full'>

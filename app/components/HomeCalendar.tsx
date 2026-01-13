@@ -2,7 +2,7 @@
 
 import { todosDB } from '@/app/lib/todos.db'
 import { useTagsStore } from '@/app/stores/tags.store'
-import { CALENDAR_REPEAT, COOKIE_LANGUAGE, TAG_COLORS } from '@/const'
+import { CALENDAR_REPEAT, TAG_COLORS } from '@/const'
 import {
   DatesSetArg,
   EventApi,
@@ -19,6 +19,7 @@ import { useCookies } from 'react-cookie'
 import { useThemeStore } from '../stores/theme.store'
 
 import type FullCalendarComponent from '@fullcalendar/react'
+import { useLocale } from 'next-intl'
 import dynamic from 'next/dynamic'
 
 const FullCalendar = dynamic(() => import('@fullcalendar/react'), {
@@ -29,6 +30,7 @@ const FullCalendar = dynamic(() => import('@fullcalendar/react'), {
 export default function HomeCalendar() {
   const [cookies] = useCookies()
   const searchParams = useSearchParams()
+  const locale = useLocale()
 
   const isDarkMode = useThemeStore((state) => state.isDarkMode)
   const getTagsById = useTagsStore((s) => s.getTagsById)
@@ -124,7 +126,7 @@ export default function HomeCalendar() {
         onPointerUp={handleMouseEnd}>
         <FullCalendar
           key={`${isDarkMode}`}
-          locale={cookies[COOKIE_LANGUAGE]}
+          locale={locale}
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin]}
           initialView='dayGridMonth'

@@ -2,7 +2,7 @@
 
 import { todosDB } from '@/app/lib/todos.db'
 import { useTagsStore } from '@/app/stores/tags.store'
-import { CALENDAR_REPEAT, COOKIE_LANGUAGE, TAG_COLORS } from '@/const'
+import { CALENDAR_REPEAT, TAG_COLORS } from '@/const'
 import {
   DatesSetArg,
   EventApi,
@@ -15,16 +15,15 @@ import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import dayjs from 'dayjs'
 import debounce from 'lodash.debounce'
+import { useLocale } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { PointerEvent, TouchEvent, useEffect, useRef, useState } from 'react'
-import { useCookies } from 'react-cookie'
 import { useTransitionRouter } from '../hooks/useTransitionRouter'
 import { useThemeStore } from '../stores/theme.store'
 
 export default function PageCalendar() {
   const searchParams = useSearchParams()
-  const [cookies] = useCookies()
-
+  const locale = useLocale()
   const screenSize = useThemeStore((state) => state.screenSize)
   const isDarkMode = useThemeStore((state) => state.isDarkMode)
   const getTagsById = useTagsStore((state) => state.getTagsById)
@@ -142,7 +141,7 @@ export default function PageCalendar() {
           key={`${isDarkMode}`}
           contentHeight='100%'
           ref={calendarRef}
-          locale={cookies[COOKIE_LANGUAGE]}
+          locale={locale}
           plugins={[dayGridPlugin, timeGridPlugin]}
           initialView='dayGridMonth'
           events={events}
