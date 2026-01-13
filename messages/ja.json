@@ -1,4 +1,29 @@
 {
+  "Landing": {
+    "TopDesc": "シンプルにやること管理ができる、\n無料のオンラインWebサイト",
+    "HomeTitle": "アプリのように使えます！",
+    "HomeDesc": "ブラウザで「ホーム画面に追加」を押してみてください。\nモバイルアプリのような体験ができます。",
+    "FeatureTagsTitle": "分類しやすいやること管理",
+    "FeatureTagsDesc": "たくさんのやることを快適に管理するために、次の機能を使ってみてください。",
+    "FeatureTagsItems": ["タグ管理", "ステータス管理", "サブタスク管理"],
+
+    "FeatureAlarmTitle": "計画的なやること管理",
+    "FeatureAlarmsDesc": "時間に合わせてやることを作成し、計画的に管理してみましょう。",
+    "FeatureAlarmItems": ["カレンダー", "開始日／終了日／曜日の設定", "時間に合わせた通知"],
+
+    "FeatureLinkTitle": "どこでもやること管理",
+    "FeatureLinkDesc": "Googleログインで、他の端末でも作成したやることを簡単に確認できます。",
+    "FeatureLinkItems": ["Googleログイン", "自動保存"],
+
+    "FeatureDarkTitle": "目にやさしいやること管理",
+    "FeatureDarkDesc": "暗い環境では、目にやさしいダークモードを使ってみてください。",
+    "FeatureDarkItems": ["ダークモード"],
+    "CTATitle": "今すぐ始めましょう",
+    "CTADesc": "これらはすべて無料で利用できます。",
+    "CTAButton": "今すぐ始める",
+    "PageDesc": "シンプルなやること管理",
+    "Start": "始める"
+  },
   "Menu": {
     "Home": "ホーム",
     "Todos": "やること",

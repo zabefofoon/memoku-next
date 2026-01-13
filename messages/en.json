@@ -1,4 +1,33 @@
 {
+  "Landing": {
+    "TopDesc": "A free online website\nfor managing your todos simply",
+    "HomeTitle": "Use it like an app!",
+    "HomeDesc": "In your browser, tap \"Add to Home Screen\".\nYou can get an app-like experience on mobile.",
+    "FeatureTagsTitle": "Easy-to-organize todo management",
+    "FeatureTagsDesc": "To manage lots of tasks more comfortably, try these features.",
+    "FeatureTagsItems": ["Tag management", "Status management", "Subtask management"],
+
+    "FeatureAlarmTitle": "Plan your todos",
+    "FeatureAlarmsDesc": "Create tasks by time and manage them in a more organized way.",
+    "FeatureAlarmItems": [
+      "Calendar",
+      "Set start/end dates & days of the week",
+      "Time-based reminders"
+    ],
+
+    "FeatureLinkTitle": "Manage your todos anywhere",
+    "FeatureLinkDesc": "With Google sign-in, you can easily view your todos on other devices too.",
+    "FeatureLinkItems": ["Google sign-in", "Auto save"],
+
+    "FeatureDarkTitle": "Eye-friendly todo management",
+    "FeatureDarkDesc": "In dark environments, try Dark Mode for a more comfortable experience.",
+    "FeatureDarkItems": ["Dark mode"],
+    "CTATitle": "Get started now",
+    "CTADesc": "All of this is free to use.",
+    "CTAButton": "Start now",
+    "PageDesc": "Simple todo management",
+    "Start": "Get started"
+  },
   "Menu": {
     "Home": "Home",
     "Todos": "Todos",
@@ -9,11 +38,11 @@
     "Intro": "About"
   },
   "General": {
-    "Unit": "{n} items",
+    "Unit": "{n}ea",
     "created": "Created",
-    "inprogress": "In Progress",
+    "inprogress": "InProgress",
     "done": "Done",
-    "hold": "On Hold",
+    "hold": "Holding",
     "YMD": "YY/MM/DD",
     "EmptyData": "No data available",
     "All": "All",

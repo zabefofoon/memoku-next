@@ -1,4 +1,29 @@
 {
+  "Landing": {
+    "TopDesc": "一个可简单管理待办事项的\n免费在线网站",
+    "HomeTitle": "像应用一样使用！",
+    "HomeDesc": "在浏览器中点击“添加到主屏幕”。\n即可获得类似手机应用的体验。",
+    "FeatureTagsTitle": "更易分类的待办管理",
+    "FeatureTagsDesc": "为了更轻松地管理大量事项，试试以下功能。",
+    "FeatureTagsItems": ["标签管理", "状态管理", "子任务管理"],
+
+    "FeatureAlarmTitle": "更有计划的待办管理",
+    "FeatureAlarmsDesc": "按时间创建待办事项，更有计划地进行管理。",
+    "FeatureAlarmItems": ["日历", "设置开始/结束日期/星期", "按时间提醒"],
+
+    "FeatureLinkTitle": "随时随地管理待办",
+    "FeatureLinkDesc": "通过 Google 登录，也能在其他设备上轻松查看已创建的待办事项。",
+    "FeatureLinkItems": ["Google 登录", "自动保存"],
+
+    "FeatureDarkTitle": "更护眼的待办管理",
+    "FeatureDarkDesc": "在昏暗环境中，开启深色模式，让眼睛更舒适。",
+    "FeatureDarkItems": ["深色模式"],
+    "CTATitle": "立即开始",
+    "CTADesc": "以上所有功能都可免费使用。",
+    "CTAButton": "立即开始",
+    "PageDesc": "简洁的待办管理",
+    "Start": "开始"
+  },
   "Menu": {
     "Home": "首页",
     "Todos": "待办",

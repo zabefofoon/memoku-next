@@ -53,8 +53,7 @@ export default async function RootLayout({ children }: LayoutProps<'/[locale]/ap
             name='viewport'
             content='width=device-width, initial-scale=1, viewport-fit=cover'></meta>
         </head>
-        <body
-          className={`${notoSansKr.className} antialiased | h-full | text-slate-800 dark:text-white/95 | bg-white dark:bg-zinc-900`}>
+        <body className={`${notoSansKr.className} antialiased | h-full`}>
           <NextIntlClientProvider>
             <EnsureAuth refreshToken={refreshToken}>
               <EnsureProviders isDarkMode={isDarkMode}>

@@ -17,6 +17,7 @@ export async function generateMetadata({ params }: PageProps<'/[locale]/app'>): 
     title: t('Menu.Home'),
   }
 }
+
 export default async function Home({ searchParams }: PageProps<'/[locale]/app'>) {
   const search = await searchParams
 

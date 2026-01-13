@@ -21,7 +21,7 @@ export default function HomeTody() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const getTagsById = useTagsStore((s) => s.getTagsById)
   const createTodo = useTodosPageStore((state) => state.createTodo)
-  const t = useTranslations('Home')
+  const t = useTranslations()
 
   const todo = todos?.todos[0]
   const tag = getTagsById(todo?.tagId)
@@ -46,16 +46,16 @@ export default function HomeTody() {
           </div>
         </Then>
         <Else>
-          <h3 className='rounded-full | font-[700]'>{t('TodayTodoLabel')}</h3>
+          <h3 className='rounded-full | font-[700]'>{t('Home.TodayTodoLabel')}</h3>
           <div className='mt-[6px] | flex flex-col gap-[4px]'>
             <If condition={!todos?.total}>
               <Then>
-                <p className='text-gray-600 dark:text-zinc-400'>{t('TodayTodoEmpty')}</p>
+                <p className='text-gray-600 dark:text-zinc-400'>{t('Home.TodayTodoEmpty')}</p>
                 <button
                   type='button'
                   className='text-gray-600 dark:text-zinc-400 text-[14px] | flex items-center | underline | w-fit | mt-[2px]'
                   onClick={() => createTodo().then((todo) => router.push(`/app/todos/${todo.id}`))}>
-                  {t('TodayTodoAdd')}
+                  {t('Home.TodayTodoAdd')}
                   <Icon name='chevron-right' />
                 </button>
               </Then>
@@ -84,7 +84,7 @@ export default function HomeTody() {
                           color: STATUS_MAP[todo?.status ?? 'created'].color,
                         }}
                       />
-                      {STATUS_MAP[todo?.status ?? 'created'].label}
+                      {t(`General.${todo?.status ?? 'created'}`)}
                     </p>
 
                     {todo && (

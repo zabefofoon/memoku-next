@@ -1,4 +1,29 @@
 {
+  "Landing": {
+    "TopDesc": "一個可簡單管理待辦事項的\n免費線上網站",
+    "HomeTitle": "像 App 一樣使用！",
+    "HomeDesc": "在瀏覽器中點選「加入主畫面」。\n即可獲得如同行動 App 的體驗。",
+    "FeatureTagsTitle": "更容易分類的待辦管理",
+    "FeatureTagsDesc": "為了更輕鬆地管理大量事項，請試試以下功能。",
+    "FeatureTagsItems": ["標籤管理", "狀態管理", "子任務管理"],
+
+    "FeatureAlarmTitle": "更有計畫的待辦管理",
+    "FeatureAlarmsDesc": "依時間建立待辦事項，讓管理更有規劃。",
+    "FeatureAlarmItems": ["行事曆", "設定開始日／結束日／星期", "依時間提醒"],
+
+    "FeatureLinkTitle": "隨時隨地管理待辦",
+    "FeatureLinkDesc": "透過 Google 登入，也能在其他裝置上輕鬆查看已建立的待辦事項。",
+    "FeatureLinkItems": ["Google 登入", "自動儲存"],
+
+    "FeatureDarkTitle": "更護眼的待辦管理",
+    "FeatureDarkDesc": "在昏暗環境中，使用深色模式讓眼睛更舒適。",
+    "FeatureDarkItems": ["深色模式"],
+    "CTATitle": "立即開始",
+    "CTADesc": "以上所有功能皆可免費使用。",
+    "CTAButton": "立即開始",
+    "PageDesc": "簡潔的待辦管理",
+    "Start": "開始"
+  },
   "Menu": {
     "Home": "首頁",
     "Todos": "待辦",

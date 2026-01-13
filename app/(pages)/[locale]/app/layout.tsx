@@ -9,7 +9,7 @@ export default async function RootLayout(props: LayoutProps<'/[locale]/app'>) {
   const isExpandAside = cookieStore.get('x-expand-aside')?.value === 'true'
 
   return (
-    <div className='relative | h-full | bg-gray-100 dark:bg-zinc-900 | flex flex-col sm:flex-row sm:gap-[36px] | sm:p-[24px] sm:pr-[0]'>
+    <div className='relative | h-full | text-slate-800 dark:text-white/95 | bg-gray-100 dark:bg-zinc-900 | flex flex-col sm:flex-row sm:gap-[36px] | sm:p-[24px] sm:pr-[0]'>
       <AppAside isExpand={isExpandAside} />
       <main
         id='scroll-el'

@@ -1,4 +1,29 @@
 {
+  "Landing": {
+    "TopDesc": "심플하게 할 일 관리를 할 수 있는,\n무료 온라인 웹사이트",
+    "HomeTitle": "앱처럼 사용하세요!",
+    "HomeDesc": "브라우저에서 \"홈 화면에 추가하기\"를 눌러보세요.\n모바일 앱과 같은 경험을 할 수 있습니다.",
+    "FeatureTagsTitle": "분류하기 쉬운 할 일 관리",
+    "FeatureTagsDesc": "수 많은 일 들을 편하게 관리하기 위해 다음 기능들을 사용해보세요.",
+    "FeatureTagsItems": ["태그 관리", "상태 관리", "하위 일 관리"],
+
+    "FeatureAlarmTitle": "계획적인 할 일 관리",
+    "FeatureAlarmsDesc": "시간에 맞춰 할 일을 만들어, 계획적으로 관리해보세요.",
+    "FeatureAlarmItems": ["캘린더", "시작일/종료일/요일 설정", "시간에 맞춘 알림"],
+
+    "FeatureLinkTitle": "어디서든 할 일 관리",
+    "FeatureLinkDesc": "구글 로그인으로, 손쉽게 다른 기기에서도 작성한 할 일을 볼 수 있습니다.",
+    "FeatureLinkItems": ["구글 로그인", "자동 저장"],
+
+    "FeatureDarkTitle": "눈이 편안한 할 일 관리",
+    "FeatureDarkDesc": "어두운 환경에서, 눈이 편하게, 다크모드를 사용해보세요.",
+    "FeatureDarkItems": ["다크모드"],
+    "CTATitle": "지금 바로 시작하세요",
+    "CTADesc": "이 모든 것은 무료로 사용할 수 있습니다.",
+    "CTAButton": "바로 시작하기",
+    "PageDesc": "심플한 할 일 관리",
+    "Start": "시작하기"
+  },
   "Menu": {
     "Home": "홈",
     "Todos": "할일",

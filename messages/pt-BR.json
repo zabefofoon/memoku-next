@@ -1,4 +1,37 @@
 {
+  "Landing": {
+    "TopDesc": "Um site online gratuito\npara gerenciar tarefas de forma simples",
+    "HomeTitle": "Use como um app!",
+    "HomeDesc": "No navegador, toque em \"Adicionar à tela inicial\".\nVocê pode ter uma experiência como a de um app no celular.",
+    "FeatureTagsTitle": "Gerenciamento de tarefas fácil de organizar",
+    "FeatureTagsDesc": "Para gerenciar muitas tarefas com mais praticidade, experimente estes recursos.",
+    "FeatureTagsItems": [
+      "Gerenciamento de tags",
+      "Gerenciamento de status",
+      "Gerenciamento de subtarefas"
+    ],
+
+    "FeatureAlarmTitle": "Gerencie tarefas com planejamento",
+    "FeatureAlarmsDesc": "Crie tarefas por horário e gerencie tudo de forma planejada.",
+    "FeatureAlarmItems": [
+      "Calendário",
+      "Definir data de início/fim e dias da semana",
+      "Lembretes por horário"
+    ],
+
+    "FeatureLinkTitle": "Gerencie tarefas em qualquer lugar",
+    "FeatureLinkDesc": "Com login do Google, você pode ver facilmente as tarefas criadas em outros dispositivos também.",
+    "FeatureLinkItems": ["Login do Google", "Salvamento automático"],
+
+    "FeatureDarkTitle": "Gerenciamento de tarefas confortável para os olhos",
+    "FeatureDarkDesc": "Em ambientes escuros, experimente o modo escuro para mais conforto visual.",
+    "FeatureDarkItems": ["Modo escuro"],
+    "CTATitle": "Comece agora mesmo",
+    "CTADesc": "Tudo isso pode ser usado gratuitamente.",
+    "CTAButton": "Começar agora",
+    "PageDesc": "Gerenciamento simples de tarefas",
+    "Start": "Começar"
+  },
   "Menu": {
     "Home": "Início",
     "Todos": "Tarefas",
@@ -9,7 +42,7 @@
     "Intro": "Introdução"
   },
   "General": {
-    "Unit": "{n} itens",
+    "Unit": "{n}ea",
     "created": "Criado",
     "inprogress": "Em andamento",
     "done": "Concluído",
