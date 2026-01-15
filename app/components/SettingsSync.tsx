@@ -30,7 +30,7 @@ export default function SettingSync() {
     <div className='emboss-sheet | p-[16px]'>
       <div className='flex items-center sm:items-start justify-between sm:justify-start gap-[12px] lg:gap-[24px]'>
         <p className='truncate text-[14px] font-[700] | shrink-0 | lg:py-[8px] | sm:w-[100px]'>
-          {t('Settings.Notification')}
+          {t('Settings.Google')}
           <If condition={memberInfo?.email}>
             <Then>
               <span className='sm:hidden ml-[4px] | text-[12px] tracking-tight !font-[400] opacity-60'>

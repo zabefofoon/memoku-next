@@ -57,30 +57,30 @@ export const STATUS_MAP = {
 }
 
 export const FILTER_STATUS = [
-  { label: '생성됨', value: 'created', icon: 'plus' },
-  { label: '진행중', value: 'inprogress', icon: 'run' },
-  { label: '중단됨', value: 'hold', icon: 'pause' },
-  { label: '완료됨', value: 'done', icon: 'check' },
+  { value: 'created', icon: 'plus' },
+  { value: 'inprogress', icon: 'run' },
+  { value: 'hold', icon: 'pause' },
+  { value: 'done', icon: 'check' },
 ] as const
 
-export const WEEK_DAYS: { name: string; value: WeekDay }[] = [
-  { name: '일', value: 'sun' },
-  { name: '월', value: 'mon' },
-  { name: '화', value: 'tue' },
-  { name: '수', value: 'wed' },
-  { name: '목', value: 'thu' },
-  { name: '금', value: 'fri' },
-  { name: '토', value: 'sat' },
+export const WEEK_DAYS: { value: WeekDay }[] = [
+  { value: 'sun' },
+  { value: 'mon' },
+  { value: 'tue' },
+  { value: 'wed' },
+  { value: 'thu' },
+  { value: 'fri' },
+  { value: 'sat' },
 ]
 
 export const WEEK_DAYS_NAME = {
-  sun: '일',
-  mon: '월',
-  tue: '화',
-  wed: '수',
-  thu: '목',
-  fri: '금',
-  sat: '토',
+  sun: 'sun',
+  mon: 'mon',
+  tue: 'tue',
+  wed: 'wed',
+  thu: 'thu',
+  fri: 'fri',
+  sat: 'sat',
 }
 
 export const MS = {

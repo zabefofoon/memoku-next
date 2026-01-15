@@ -51,7 +51,14 @@
     "EmptyData": "Não há dados",
     "All": "Tudo",
     "Search": "Pesquisar",
-    "Logout": "Sair"
+    "Logout": "Sair",
+    "sun": "Dom",
+    "mon": "Seg",
+    "tue": "Ter",
+    "wed": "Qua",
+    "thu": "Qui",
+    "fri": "Sex",
+    "sat": "Sáb"
   },
   "Home": {
     "PageTitle": "Bem-vindo ao Memoku!",
@@ -114,8 +121,8 @@
     "TagColor": "Cor",
     "Name": "Nome",
     "DarkMode": "Modo escuro",
-    "Notification": "Configurações de notificações",
-    "Google": "Sincronização com Google",
+    "Notification": "notificações",
+    "Google": "Google sync",
     "Language": "Idioma"
   },
   "Guide": {

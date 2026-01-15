@@ -2,7 +2,6 @@ import { MS } from '@/const'
 import { clsx, type ClassValue } from 'clsx'
 import ShortUniqueId from 'short-unique-id'
 import { twMerge } from 'tailwind-merge'
-import { Todo } from '../models/Todo'
 
 const etcUtil = {
   sleep(ms: number): Promise<void> {
@@ -28,7 +27,7 @@ const etcUtil = {
         resolve(reader.result as string)
       }
       reader.onerror = reject
-      reader.readAsDataURL(blob) // Blob을 Base64로 변환
+      reader.readAsDataURL(blob) // Convert Blob to base64 data URL.
     })
   },
 
@@ -49,7 +48,7 @@ const etcUtil = {
             let width = img.width
             let height = img.height
 
-            // 이미지 크기를 유지하면서 비율에 맞게 리사이즈
+            // Resize while preserving aspect ratio.
             if (width > height) {
               if (width > maxWidth) {
                 height = (height * maxWidth) / width
@@ -87,18 +86,7 @@ const etcUtil = {
     })
   },
 
-  getRemainedTime(todo: Todo): string {
-    const now = Date.now()
-    const start = todo.start ?? 0
-    const end = todo.end ?? 0
-
-    if (now < start) return `${this.formatDuration(start - now, 'until')} 후 시작`
-    else if (now >= start && now < end)
-      return `${this.formatDuration(start - now, 'until')} 후 시작`
-    else return `${this.formatDuration(start - now, 'until')} 후 초과`
-  },
-
-  formatDuration(ms: number, mode: 'until' | 'left' | 'passed'): string {
+  formatDuration(ms: number, mode: 'until' | 'left' | 'passed', locale = 'en'): string {
     if (ms < 0) ms = -ms
 
     const days = Math.floor(ms / MS.day)
@@ -109,15 +97,17 @@ const etcUtil = {
 
     let minutes = Math.floor(ms / MS.minute)
 
-    // 남은 시간(until/left)인데 실제로는 1분 미만 남았을 때 표시 보정
     if ((mode === 'until' || mode === 'left') && days === 0 && hours === 0 && minutes === 0) {
       minutes = 1
     }
 
+    const formatUnit = (value: number, unit: 'day' | 'hour' | 'minute') =>
+      new Intl.NumberFormat(locale, { style: 'unit', unit, unitDisplay: 'short' }).format(value)
+
     const parts: string[] = []
-    if (days) parts.push(`${days}일`)
-    if (hours) parts.push(`${hours}시간`)
-    parts.push(`${minutes}분`)
+    if (days) parts.push(formatUnit(days, 'day'))
+    if (hours) parts.push(formatUnit(hours, 'hour'))
+    parts.push(formatUnit(minutes, 'minute'))
 
     return parts.join(' ')
   },

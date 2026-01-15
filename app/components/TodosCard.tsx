@@ -177,12 +177,12 @@ export function TodoCard({
       <div
         className={etcUtil.classNames([
           display !== 'grid'
-            ? `w-[240px] shrink-0 | flex  ${hideChildren ? 'justify-end' : 'justify-center'}`
+            ? `w-[300px] shrink-0 | flex  ${hideChildren ? 'justify-end' : 'justify-center'}`
             : 'mt-[6px]',
         ])}>
         <TodoTimeText
           todo={todo}
-          timeFormat='YY/MM/DD'
+          timeFormat={t('General.YMD')}
           onClick={(event: MouseEvent) => {
             event.stopPropagation()
             event.preventDefault()
@@ -203,7 +203,7 @@ export function TodoCard({
               display !== 'grid' ? '' : 'mt-[auto] pt-[6px]',
             ])}>
             {/* 하위 일 더 보기 */}
-            <div className={etcUtil.classNames([display !== 'grid' ? 'w-[120px] shrink-0' : ''])}>
+            <div className={etcUtil.classNames([display !== 'grid' ? 'w-[180px] shrink-0' : ''])}>
               <If condition={todo.childId}>
                 <Then>
                   <button

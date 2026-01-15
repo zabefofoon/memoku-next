@@ -1,6 +1,5 @@
-import { WEEK_DAYS_NAME } from '@/const'
 import dayjs from 'dayjs'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { MouseEvent } from 'react'
 import { Case, Else, If, Switch, Then } from 'react-if'
 import { Todo } from '../models/Todo'
@@ -19,6 +18,7 @@ export default function TodoTimeText({
   onClick,
 }: Props) {
   const t = useTranslations()
+  const locale = useLocale()
   const now = Date.now()
   const start = todo.start ?? 0
   const end = todo.end ?? 0
@@ -46,7 +46,7 @@ export default function TodoTimeText({
               <Else>
                 <p className='text-[11px] text-gray-400'>
                   {dayjs(todo.start).format(t('General.YMD'))} ~{' '}
-                  {dayjs(todo.end).format(t('General.YMD'))}
+                  {dayjs(todo.end).format(t('General.YMD'))}asd
                 </p>
               </Else>
             </If>
@@ -60,7 +60,7 @@ export default function TodoTimeText({
                 <p className='text-[11px]'>
                   {todo.days && todo.days.length === 7
                     ? t('Todo.AllDays')
-                    : todo.days?.map((day) => WEEK_DAYS_NAME[day]).join(',')}
+                    : todo.days?.map((day) => t(`General.${day}`)).join(',')}
                 </p>
               </div>
 
@@ -87,21 +87,21 @@ export default function TodoTimeText({
                         <Case condition={isBeforeRemainedTime}>
                           <span className='text-gray-600 dark:text-zinc-400 font-[600]'>
                             {t('Todo.TimeUntil', {
-                              time: etcUtil.formatDuration(start - now, 'until'),
+                              time: etcUtil.formatDuration(start - now, 'until', locale),
                             })}
                           </span>
                         </Case>
                         <Case condition={isInprogressRemainedTime}>
                           <span className='text-indigo-500 font-[600]'>
                             {t('Todo.TimeLeft', {
-                              time: etcUtil.formatDuration(end - now, 'left'),
+                              time: etcUtil.formatDuration(end - now, 'left', locale),
                             })}
                           </span>
                         </Case>
                         <Case condition={isAfterRemainedTime}>
                           <span className='text-red-500 font-[600]'>
                             {t('Todo.TimePassed', {
-                              time: etcUtil.formatDuration(now - end, 'passed'),
+                              time: etcUtil.formatDuration(now - end, 'passed', locale),
                             })}
                           </span>
                         </Case>

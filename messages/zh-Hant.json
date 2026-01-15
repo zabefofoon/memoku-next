@@ -43,7 +43,14 @@
     "EmptyData": "沒有資料",
     "All": "全部",
     "Search": "搜尋",
-    "Logout": "登出"
+    "Logout": "登出",
+    "sun": "日",
+    "mon": "一",
+    "tue": "二",
+    "wed": "三",
+    "thu": "四",
+    "fri": "五",
+    "sat": "六"
   },
   "Home": {
     "PageTitle": "歡迎使用 Memoku！",

@@ -155,7 +155,7 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
                           scroll: false,
                         })
                       }}>
-                      {dayjs(start.date).format('YY.MM.DD')}
+                      {dayjs(start.date).format(t('General.YMD'))}
                     </button>
                   </Then>
                 </If>
@@ -187,7 +187,7 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
                           scroll: false,
                         })
                       }}>
-                      {dayjs(end.date).format('YY.MM.DD')}
+                      {dayjs(end.date).format(t('General.YMD'))}
                     </button>
                   </Then>
                 </If>
@@ -227,7 +227,7 @@ export default function TodosTimeModal({ isShow = false, todo, updateTime, close
                         'bg-indigo-500 text-white': days?.includes(item.value),
                       },
                     ])}>
-                    {item.name}
+                    {t(`General.${item.value}`)}
                   </span>
                 </button>
               ))}

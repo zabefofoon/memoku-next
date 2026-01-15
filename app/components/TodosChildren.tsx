@@ -87,7 +87,7 @@ export function TodosChildren({ isShow, close }: Props) {
       containerClass='sm:max-w-[50dvw]'
       header={() => <span>{t('Todo.ChildrenList')}</span>}
       filters={() => (
-        <div className='flex gap-[6px] | text-[12px]'>
+        <div className='overflow-auto scroll-hidden | p-[6px] | flex gap-[6px] | text-[12px] font-[600]'>
           {FILTER_STATUS.map((status) => (
             <div
               key={status.value}
@@ -96,7 +96,7 @@ export function TodosChildren({ isShow, close }: Props) {
                 className='rounded-full | bg-white | shadow-md'
                 onClick={() => toggleStatus(status.value)}>
                 <span
-                  className='px-[12px] | h-[28px] aspect-square | flex items-center justify-center gap-[4px] | rounded-full | whitespace-nowrap'
+                  className='px-[8px] | h-[28px] aspect-square | flex items-center justify-center gap-[4px] | rounded-full | whitespace-nowrap'
                   style={{
                     background:
                       cookies['x-theme'] === 'dark'
@@ -109,9 +109,9 @@ export function TodosChildren({ isShow, close }: Props) {
                   }}>
                   <Icon
                     name={status.icon}
-                    className='text-[16px]'
+                    className='text-[14px] tracking-tight'
                   />
-                  {status.label}
+                  {t(`General.${status.value}`)}
                 </span>
               </button>
               <If condition={selectedStatus.includes(status.value)}>
