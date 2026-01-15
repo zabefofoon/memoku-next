@@ -129,7 +129,7 @@ export default function UIBottomSheet({
         ref={nodeRef}
         role='dialog'
         aria-modal='true'
-        className='fixed left-0 top-0 z-50 | w-full h-full | flex items-end sm:items-center justify-center'
+        className='text-slate-800 dark:text-white/95 | fixed left-0 top-0 z-50 | w-full h-full | flex items-end sm:items-center justify-center'
         data-sheet={open}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

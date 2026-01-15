@@ -40,7 +40,7 @@ export default function UIModal({ open, close, header, content, ok, cancel }: Pr
         ref={nodeRef}
         role='dialog'
         aria-modal='true'
-        className='fixed left-0 top-0 z-50 | w-full h-full | flex items-center justify-center'>
+        className='text-slate-800 dark:text-white/95 | fixed left-0 top-0 z-50 | w-full h-full | flex items-center justify-center'>
         <button
           aria-label='닫기'
           onClick={close}
