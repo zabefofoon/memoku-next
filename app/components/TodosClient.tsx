@@ -116,7 +116,7 @@ export function TodosClient() {
 
   useEffect(() => {
     const { prevPathname, setPrevPathname } = useScrollStore.getState()
-    const shouldRestore = /^\/app\/todos\/[^/]+$/.test(prevPathname)
+    const shouldRestore = /\/app\/todos\/[^/]+$/.test(prevPathname)
 
     if (!shouldRestore) setPage(0, loadTodos)
     else {

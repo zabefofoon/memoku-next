@@ -27,17 +27,16 @@ export function useTransitionRouter() {
         return result
       })
 
-      if (!('startViewTransition' in document)) router.push(href, options)
+      if (!('startViewTransition' in document)) return router.push(href, options)
+
+      const path = href.split('?')[0]
+      if (transitionContext.rootPages?.includes(path)) return router.push(href, options)
       else {
-        const path = href.split('?')[0]
-        if (transitionContext.rootPages?.includes(path)) router.push(href, options)
-        else {
-          router.push(href)
-          document.startViewTransition(async () => {
-            document.documentElement.classList.remove('back', 'forward')
-            document.documentElement.classList.add('forward')
-          })
-        }
+        return document.startViewTransition(async () => {
+          document.documentElement.classList.remove('back', 'forward')
+          document.documentElement.classList.add('forward')
+          return router.push(href)
+        })
       }
     },
     [router, transitionContext]
