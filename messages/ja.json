@@ -112,7 +112,10 @@
     "DarkMode": "ダークモード",
     "Notification": "通知設定",
     "Google": "Google連携",
-    "Language": "言語"
+    "Language": "言語",
+    "Data": "データ",
+    "DataImport": "インポート",
+    "DataExport": "エクスポート"
   },
   "Guide": {
     "PageTitle": "ガイド",

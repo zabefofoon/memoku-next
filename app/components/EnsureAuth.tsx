@@ -2,6 +2,7 @@
 
 import { PropsWithChildren, useEffect, useState } from 'react'
 import { api } from '../lib/api'
+import { tagsDB } from '../lib/tags.db'
 import { todosDB } from '../lib/todos.db'
 import { Tag, Todo } from '../models/Todo'
 import { useAuthStore } from '../stores/auth.store'
@@ -19,15 +20,7 @@ export default function EnsureAuth({ refreshToken, children }: PropsWithChildren
   useEffect(() => {
     const { setMemberInfo } = useAuthStore.getState()
     const { setImageFolderId, setFileId } = useSheetStore.getState()
-    const {
-      updateIndex,
-      updateDirties,
-      initTags,
-      addNewTagBulk,
-      deleteTags,
-      getMetas,
-      getAllDirtyTags,
-    } = useTagsStore.getState()
+    const { initTags, deleteTags } = useTagsStore.getState()
 
     const loadGoogleMe = async (): Promise<void> => {
       const res = await api.getAuthGoogleMe()
@@ -48,20 +41,20 @@ export default function EnsureAuth({ refreshToken, children }: PropsWithChildren
     }
 
     const loadLocalMetaTagRows = async (): Promise<{ id: string; modified?: number }[]> => {
-      return await getMetas()
+      return await tagsDB.getMetas()
     }
 
     const pushDirtyTags = async (fileId: string) => {
-      const tags = await getAllDirtyTags()
+      const tags = await tagsDB.getAllDirtyTags()
       if (tags.length === 0) return
       const res = await api.postSheetGoogleBulkTags(fileId, tags)
       const result = await res.json()
       if (res.ok) {
         const ids = tags.map(({ id }) => id).filter((id): id is string => Boolean(id))
         ids.forEach(
-          (id, index) => result.indexes?.[index] && updateIndex(id, result.indexes[index])
+          (id, index) => result.indexes?.[index] && tagsDB.updateIndex(id, result.indexes[index])
         )
-        updateDirties(ids, false)
+        tagsDB.updateDirties(ids, false)
       }
     }
 
@@ -178,8 +171,7 @@ export default function EnsureAuth({ refreshToken, children }: PropsWithChildren
                     )
                     .map(({ id, index }) => ({ id, index }))
                   loadNewOrUpdatedTags(fileId, remoteNewOrUpdated).then((tags) => {
-                    addNewTagBulk(tags)
-                    initTags()
+                    tagsDB.addNewTagBulk(tags).then(() => initTags())
                   })
                 })
               })

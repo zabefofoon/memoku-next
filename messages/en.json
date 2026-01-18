@@ -119,7 +119,10 @@
     "DarkMode": "Dark mode",
     "Notification": "Notifications",
     "Google": "Google sync",
-    "Language": "Language"
+    "Language": "Language",
+    "Data": "Data",
+    "DataImport": "Import",
+    "DataExport": "Export"
   },
   "Guide": {
     "PageTitle": "Guide",

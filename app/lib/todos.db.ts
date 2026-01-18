@@ -531,7 +531,23 @@ export const todosDB = {
     return db.todos.bulkUpdate(ids.map((id) => ({ key: id, changes: { dirty: value } })))
   },
 
-  addNewTodoBulk: (todos: Todo[]): Promise<number> => {
+  addNewTodoBulk: async (todos: Todo[]): Promise<number> => {
+    for (let i = 0; i < todos.length; i++) {
+      const todo = todos[i]
+      const base64Images = todo.images
+        ?.flatMap((image) => image)
+        .filter((item) => typeof item === 'string' && item.startsWith('data:'))
+      if (base64Images?.length) {
+        const items = base64Images.map((image) => ({
+          id: etcUtil.generateUniqueId(),
+          todoId: todo.id,
+          image: etcUtil.base64ToBlob(image as string),
+        }))
+        await db.images.bulkAdd(items)
+        delete todo.images
+      }
+    }
+
     return db.todos.bulkPut(todos)
   },
   getMetas: async (): Promise<{ id: string; modified?: number }[]> => {

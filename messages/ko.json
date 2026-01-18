@@ -112,7 +112,10 @@
     "DarkMode": "다크모드",
     "Notification": "알림설정",
     "Google": "구글연동",
-    "Language": "언어"
+    "Language": "언어",
+    "Data": "데이터",
+    "DataImport": "가져오기",
+    "DataExport": "내보내기"
   },
   "Guide": {
     "PageTitle": "가이드",

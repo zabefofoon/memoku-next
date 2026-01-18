@@ -4,10 +4,10 @@ import type { DebouncedFunc } from 'lodash'
 import debounce from 'lodash.debounce'
 import { create } from 'zustand'
 import { api } from '../lib/api'
+import { imagesDB } from '../lib/images.db'
 import { todosDB } from '../lib/todos.db'
 import { ImageRow, Tag, Todo } from '../models/Todo'
 import etcUtil from '../utils/etc.util'
-import { useImagesStore } from './images.store'
 import { useSheetStore } from './sheet.store'
 import { useThemeStore } from './theme.store'
 import { useTodosPageStore } from './todosPage.store'
@@ -395,7 +395,6 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
   },
   async loadImages(todo: Todo): Promise<void> {
     const { fileId } = useSheetStore.getState()
-    const { getImages, deleteImages } = useImagesStore.getState()
     const { setImages } = get()
 
     if (todo.images?.length) {
@@ -407,7 +406,7 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
         })) ?? []
       )
     } else {
-      const res = await getImages(todo.id)
+      const res = await imagesDB.getImages(todo.id)
 
       const imageData: ImageRow[] = []
       for (const key in res) {
@@ -462,7 +461,7 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
                 if (res.ok) todosDB.updateDirties([todo.id], false)
               })
 
-            await deleteImages(localSavedImages.map(({ id }) => id))
+            await imagesDB.deleteImages(localSavedImages.map(({ id }) => id))
 
             setImages(nextImages.map((url) => ({ id: 'uploaded', image: url, todoId: todo.id })))
           }
@@ -473,7 +472,6 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
   async deleteImage(image: string, cb?: () => void): Promise<void> {
     const { images, todo, setImages } = get()
     const { fileId } = useSheetStore.getState()
-    const { deleteImages } = useImagesStore.getState()
 
     if (images == null) return
     if (todo == null) return
@@ -506,20 +504,19 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
           todo.id,
           todo.images?.filter((image) => image !== images[index].image) ?? []
         )
-      else await deleteImages([images[index].id])
+      else await imagesDB.deleteImages([images[index].id])
       setImages((prev) => prev?.filter((_, i) => i !== index))
     }
     cb?.()
   },
   async deleteImageAll(): Promise<void> {
     const { images, todo } = get()
-    const { deleteImages } = useImagesStore.getState()
     const { fileId } = useSheetStore.getState()
 
     if (images == null) return
     if (todo == null) return
 
-    if (!fileId) deleteImages(images.map(({ id }) => id))
+    if (!fileId) imagesDB.deleteImages(images.map(({ id }) => id))
     else {
       const deleteImages = images.map(({ image }) => image)
       const ids = deleteImages.map((url) => new URL(url.toString()).pathname.split('/').at(-1))
@@ -527,7 +524,6 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
     }
   },
   async addImages(files: Blob[]): Promise<void> {
-    const { postImages } = useImagesStore.getState()
     const { fileId, imageFolderId } = useSheetStore.getState()
     const { images, todo, setImages } = get()
     if (todo == null) return
@@ -575,7 +571,7 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
           )
         })
     } else {
-      const ress = await postImages(todo.id, blobs)
+      const ress = await imagesDB.postImages(todo.id, blobs)
       setImages((prev) => [
         ...ress.map((item, index) => ({ ...item, image: base64s[index] })),
         ...(prev ?? []),
@@ -643,8 +639,8 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
     setThisWeekTodos(undefined)
     setNextWeekTodos(undefined)
     setChildren(undefined)
-
-    api.registAlarm({ todo_id: todo.id, device_id })
+    if (todo.days?.length || (todo.end && todo.start))
+      api.registAlarm({ todo_id: todo.id, device_id })
 
     cb?.()
   },

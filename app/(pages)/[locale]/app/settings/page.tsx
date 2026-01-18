@@ -1,3 +1,4 @@
+import SettingsData from '@/app/components/SettingsData'
 import SettingsLanguage from '@/app/components/SettingsLanguage'
 import SettingsNotification from '@/app/components/SettingsNotification'
 import SettingsSync from '@/app/components/SettingsSync'
@@ -32,6 +33,7 @@ export default async function Settings() {
         <SettingsNotification />
         <SettingsSync />
         <SettingsLanguage />
+        <SettingsData />
       </div>
     </div>
   )

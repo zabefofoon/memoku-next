@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
+import { tagsDB } from '../lib/tags.db'
 import { Tag } from '../models/Todo'
 import { useSheetStore } from '../stores/sheet.store'
 import { useTagsStore } from '../stores/tags.store'
@@ -19,11 +20,7 @@ export default function SettingsTags() {
   const router = useRouter()
   const initTags = useTagsStore((s) => s.initTags)
   const allTags = useTagsStore((s) => s.tags)
-  const getTag = useTagsStore((s) => s.getTag)
-  const addTag = useTagsStore((s) => s.addTag)
-  const updateTag = useTagsStore((s) => s.updateTag)
-  const updateIndex = useTagsStore((s) => s.updateIndex)
-  const updateDirties = useTagsStore((s) => s.updateDirties)
+
   const deleteTags = useTagsStore((s) => s.deleteTags)
   const fileId = useSheetStore((s) => s.fileId)
 
@@ -35,7 +32,7 @@ export default function SettingsTags() {
     const tagId = searchParams.get('delete')
     if (!tagId) return
     if (fileId) {
-      const currentTag = await getTag(tagId)
+      const currentTag = await tagsDB.getTag(tagId)
       if (currentTag == null) return
 
       const res = await api.patchSheetGoogleTag(fileId, {
@@ -58,15 +55,15 @@ export default function SettingsTags() {
     const tagQuery = searchParams.get('tag')
     if (fileId) {
       if (tagQuery === 'new') {
-        const [id, now] = await addTag(tagInfo)
+        const [id, now] = tagsDB.addTag(tagInfo)
         const res = await api.postSheetGoogleTag(fileId, id, tagInfo.color, tagInfo.label, now)
         const result = await res.json()
-        updateIndex(id, result.index)
-        updateDirties([id], false)
+        tagsDB.updateIndex(id, result.index)
+        tagsDB.updateDirties([id], false)
       } else if (!!tagQuery) {
-        const currentTag = await getTag(tagQuery)
+        const currentTag = await tagsDB.getTag(tagQuery)
         if (currentTag == null) return
-        const now = await updateTag(tagQuery, tagInfo)
+        const now = await tagsDB.updateTag(tagQuery, tagInfo)
         const res = await api.patchSheetGoogleTag(fileId, {
           color: tagInfo.color,
           label: tagInfo.label,
@@ -75,11 +72,11 @@ export default function SettingsTags() {
         })
 
         const result = await res.json()
-        if (result.ok) updateDirties([tagQuery], false)
+        if (result.ok) tagsDB.updateDirties([tagQuery], false)
       }
     } else {
-      if (tagQuery === 'new') await addTag(tagInfo)
-      else if (!!tagQuery) await updateTag(tagQuery, tagInfo)
+      if (tagQuery === 'new') tagsDB.addTag(tagInfo)
+      else if (!!tagQuery) await tagsDB.updateTag(tagQuery, tagInfo)
     }
 
     initTags()
@@ -135,7 +132,8 @@ export default function SettingsTags() {
 
               <Link
                 className='p-[2px]'
-                href={`?delete=${tag.id}`}>
+                href={`?delete=${tag.id}`}
+                onClick={(event) => event.stopPropagation()}>
                 <Icon
                   name='delete'
                   className='text-[14px]'

@@ -112,7 +112,10 @@
     "DarkMode": "深色模式",
     "Notification": "通知设置",
     "Google": "Google 同步",
-    "Language": "语言"
+    "Language": "语言",
+    "Data": "数据",
+    "DataImport": "导入",
+    "DataExport": "导出"
   },
   "Guide": {
     "PageTitle": "指南",
