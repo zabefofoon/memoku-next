@@ -74,7 +74,7 @@ export function TodoCard({
       <button
         type='button'
         className={etcUtil.classNames([
-          'expand-hitbox | flex items-center gap-[4px]',
+          'flex items-center gap-[4px]',
           display !== 'grid' ? 'w-[100px] shrink-0' : 'w-fit',
         ])}
         onClick={(event) => {

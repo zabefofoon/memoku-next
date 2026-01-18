@@ -17,6 +17,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useCookies } from 'react-cookie'
 import { Else, If, Then } from 'react-if'
+import { useTranstionsStore } from '../stores/transitions.store'
 
 export default function TodosDetailClient() {
   const router = useRouter()
@@ -41,7 +42,7 @@ export default function TodosDetailClient() {
   const setChildTodo = useTodosDetailStore((s) => s.setChildTodo)
   const setParentTodo = useTodosDetailStore((s) => s.setParentTodo)
   const setImages = useTodosDetailStore((s) => s.setImages)
-
+  const setIsLoaded = useTranstionsStore((s) => s.setIsLoaded)
   const randomizeIndex = useRef<number>(0)
   const guideTexts = t.raw('Todo.Guide')
 
@@ -50,12 +51,13 @@ export default function TodosDetailClient() {
   }, [setIsLoading])
 
   useEffect(() => {
+    setIsLoaded(true)
     return () => {
       setChildTodo()
       setParentTodo()
       setImages([])
     }
-  }, [setChildTodo, setParentTodo, setImages])
+  }, [setChildTodo, setParentTodo, setImages, setIsLoaded])
 
   useEffect(() => {
     randomizeIndex.current = Math.floor(Math.random() * guideTexts.length)

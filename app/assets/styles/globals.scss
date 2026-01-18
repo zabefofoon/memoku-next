@@ -248,26 +248,26 @@ button {
 .back::view-transition-old(root) {
   @media (max-width: 640px) {
     z-index: 1;
-    animation: slide-to-right 250ms ease both 100ms;
+    animation: slide-to-right 250ms ease both;
   }
 }
 
 .back::view-transition-new(root) {
   @media (max-width: 640px) {
-    animation: slide-from-left 250ms ease both 100ms;
+    animation: slide-from-left 250ms ease both;
   }
 }
 
 .forward::view-transition-old(root) {
   @media (max-width: 640px) {
-    animation: slide-to-left 250ms ease both 100ms;
+    animation: slide-to-left 250ms ease both;
   }
 }
 
 .forward::view-transition-new(root) {
   @media (max-width: 640px) {
     z-index: 1;
-    animation: slide-from-right 250ms ease both 100ms;
+    animation: slide-from-right 250ms ease both;
   }
 }
 

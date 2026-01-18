@@ -1,10 +1,10 @@
 import 'server-only'
 
+import { MDXRemote } from 'next-mdx-remote/rsc'
 import { notFound } from 'next/navigation'
 
-import { BackButton } from '@/app/components/BackButton'
+import GuidesDetailContent from '@/app/components/GuidesDetailContent'
 import { getNewsBySlug } from '@/lib/news'
-import { MDXRemote } from 'next-mdx-remote/rsc'
 
 type PageProps = {
   params: {
@@ -49,22 +49,8 @@ export default async function NewsDetail({ params }: PageProps) {
   const entry = await getNewsBySlug(decodeURIComponent(title), locale)
   if (!entry) notFound()
   return (
-    <article className='h-[calc(100dvh-4px)] sm:h-full | rounded-xl | flex flex-col'>
-      <div className='p-[16px] sm:p-0'>
-        <BackButton title={entry.title} />
-      </div>
-      <section className='flex-1 overflow-y-scroll | px-[16px] sm:p-0 sm:mt-[24px] | flex flex-col'>
-        <div className='shrink-0 w-full min-h-[300px] max-h-[400px] | flex justify-center overflow-hidden'>
-          <img
-            className='w-full h-full object-cover object-center rounded-lg | aspect-[16/5]'
-            src={entry.top}
-            alt={entry.title}
-          />
-        </div>
-        <div className='mt-[24px] mb-[40px] | mx-auto | prose prose-sm dark:prose-invert'>
-          <MDXRemote source={entry.content} />
-        </div>
-      </section>
-    </article>
+    <GuidesDetailContent entry={entry}>
+      <MDXRemote source={entry.content} />
+    </GuidesDetailContent>
   )
 }

@@ -2,12 +2,15 @@
 
 import { NavigateOptions } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import { useRouter } from 'next/navigation'
-import { use, useCallback, useMemo } from 'react'
+import { use, useCallback, useMemo, useRef } from 'react'
 import { Direction, ViewTransitionsContext } from '../components/ViewTransitions'
+import { useTranstionsStore } from '../stores/transitions.store'
+import etcUtil from '../utils/etc.util'
 
 export function useTransitionRouter() {
   const router = useRouter()
   const transitionContext = use(ViewTransitionsContext)
+  const loadTried = useRef<number>(0)
 
   const push = useCallback(
     (href: string, options: NavigateOptions) => {
@@ -32,10 +35,20 @@ export function useTransitionRouter() {
       const path = href.split('?')[0]
       if (transitionContext.rootPages?.includes(path)) return router.push(href, options)
       else {
+        const { setIsLoaded } = useTranstionsStore.getState()
+
         return document.startViewTransition(async () => {
           document.documentElement.classList.remove('back', 'forward')
           document.documentElement.classList.add('forward')
-          return router.push(href)
+          router.push(href, options)
+
+          loadTried.current = 0
+          while (!useTranstionsStore.getState().isLoaded) {
+            loadTried.current++
+            if (loadTried.current > 10) break
+            await etcUtil.sleep(100)
+          }
+          setIsLoaded(false)
         })
       }
     },
