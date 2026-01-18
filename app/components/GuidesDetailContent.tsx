@@ -1,7 +1,7 @@
 'use client'
 
 import { NewsEntry } from '@/lib/news'
-import { PropsWithChildren, useEffect } from 'react'
+import { PropsWithChildren, useLayoutEffect } from 'react'
 import { useTranstionsStore } from '../stores/transitions.store'
 import { BackButton } from './BackButton'
 
@@ -12,7 +12,7 @@ interface Props {
 export default function GuidesDetailContent({ entry, children }: PropsWithChildren<Props>) {
   const setIsLoaded = useTranstionsStore((s) => s.setIsLoaded)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setIsLoaded(true)
   }, [setIsLoaded])
 

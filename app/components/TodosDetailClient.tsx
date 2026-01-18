@@ -48,16 +48,16 @@ export default function TodosDetailClient() {
 
   useLayoutEffect(() => {
     setIsLoading(true)
-  }, [setIsLoading])
+    setIsLoaded(true)
+  }, [setIsLoading, setIsLoaded])
 
   useEffect(() => {
-    setIsLoaded(true)
     return () => {
       setChildTodo()
       setParentTodo()
       setImages([])
     }
-  }, [setChildTodo, setParentTodo, setImages, setIsLoaded])
+  }, [setChildTodo, setParentTodo, setImages])
 
   useEffect(() => {
     randomizeIndex.current = Math.floor(Math.random() * guideTexts.length)
