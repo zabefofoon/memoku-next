@@ -33,7 +33,9 @@ export function useTransitionRouter() {
       if (!('startViewTransition' in document)) return router.push(href, options)
 
       const path = href.split('?')[0]
+
       if (transitionContext.rootPages?.includes(path)) return router.push(href, options)
+      if (!path) return router.push(href, options)
       else {
         const { setIsLoaded } = useTranstionsStore.getState()
 
