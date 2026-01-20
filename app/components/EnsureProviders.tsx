@@ -29,6 +29,7 @@ export function EnsureProviders({ isDarkMode, children }: Props) {
   }, [initTags, isDarkMode, setIsDarkMode, setScreenSize])
 
   useEffect(() => {
+    navigator.storage?.persist?.()
     document
       .querySelector('meta[name=theme-color]')
       ?.setAttribute('content', isDarkModeInStore ? '#18181b' : 'white')
