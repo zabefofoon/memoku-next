@@ -219,12 +219,12 @@ export async function GET() {
     const spreadsheetId = createRes.data.spreadsheetId!
     await google.sheets({ version: 'v4', auth: oauth2 }).spreadsheets.values.batchUpdate({
       spreadsheetId,
-      valueInputOption: 'USER_ENTERED',
       requestBody: {
         data: [
           { range: 'todo2!A1', values: [TODO2_HEADERS] },
           { range: 'tags!A1', values: [TAGS_HEADERS] },
         ],
+        valueInputOption: 'USER_ENTERED',
       },
     })
 
