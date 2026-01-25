@@ -16,6 +16,10 @@ export const tagsDB = {
     const [res] = await db.tags.where({ id }).toArray()
     return res
   },
+  async getTagByIds(ids: string[]) {
+    if (!ids.length) return []
+    return db.tags.where('id').anyOf(ids).toArray()
+  },
   addTag(tagInfo: { label: string; color: keyof typeof TAG_COLORS }): [string, number] {
     const id = etcUtil.generateUniqueId()
     const now = Date.now()

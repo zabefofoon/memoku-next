@@ -15,6 +15,10 @@ export const todosDB = {
   getAllDirtyTodos: async (): Promise<Todo[]> => {
     return db.todos.filter(({ dirty }) => Boolean(dirty) || dirty == null).toArray()
   },
+  getTodosByIds: async (ids: string[]): Promise<Todo[]> => {
+    if (!ids.length) return []
+    return db.todos.where('id').anyOf(ids).toArray()
+  },
   getTodo: async (id: string): Promise<Todo> => {
     const [res] = await db.todos.where({ id }).toArray()
     return res

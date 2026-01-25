@@ -1,5 +1,17 @@
 import { TAG_COLORS } from '@/const'
 
+export interface MetaTagRow {
+  id: string
+  modified: number
+  index: number
+  deleted?: string | undefined
+}
+
+export interface MetaRow {
+  id: string
+  modified?: number
+}
+
 export interface TodoWithChildren extends Todo {
   isExpanded?: boolean
   children?: Todo[]

@@ -4,7 +4,7 @@ import { PropsWithChildren, useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { tagsDB } from '../lib/tags.db'
 import { todosDB } from '../lib/todos.db'
-import { Tag, Todo } from '../models/Todo'
+import { MetaRow, MetaTagRow, Tag, Todo } from '../models/Todo'
 import { useAuthStore } from '../stores/auth.store'
 import { useSheetStore } from '../stores/sheet.store'
 import { useTagsStore } from '../stores/tags.store'
@@ -36,16 +36,40 @@ export default function EnsureAuth({ refreshToken, children }: PropsWithChildren
       return result.fileId
     }
 
-    const loadLocalMetaRows = async (): Promise<{ id: string; modified?: number }[]> => {
+    const loadLocalMetaRows = async (): Promise<MetaRow[]> => {
       return await todosDB.getMetas()
     }
 
-    const loadLocalMetaTagRows = async (): Promise<{ id: string; modified?: number }[]> => {
+    const loadLocalMetaTagRows = async (): Promise<MetaRow[]> => {
       return await tagsDB.getMetas()
     }
 
     const pushDirtyTags = async (fileId: string) => {
       const tags = await tagsDB.getAllDirtyTags()
+      if (tags.length === 0) return
+      const res = await api.postSheetGoogleBulkTags(fileId, tags)
+      const result = await res.json()
+      if (res.ok) {
+        const ids = tags.map(({ id }) => id).filter((id): id is string => Boolean(id))
+        ids.forEach(
+          (id, index) => result.indexes?.[index] && tagsDB.updateIndex(id, result.indexes[index])
+        )
+        tagsDB.updateDirties(ids, false)
+      }
+    }
+
+    const pushOnlyLocalsTags = async (
+      fileId: string,
+      localMeta: MetaRow[],
+      remoteMeta: MetaTagRow[],
+      deletedRows: string[]
+    ) => {
+      const onlyHasLocals = localMeta
+        .filter(({ id }) => !deletedRows.includes(id))
+        .filter(({ id }) => !remoteMeta.map(({ id }) => id).includes(id))
+        .map(({ id }) => id)
+
+      const tags = await tagsDB.getTagByIds(onlyHasLocals)
       if (tags.length === 0) return
       const res = await api.postSheetGoogleBulkTags(fileId, tags)
       const result = await res.json()
@@ -78,9 +102,37 @@ export default function EnsureAuth({ refreshToken, children }: PropsWithChildren
       }
     }
 
-    const loadRemoteMetaRows = async (
-      fileId: string
-    ): Promise<{ id: string; modified: number; index: number; deleted?: string }[]> => {
+    const pushOnlyLocals = async (
+      fileId: string,
+      localMeta: MetaRow[],
+      remoteMeta: MetaRow[],
+      deletedRows: string[]
+    ) => {
+      const onlyHasLocals = localMeta
+        .filter(({ id }) => !deletedRows.includes(id))
+        .filter(({ id }) => !remoteMeta.map(({ id }) => id).includes(id))
+        .map(({ id }) => id)
+
+      const todos = await todosDB.getTodosByIds(onlyHasLocals)
+
+      if (todos.length === 0) return
+
+      const chunkSize = 200
+      for (let i = 0; i < todos.length; i += chunkSize) {
+        const chunk = todos.slice(i, i + chunkSize)
+        const res = await api.postSheetGoogleBulk(fileId, chunk)
+        const result = await res.json()
+        if (res.ok) {
+          const ids = chunk.map(({ id }) => id).filter((id): id is string => Boolean(id))
+          ids.forEach(
+            (id, index) => result.indexes?.[index] && todosDB.updateIndex(id, result.indexes[index])
+          )
+          todosDB.updateDirties(ids, false)
+        } else break
+      }
+    }
+
+    const loadRemoteMetaRows = async (fileId: string): Promise<MetaTagRow[]> => {
       const chunkSize = 1000
       let start = 2
       const allMetas: { id: string; modified: number; index: number }[] = []
@@ -132,9 +184,7 @@ export default function EnsureAuth({ refreshToken, children }: PropsWithChildren
       return result.folderId
     }
 
-    const loadRemoteMetaTagRows = async (
-      fileId: string
-    ): Promise<{ id: string; modified: number; index: number; deleted?: string }[]> => {
+    const loadRemoteMetaTagRows = async (fileId: string): Promise<MetaTagRow[]> => {
       const res = await api.getSheetGoogleMetaTags(fileId)
       const result = await res.json()
       return result.metas
@@ -171,6 +221,8 @@ export default function EnsureAuth({ refreshToken, children }: PropsWithChildren
                         (!localMap.has(row.id) || (row.modified ?? 0) > (localMap.get(row.id) ?? 0))
                     )
                     .map(({ id, index }) => ({ id, index }))
+
+                  pushOnlyLocalsTags(fileId, localMeta, remoteMeta, deletedRows)
                   loadNewOrUpdatedTags(fileId, remoteNewOrUpdated).then((tags) => {
                     tagsDB.addNewTagBulk(tags).then(() => initTags())
                   })
@@ -193,6 +245,9 @@ export default function EnsureAuth({ refreshToken, children }: PropsWithChildren
                         (!localMap.has(row.id) || row.modified > (localMap.get(row.id) ?? 0))
                     )
                     .map(({ id, index }) => ({ id, index }))
+
+                  pushOnlyLocals(fileId, localMeta, remoteMeta, deletedRows)
+
                   loadNewOrUpdated(fileId, remoteNewOrUpdated).then((todos) => {
                     todosDB.addNewTodoBulk(todos)
                     setIsAuthed(true)
