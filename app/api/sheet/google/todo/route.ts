@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     valueInputOption: 'RAW',
     range: 'todo2',
     requestBody: {
-      values: [[id, '', '', created, modified, '', 'created', parent.replace('undefined', '')]],
+      values: [[id, '', '', +created, +modified, '', 'created', parent.replace('undefined', '')]],
     },
   })
 
