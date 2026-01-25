@@ -162,6 +162,7 @@ export default function EnsureAuth({ refreshToken, children }: PropsWithChildren
                 loadLocalMetaTagRows().then((localMeta) => {
                   const localMap = new Map(localMeta.map((l) => [l.id, l.modified]))
                   const deletedRows = remoteMeta.filter((row) => row.deleted).map(({ id }) => id)
+
                   deleteTags(deletedRows)
                   const remoteNewOrUpdated = remoteMeta
                     .filter(

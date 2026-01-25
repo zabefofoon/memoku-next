@@ -16,6 +16,7 @@ const todoToRow = (todo: Todo) => [
   todo.start,
   todo.end,
   todo.days?.join(','),
+  '',
 ]
 
 export async function POST(req: Request) {
@@ -61,11 +62,10 @@ export async function POST(req: Request) {
   if (todosWithoutIndex.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const values = todosWithoutIndex.map((todo: any) => todoToRow(todo))
-
     const res = await spreadsheet.spreadsheets.values.append({
       spreadsheetId: body.fileId,
       valueInputOption: 'RAW',
-      range: 'todo2',
+      range: 'todo2!A1',
       requestBody: { values },
     })
 

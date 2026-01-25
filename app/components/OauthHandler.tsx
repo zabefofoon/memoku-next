@@ -8,14 +8,15 @@ import { useAuthStore } from '../stores/auth.store'
 interface Props {
   memberInfo: MemberInfo
 }
-export default function OauthHandler(props: Props) {
-  const setMemberInfo = useAuthStore((s) => s.setMemberInfo)
+export default function OauthHandler({ memberInfo }: Props) {
   const router = useRouter()
 
   useEffect(() => {
-    setMemberInfo(props.memberInfo)
+    const { setMemberInfo } = useAuthStore.getState()
+
+    setMemberInfo(memberInfo)
     router.replace('/app')
-  }, [router, props.memberInfo, setMemberInfo])
+  }, [memberInfo, router])
 
   return null
 }

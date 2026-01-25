@@ -18,7 +18,7 @@ const TODO2_HEADERS = [
   'deleted',
 ]
 
-const TAGS_HEADERS = ['id', 'color', 'label', 'removed', 'modified']
+const TAGS_HEADERS = ['id', 'color', 'label', 'modified', 'removed']
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function transformTodoSheet(auth: any, spreadsheetId: string) {
@@ -190,24 +190,22 @@ export async function GET() {
   const headerCookies = await cookies()
   const access = headerCookies.get('x-google-access-token')?.value
   const refresh = headerCookies.get('x-google-refresh-token')?.value
-
   const oauth2 = new google.auth.OAuth2(
     process.env.GOOGLE_OAUTH_CLIENT_ID!,
     process.env.GOOGLE_OAUTH_CLIENT_SECRET!,
     `${process.env.APP_ORIGIN}/api/auth/google/callback`
   )
   oauth2.setCredentials({ access_token: access, refresh_token: refresh })
-
   const res = await google.drive({ version: 'v3', auth: oauth2 }).files.list({
     q: `name='${fileName}' and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`,
     pageSize: 1,
     fields: 'files(id)',
     spaces: 'drive',
   })
-
   const fileId = res.data.files && res.data.files.length > 0 ? res.data.files[0].id : undefined
   if (fileId) {
     await Promise.all([transformTodoSheet(oauth2, fileId), ensureTagsSheet(oauth2, fileId)])
+
     return NextResponse.json({ ok: true, fileId })
   } else {
     const sheets = google.sheets({ version: 'v4', auth: oauth2 })
@@ -219,9 +217,9 @@ export async function GET() {
     })
 
     const spreadsheetId = createRes.data.spreadsheetId!
-
     await google.sheets({ version: 'v4', auth: oauth2 }).spreadsheets.values.batchUpdate({
       spreadsheetId,
+      valueInputOption: 'USER_ENTERED',
       requestBody: {
         data: [
           { range: 'todo2!A1', values: [TODO2_HEADERS] },

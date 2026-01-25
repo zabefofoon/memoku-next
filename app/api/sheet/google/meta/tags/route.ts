@@ -25,19 +25,19 @@ export async function GET(req: Request) {
     spreadsheetId: fileId,
     ranges: [
       `tags!A2:A999`, // id
-      `tags!E2:E999`, // modified
-      `tags!D2:D999`, // deleted
+      `tags!D2:D999`, // modified
+      `tags!E2:E999`, // deleted
     ],
     valueRenderOption: 'UNFORMATTED_VALUE',
   })
-  const [colA, colE, colM] = res.data.valueRanges ?? []
+  const [colA, colD, colE] = res.data.valueRanges ?? []
 
   const metas =
     colA?.values
       ?.map((value, index) => {
         const id = value[0]
-        const modified = colE?.values?.[index]?.[0]
-        const deleted = colM?.values?.[index]?.[0]
+        const modified = colD?.values?.[index]?.[0]
+        const deleted = colE?.values?.[index]?.[0]
         return { id, modified, index: 2 + index, deleted }
       })
       .filter(

@@ -130,7 +130,7 @@ export const api = {
 
   postSheetGoogleTag(fileId: string, id: string, color: string, label: string, now: number) {
     return fetch(
-      `/api/sheet/google/tag?fileId=${fileId}&id=${id}&color=${color}&label=${label}&modified=${now}`,
+      `/api/sheet/google/tag?fileId=${fileId}&id=${id}&color=${color}&label=${label}&now=${now}`,
       { method: 'POST' }
     )
   },

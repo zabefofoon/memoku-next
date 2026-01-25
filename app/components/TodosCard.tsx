@@ -177,7 +177,7 @@ export function TodoCard({
       <div
         className={etcUtil.classNames([
           display !== 'grid'
-            ? `w-[300px] shrink-0 | flex  ${hideChildren ? 'justify-end' : 'justify-center'}`
+            ? `shrink-0 | flex  ${hideChildren ? 'justify-end' : 'w-[300px] justify-center'}`
             : 'mt-[6px]',
         ])}>
         <TodoTimeText

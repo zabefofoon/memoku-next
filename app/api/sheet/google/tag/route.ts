@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   const id = url.searchParams.get('id') ?? ''
   const color = url.searchParams.get('color') ?? ''
   const label = url.searchParams.get('label') ?? ''
-  const modified = url.searchParams.get('modified') ?? ''
+  const modified = url.searchParams.get('now') ?? ''
 
   const headerCookies = await cookies()
   const access = headerCookies.get('x-google-access-token')?.value
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     valueInputOption: 'RAW',
     range: 'tags',
     requestBody: {
-      values: [[id, color, label, '', modified]],
+      values: [[id, color, label, modified, '']],
     },
   })
 
@@ -54,7 +54,7 @@ export async function PATCH(req: Request) {
 
   const color = url.searchParams.get('color') ?? ''
   const label = url.searchParams.get('label') ?? ''
-  const modified = url.searchParams.get('modified') ?? ''
+  const modified = url.searchParams.get('now') ?? ''
   const deleted = url.searchParams.get('deleted') ?? ''
 
   const headerCookies = await cookies()
@@ -75,9 +75,8 @@ export async function PATCH(req: Request) {
 
   if (color) data.push({ range: `tags!B${index}:B${index}`, values: [[color]] })
   if (label) data.push({ range: `tags!C${index}:C${index}`, values: [[label]] })
-  if (modified) data.push({ range: `tags!E${index}:E${index}`, values: [[modified]] })
-  if (deleted) data.push({ range: `tags!D${index}:D${index}`, values: [[true]] })
-  data.push({ range: `tags!E${index}:E${index}`, values: [[modified]] })
+  if (deleted) data.push({ range: `tags!E${index}:E${index}`, values: [[true]] })
+  data.push({ range: `tags!D${index}:D${index}`, values: [[modified]] })
 
   const res = await sheets.spreadsheets.values.batchUpdate({
     spreadsheetId: fileId,
