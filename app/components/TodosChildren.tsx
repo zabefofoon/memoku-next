@@ -149,15 +149,17 @@ export function TodosChildren({ isShow, close }: Props) {
               ))}
             </Then>
           </If>
-          <button
-            className='rounded-md bg-indigo-500 py-[12px] sm:mt-[24px] mx-auto | w-full max-w-[320px]'
-            onClick={() => {
-              const target = children?.at(-1) || childrenRoot
-              if (target) addChildren(target).then(({ id }) => router.push(`/app/todos/${id}`))
-            }}>
-            <p className='text-white text-[15px] font-[700]'>{t('Todo.AddChildren')}</p>
-          </button>
         </div>
+      )}
+      ok={() => (
+        <button
+          className='rounded-md bg-indigo-500 py-[12px] mx-auto | w-full max-w-[320px]'
+          onClick={() => {
+            const target = children?.at(-1) || childrenRoot
+            if (target) addChildren(target).then(({ id }) => router.push(`/app/todos/${id}`))
+          }}>
+          <p className='text-white text-[15px] font-[700]'>{t('Todo.AddChildren')}</p>
+        </button>
       )}
     />
   )
