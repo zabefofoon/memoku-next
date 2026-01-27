@@ -3,6 +3,7 @@
 import { useTagsStore } from '@/app/stores/tags.store'
 import { PropsWithChildren, useEffect } from 'react'
 import { CookiesProvider } from 'react-cookie'
+import { Toaster } from 'sonner'
 import { useThemeStore } from '../stores/theme.store'
 
 interface Props extends PropsWithChildren {
@@ -29,11 +30,19 @@ export function EnsureProviders({ isDarkMode, children }: Props) {
   }, [initTags, isDarkMode, setIsDarkMode, setScreenSize])
 
   useEffect(() => {
-    navigator.storage?.persist?.()
+    navigator?.storage?.persist?.()
     document
       .querySelector('meta[name=theme-color]')
       ?.setAttribute('content', isDarkModeInStore ? '#18181b' : 'white')
   }, [isDarkModeInStore])
 
-  return <CookiesProvider>{children}</CookiesProvider>
+  return (
+    <CookiesProvider>
+      {children}
+      <Toaster
+        theme={isDarkModeInStore ? 'dark' : 'light'}
+        position='top-center'
+      />
+    </CookiesProvider>
+  )
 }

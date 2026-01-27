@@ -1,4 +1,5 @@
 import SettingsData from '@/app/components/SettingsData'
+import SettingsDelete from '@/app/components/SettingsDelete'
 import SettingsLanguage from '@/app/components/SettingsLanguage'
 import SettingsNotification from '@/app/components/SettingsNotification'
 import SettingsSync from '@/app/components/SettingsSync'
@@ -27,13 +28,14 @@ export default async function Settings() {
         <p className='text-[16px] opacity-50'>{t('Settings.PageDesc')}</p>
       </div>
 
-      <div className='flex flex-col gap-[4px]'>
+      <div className='flex flex-col gap-[4px] | pb-[60px]'>
         <SettingsTags />
         <SettingsTheme />
         <SettingsNotification />
         <SettingsSync />
         <SettingsLanguage />
         <SettingsData />
+        <SettingsDelete />
       </div>
     </div>
   )

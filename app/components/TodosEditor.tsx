@@ -38,6 +38,17 @@ export default function TodosEditor() {
     setTextValue(todo?.description ?? '')
   }, [todo?.description])
 
+  useEffect(() => {
+    const handleTutorial2 = (): void => {
+      setTextValue('Hello, Memoku!')
+      saveText('Hello, Memoku!')
+    }
+    window.addEventListener('tutorial2', handleTutorial2)
+    return () => {
+      window.removeEventListener('tutorial2', handleTutorial2)
+    }
+  }, [saveText])
+
   return (
     <div className='flex flex-col gap-[12px] | flex-1 w-full overflow-auto | relative | p-[8px]'>
       <div className='absolute top-[8px] right-[8px] | flex gap-[8px]'>
@@ -119,7 +130,7 @@ export default function TodosEditor() {
       <textarea
         ref={textareaEl}
         name='postContent'
-        className='w-full flex-1 | resize-none outline-0 | rounded-xl | text-[15px]'
+        className='w-full flex-1 | resize-none outline-0 | text-[15px]'
         value={textValue}
         onChange={(e) => setTextValue(e.currentTarget.value)}
         onInput={(event) => saveText(event.currentTarget.value)}

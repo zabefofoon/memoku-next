@@ -19,7 +19,7 @@ export function PermissionNotificationDetector() {
   const deviceId = cookies[COOKIE_DEVICE_ID] || etcUtil.generateUniqueId()
 
   useEffect(() => {
-    navigator.serviceWorker?.register('/sw.js', {
+    navigator?.serviceWorker?.register('/sw.js', {
       scope: '/',
       updateViaCache: 'none',
     })
@@ -27,7 +27,7 @@ export function PermissionNotificationDetector() {
     if (Notification.permission === 'default') {
       Notification.requestPermission().then(async (state) => {
         if (state === 'granted') {
-          const registrations = await navigator.serviceWorker.getRegistrations()
+          const registrations = await navigator?.serviceWorker.getRegistrations()
           for (const registration of registrations) {
             const pushSubscription = await registration.pushManager.subscribe({
               userVisibleOnly: true,
@@ -60,7 +60,7 @@ export function PermissionNotificationDetector() {
     }
 
     permissionChangeHandler()
-    navigator.permissions.query({ name: 'notifications' as PermissionName }).then((result) => {
+    navigator?.permissions.query({ name: 'notifications' as PermissionName }).then((result) => {
       status = result
       status?.addEventListener('change', permissionChangeHandler)
       document.addEventListener('visibilitychange', handleVisibilitychange)
@@ -79,13 +79,13 @@ export function PermissionNotificationDetector() {
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').then((reg) => {
+      navigator?.serviceWorker.register('/sw.js').then((reg) => {
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing
           if (!newWorker) return
 
           newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            if (newWorker.state === 'installed' && navigator?.serviceWorker.controller) {
               // waiting 상태면 skipWaiting 요청
               reg.waiting?.postMessage({ type: 'SKIP_WAITING' })
             }
@@ -94,7 +94,7 @@ export function PermissionNotificationDetector() {
       })
 
       // 컨트롤러가 바뀌면(=새 SW가 적용되면) 페이지 리로드
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
+      navigator?.serviceWorker.addEventListener('controllerchange', () => {
         if (confirm('새 버전이 업데이트 되었습니다. 바로 적용하시겠습니까?'))
           window.location.reload()
       })
@@ -114,8 +114,8 @@ export function PermissionNotificationDetector() {
       }
     }
 
-    navigator.serviceWorker?.addEventListener('message', handler)
-    return () => navigator.serviceWorker?.removeEventListener('message', handler)
+    navigator?.serviceWorker?.addEventListener('message', handler)
+    return () => navigator?.serviceWorker?.removeEventListener('message', handler)
   }, [params, router])
   return null
 }

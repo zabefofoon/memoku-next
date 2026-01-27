@@ -9,6 +9,9 @@ export interface CreatedSeriesPoint {
 }
 
 export const tagsDB = {
+  async getAllTagsCount() {
+    return db.tags.count()
+  },
   async getAllTags() {
     return db.tags.toArray()
   },
@@ -33,6 +36,9 @@ export const tagsDB = {
   },
   deleteTags(ids: string[]) {
     return db.tags.bulkDelete(ids)
+  },
+  deleteAllTags() {
+    return db.tags.clear()
   },
   updateIndex(id: string, index: number) {
     return db.tags.update(id, { index })

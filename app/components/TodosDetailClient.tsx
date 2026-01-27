@@ -18,6 +18,8 @@ import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useCookies } from 'react-cookie'
 import { Else, If, Then } from 'react-if'
 import { useTranstionsStore } from '../stores/transitions.store'
+import { useTutorialStore } from '../stores/tutorial.store'
+import UITooltip from './UITooltip'
 
 export default function TodosDetailClient() {
   const router = useRouter()
@@ -43,8 +45,23 @@ export default function TodosDetailClient() {
   const setParentTodo = useTodosDetailStore((s) => s.setParentTodo)
   const setImages = useTodosDetailStore((s) => s.setImages)
   const setIsLoaded = useTranstionsStore((s) => s.setIsLoaded)
+  const tutorialStep = useTutorialStore((s) => s.tutorialStep)
+  const setTutorial = useTutorialStore((s) => s.setTutorialStep)
+
   const randomizeIndex = useRef<number>(0)
   const guideTexts = t.raw('Todo.Guide')
+
+  const setTutorialStep = (): void => {
+    if (![1, 2].includes(tutorialStep ?? -1)) return
+
+    if (tutorialStep === 1) {
+      window.dispatchEvent(new Event('tutorial2'))
+      setTutorial(2)
+    } else {
+      router.replace('/app/settings')
+      setTutorial(3)
+    }
+  }
 
   useLayoutEffect(() => {
     setIsLoading(true)
@@ -141,10 +158,40 @@ export default function TodosDetailClient() {
           </Then>
         </If>
 
-        <div className='pb-[4px] | flex-1 overflow-hidden | flex gap-[16px] flex-col sm:flex-row'>
-          <div className='emboss-sheet | p-[8px] | w-full h-full | flex flex-col | sm:overflow-auto'>
-            <TodosEditor />
+        <div
+          className={etcUtil.classNames([
+            'pb-[4px] | flex-1 overflow-hidden | flex gap-[16px] flex-col sm:flex-row',
+            { 'overflow-visible': [1, 2].includes(tutorialStep ?? -1) },
+          ])}>
+          <div
+            className={etcUtil.classNames([
+              'w-full h-full',
+              { 'tutorial-dim relative z-[100] rounded-lg': [1, 2].includes(tutorialStep ?? -1) },
+            ])}
+            role='presentation'
+            onClick={setTutorialStep}>
+            <If condition={[1, 2].includes(tutorialStep ?? -1)}>
+              <Then>
+                <UITooltip
+                  direction='BOTTOM_LEFT'
+                  className='absolute top-0 left-0 translate-y-[-16px] z-[30]'
+                  style={{
+                    positionAnchor: '--home-add-button',
+                    top: 'anchor(--home-add-button bottom)',
+                    left: 'anchor(--home-add-button left)',
+                    marginTop: '-8px',
+                  }}>
+                  <p className='whitespace-nowrap text-[13px] tracking-tight'>
+                    {t('Tutorial.Step2')}
+                  </p>
+                </UITooltip>
+              </Then>
+            </If>
+            <div className='emboss-sheet | p-[8px] | w-full h-full | flex flex-col | sm:overflow-auto'>
+              <TodosEditor />
+            </div>
           </div>
+
           <TodosImages />
         </div>
 

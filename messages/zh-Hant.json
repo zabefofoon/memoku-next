@@ -116,7 +116,9 @@
     "Language": "語言",
     "Data": "資料",
     "DataImport": "匯入",
-    "DataExport": "匯出"
+    "DataExport": "匯出",
+    "Init": "重設",
+    "InitAllDelete": "全部刪除"
   },
   "Guide": {
     "PageTitle": "指南",
@@ -127,5 +129,16 @@
     "Phrase": "刪除的資料無法復原。\n是否繼續？",
     "Do": "刪除",
     "Cancel": "取消"
+  },
+  "Tutorial": {
+    "Title": "歡迎！",
+    "Phrase": "要開始 Memoku 的教學嗎？",
+    "Proceed": "開始",
+    "Cancel": "取消",
+    "Step1": "在這裡試著新增一個新任務。",
+    "Step2": "在這裡試著填寫任務內容。",
+    "Step3": "在這裡試著新增標籤。",
+    "Step5": "試著更改標籤。",
+    "Done": "你已完成教學。"
   }
 }

@@ -6,14 +6,18 @@ import { TAG_COLORS } from '@/const'
 import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { If, Then } from 'react-if'
 import { api } from '../lib/api'
 import { tagsDB } from '../lib/tags.db'
 import { Tag } from '../models/Todo'
 import { useSheetStore } from '../stores/sheet.store'
 import { useTagsStore } from '../stores/tags.store'
+import { useTutorialStore } from '../stores/tutorial.store'
+import etcUtil from '../utils/etc.util'
 import { Icon } from './Icon'
 import { SettingsTagModal } from './SettingsTagModal'
 import { TodosDeleteModal } from './TodosDeleteModal'
+import UITooltip from './UITooltip'
 
 export default function SettingsTags() {
   const t = useTranslations()
@@ -23,7 +27,8 @@ export default function SettingsTags() {
 
   const deleteTags = useTagsStore((s) => s.deleteTags)
   const fileId = useSheetStore((s) => s.fileId)
-
+  const tutorialStep = useTutorialStore((s) => s.tutorialStep)
+  const setTutorial = useTutorialStore((s) => s.setTutorialStep)
   const searchParams = useSearchParams()
 
   const [tags, setTags] = useState<Tag[]>()
@@ -82,12 +87,27 @@ export default function SettingsTags() {
     initTags()
   }
 
+  const setTutorialStep = (): void => {
+    if (tutorialStep === 3) {
+      tagsDB.addTag({ color: 'red', label: 'Promise' })
+      setTutorial(4)
+      initTags()
+    } else if (tutorialStep === 4) {
+      router.replace('/app/todos')
+      setTutorial(5)
+    }
+  }
+
   useEffect(() => {
     setTags(allTags)
   }, [allTags])
 
   return (
-    <div className='emboss-sheet | p-[16px]'>
+    <div
+      className='emboss-sheet | p-[16px]'
+      style={{
+        overflow: 'visible',
+      }}>
       <TodosDeleteModal
         isShow={!!searchParams.get('delete')}
         close={router.back}
@@ -105,50 +125,88 @@ export default function SettingsTags() {
 
         <div className='flex flex-wrap gap-[8px] | my-auto'>
           {tags?.map((tag) => (
-            <button
+            <div
               key={tag.id}
-              type='button'
-              className='neu-button'
+              className={etcUtil.classNames([
+                { 'tutorial-dim z-[10] rounded-xl': [4].includes(tutorialStep ?? -1) },
+              ])}
+              role='presentation'
               onClick={(event) => {
-                event.preventDefault()
-                event.stopPropagation()
-
-                const urlParams = new URLSearchParams(searchParams.toString())
-                urlParams.append('tag', tag.id)
-                router.push(`?${decodeURIComponent(urlParams.toString())}`, {
-                  scroll: false,
-                })
+                if (tutorialStep) {
+                  event.stopPropagation()
+                  event.preventDefault()
+                  setTutorialStep()
+                }
               }}>
-              <Icon
-                name='tag-active'
-                className='text-[11px] translate-y-[1px]'
-                style={{
-                  color: tag
-                    ? TAG_COLORS[tag.color]?.white || 'var(--color-slate-500)'
-                    : 'var(--color-slate-500)',
-                }}
-              />
-              <p>{tag?.label ?? 'MEMO'}</p>
+              <button
+                type='button'
+                className='neu-button'
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
 
-              <Link
-                className='p-[2px]'
-                href={`?delete=${tag.id}`}
-                onClick={(event) => event.stopPropagation()}>
+                  const urlParams = new URLSearchParams(searchParams.toString())
+                  urlParams.append('tag', tag.id)
+                  router.push(`?${decodeURIComponent(urlParams.toString())}`, {
+                    scroll: false,
+                  })
+                }}>
                 <Icon
-                  name='delete'
-                  className='text-[14px]'
+                  name='tag-active'
+                  className='text-[11px] translate-y-[1px]'
+                  style={{
+                    color: tag
+                      ? TAG_COLORS[tag.color]?.white || 'var(--color-slate-500)'
+                      : 'var(--color-slate-500)',
+                  }}
                 />
-              </Link>
-            </button>
+                <p>{tag?.label ?? 'MEMO'}</p>
+
+                <Link
+                  className='p-[2px]'
+                  href={`?delete=${tag.id}`}
+                  onClick={(event) => event.stopPropagation()}>
+                  <Icon
+                    name='delete'
+                    className='text-[14px]'
+                  />
+                </Link>
+              </button>
+            </div>
           ))}
-          <Link
-            href='?tag=new'
-            className='pl-[12px] pr-[6px] py-[6px] | border border-dashed rounded-full border-slate-400 dark:border-zinc-600 | flex items-center justify-center gap-[4px]'>
-            <p className='text-[12px] text-gray-600 dark:text-gray-200'>{t('Settings.TagNew')}</p>
-            <Icon name='plus' />
-          </Link>
+          <div
+            className={etcUtil.classNames({
+              'tutorial-dim z-[10] rounded-xl': [3].includes(tutorialStep ?? -1),
+            })}
+            role='presentation'
+            onClick={setTutorialStep}>
+            <Link
+              href='?tag=new'
+              className='pl-[12px] pr-[6px] py-[6px] | border border-dashed rounded-full border-slate-400 dark:border-zinc-600 | flex items-center justify-center gap-[4px]'
+              style={{
+                anchorName: '--settings-tag',
+              }}>
+              <p className='text-[12px] text-gray-600 dark:text-gray-200'>{t('Settings.TagNew')}</p>
+              <Icon name='plus' />
+            </Link>
+          </div>
         </div>
       </div>
+      <If condition={[3].includes(tutorialStep ?? -1)}>
+        <Then>
+          <UITooltip
+            direction='TOP_LEFT'
+            className='absolute bottom-0 left-0 translate-y-[0] z-[30]'
+            style={{
+              positionAnchor: '--settings-tag',
+              top: 'anchor(--settings-tag bottom)',
+              left: 'anchor(--settings-tag left)',
+              marginTop: '8px',
+            }}>
+            <p className='whitespace-nowrap text-[13px] tracking-tight'>{t('Tutorial.Step3')}</p>
+          </UITooltip>
+        </Then>
+      </If>
     </div>
   )
 }

@@ -127,7 +127,9 @@
     "Language": "Idioma",
     "Data": "Dados",
     "DataImport": "Importar",
-    "DataExport": "Exportar"
+    "DataExport": "Exportar",
+    "Init": "Redefinir",
+    "InitAllDelete": "Excluir tudo"
   },
   "Guide": {
     "PageTitle": "Guia",
@@ -138,5 +140,16 @@
     "Phrase": "Os dados excluídos não podem ser recuperados.\nDeseja continuar?",
     "Do": "Excluir",
     "Cancel": "Cancelar"
+  },
+  "Tutorial": {
+    "Title": "Bem-vindo(a)!",
+    "Phrase": "Deseja iniciar o tutorial do Memoku?",
+    "Proceed": "Iniciar",
+    "Cancel": "Cancelar",
+    "Step1": "Tente adicionar uma nova tarefa aqui.",
+    "Step2": "Tente escrever sua tarefa aqui.",
+    "Step3": "Tente adicionar uma tag aqui.",
+    "Step5": "Tente alterar a tag aqui.",
+    "Done": "Você concluiu o tutorial."
   }
 }

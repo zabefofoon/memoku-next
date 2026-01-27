@@ -24,6 +24,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useCookies } from 'react-cookie'
 import { Else, If, Then } from 'react-if'
+import { useTutorialStore } from '../stores/tutorial.store'
+import etcUtil from '../utils/etc.util'
+import UITooltip from './UITooltip'
 
 export function TodosClient() {
   const router = useRouter()
@@ -52,6 +55,7 @@ export function TodosClient() {
   const page = useTodosPageStore((state) => state.page)
   const saveTodosQuries = useThemeStore((state) => state.saveTodosQuries)
   const [isShow, setIsShow] = useState(true)
+  const tutorialStep = useTutorialStore((s) => s.tutorialStep)
 
   const searchQuery = searchParams.get('searchText')
   const statusQuery = searchParams.get('status')
@@ -186,7 +190,11 @@ export function TodosClient() {
           <DarkModeButton />
         </div>
       </div>
-      <div className='w-full h-full | flex flex-col | sm:overflow-hidden'>
+      <div
+        className={etcUtil.classNames([
+          'w-full h-full | flex flex-col | sm:overflow-hidden',
+          { 'sm:overflow-visible': [5, 6].includes(tutorialStep ?? -1) },
+        ])}>
         <div
           className='sticky top-0 left-0 z-[50] | pt-[16px] pb-[6px] | bg-gray-100/50 dark:bg-transparent | transition-transform'
           style={{
@@ -251,7 +259,11 @@ export function TodosClient() {
           </div>
           <TodosSelectedFilters />
         </div>
-        <div className='overflow-auto | flex-1 flex flex-col gap-[32px] mb-[88px] sm:mb-0'>
+        <div
+          className={etcUtil.classNames([
+            'overflow-auto | flex-1 flex flex-col gap-[32px] mb-[88px] sm:mb-0',
+            { 'overflow-visible': [5, 6].includes(tutorialStep ?? -1) },
+          ])}>
           <TodosCardsToday />
           <TodosCardsThisWeek />
           <TodosCardsNextWeek />
@@ -267,6 +279,20 @@ export function TodosClient() {
           </If>
         </div>
       </div>
+      <If condition={tutorialStep === 5}>
+        <Then>
+          <UITooltip
+            direction='BOTTOM_LEFT'
+            className='absolute translate-y-[-32px] z-[51]'
+            style={{
+              positionAnchor: '--todo-card',
+              top: 'anchor(--todo-card top)',
+              left: 'anchor(--todo-card left)',
+            }}>
+            <p className='whitespace-nowrap text-[13px] tracking-tight'>{t('Tutorial.Step5')}</p>
+          </UITooltip>
+        </Then>
+      </If>
     </div>
   )
 }

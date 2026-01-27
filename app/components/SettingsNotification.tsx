@@ -25,7 +25,7 @@ export default function SettingsTags() {
 
       const deviceId = cookies[COOKIE_DEVICE_ID] || etcUtil.generateUniqueId()
 
-      const registrations = await navigator.serviceWorker.getRegistrations()
+      const registrations = await navigator?.serviceWorker.getRegistrations()
       for (const registration of registrations) {
         const pushSubscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,

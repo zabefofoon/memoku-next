@@ -123,7 +123,9 @@
     "Language": "Language",
     "Data": "Data",
     "DataImport": "Import",
-    "DataExport": "Export"
+    "DataExport": "Export",
+    "Init": "Reset",
+    "InitAllDelete": "Delete all"
   },
   "Guide": {
     "PageTitle": "Guide",
@@ -134,5 +136,16 @@
     "Phrase": "Deleted data cannot be recovered.\nDo you want to continue?",
     "Do": "Delete",
     "Cancel": "Cancel"
+  },
+  "Tutorial": {
+    "Title": "Welcome!",
+    "Phrase": "Would you like to start the Memoku tutorial?",
+    "Proceed": "Start",
+    "Cancel": "Cancel",
+    "Step1": "Try adding a new task here.",
+    "Step2": "Try writing your task here.",
+    "Step3": "Try adding a tag here.",
+    "Step5": "Try changing the tag here.",
+    "Done": "You've completed the tutorial."
   }
 }

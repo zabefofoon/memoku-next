@@ -24,4 +24,8 @@ export const imagesDB = {
   deleteImages(ids: string[]) {
     return db.images.bulkDelete(ids)
   },
+
+  deleteAllImages() {
+    return db.images.clear()
+  },
 }

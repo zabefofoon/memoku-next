@@ -9,6 +9,9 @@ export interface CreatedSeriesPoint {
 }
 
 export const todosDB = {
+  getTodosCount: async (): Promise<number> => {
+    return db.todos.count()
+  },
   checkExistTodo: async (id: string): Promise<boolean> => {
     return (await db.todos.where('id').equals(id).count()) > 0
   },
@@ -482,6 +485,7 @@ export const todosDB = {
       modified: Date.now(),
       dirty: true,
     }
+
     return db.transaction('rw', db.todos, async () => {
       const id = await db.todos.add(newTodo)
       if (todo.parentId) await db.todos.update(todo.parentId, { childId: id })
@@ -525,6 +529,9 @@ export const todosDB = {
 
       return deletedCount
     })
+  },
+  deleteAllTodos: async () => {
+    await db.todos.clear()
   },
   updateTag: async (id: string, tagId: string): Promise<number> => {
     const now = Date.now()
