@@ -60,7 +60,8 @@
     "TodayTodoAdd": "追加する",
     "HomeNewsMore": "もっと見る",
     "HomeRecentLabel": "最近更新",
-    "HomeSequelLabel": "週間アクティビティ"
+    "HomeSequelLabel": "週間アクティビティ",
+    "HomeTagEmpty": "タグがありません。\n新しく追加してみてください。"
   },
   "Todo": {
     "Created": "{date} 作成",

@@ -12,7 +12,8 @@ export default function HomeSequelChart({ data }: Props) {
     <ResponsiveContainer
       width='100%'
       height='100%'
-      minHeight={200}>
+      minHeight={200}
+      initialDimension={{ width: 1, height: 1 }}>
       <ComposedChart
         data={data}
         margin={{ top: 20, left: 12, right: 12, bottom: 20 }}>

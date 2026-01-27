@@ -60,7 +60,8 @@
     "TodayTodoAdd": "추가하기",
     "HomeNewsMore": "더 보기",
     "HomeRecentLabel": "최근 수정",
-    "HomeSequelLabel": "주간 활동"
+    "HomeSequelLabel": "주간 활동",
+    "HomeTagEmpty": "태그가 없습니다.\n새로 추가해보세요."
   },
   "Todo": {
     "Created": "{date} 생성",

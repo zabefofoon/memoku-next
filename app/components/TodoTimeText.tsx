@@ -46,7 +46,7 @@ export default function TodoTimeText({
               <Else>
                 <p className='text-[11px] text-gray-400'>
                   {dayjs(todo.start).format(t('General.YMD'))} ~{' '}
-                  {dayjs(todo.end).format(t('General.YMD'))}asd
+                  {dayjs(todo.end).format(t('General.YMD'))}
                 </p>
               </Else>
             </If>

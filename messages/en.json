@@ -64,7 +64,8 @@
     "TodayTodoAdd": "Add",
     "HomeNewsMore": "See more",
     "HomeRecentLabel": "Recently updated",
-    "HomeSequelLabel": "Weekly activity"
+    "HomeSequelLabel": "Weekly activity",
+    "HomeTagEmpty": "No tags.\nTry adding one."
   },
   "Todo": {
     "Created": "Created on {date}",

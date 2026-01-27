@@ -11,7 +11,8 @@ export default function HomeTotalChart({ data, total, isDarkMode }: Props) {
     <ResponsiveContainer
       width={'100%'}
       height={'100%'}
-      minHeight='300px'>
+      minHeight='300px'
+      initialDimension={{ width: 1, height: 1 }}>
       <RadialBarChart
         margin={{ top: 0, left: 0, right: 0, bottom: 0 }}
         data={data}

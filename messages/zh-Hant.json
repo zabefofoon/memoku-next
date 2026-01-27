@@ -60,7 +60,8 @@
     "TodayTodoAdd": "新增",
     "HomeNewsMore": "查看更多",
     "HomeRecentLabel": "最近更新",
-    "HomeSequelLabel": "每週活動"
+    "HomeSequelLabel": "每週活動",
+    "HomeTagEmpty": "沒有標籤。\n試著新增一個吧。"
   },
   "Todo": {
     "Created": "{date} 建立",
