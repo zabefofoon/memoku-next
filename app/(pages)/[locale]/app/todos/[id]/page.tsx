@@ -12,6 +12,6 @@ export async function generateMetadata({
   }
 }
 
-export default function TodosDetail() {
+export default async function TodosDetail() {
   return <TodosDetailClient />
 }

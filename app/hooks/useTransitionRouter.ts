@@ -47,8 +47,8 @@ export function useTransitionRouter() {
           loadTried.current = 0
           while (!useTranstionsStore.getState().isLoaded) {
             loadTried.current++
-            if (loadTried.current > 10) break
-            await etcUtil.sleep(100)
+            if (loadTried.current > 20) break
+            await etcUtil.sleep(300)
           }
           setIsLoaded(false)
         })
