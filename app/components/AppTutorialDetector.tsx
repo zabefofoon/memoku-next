@@ -1,6 +1,7 @@
 'use client'
 
 import { COOKIE_TUTORIAL } from '@/const'
+import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
 import { toast } from 'sonner'
@@ -10,6 +11,7 @@ import { useTutorialStore } from '../stores/tutorial.store'
 import { AppTutorialConfirm } from './AppTutorialConfirm'
 
 export function AppTutorialDetector() {
+  const t = useTranslations()
   const [cookies, setCookies] = useCookies()
   const [isShowTutorialConfirm, setIsShowTutorialConfirm] = useState<boolean>(false)
   const tutorialStep = useTutorialStore((s) => s.tutorialStep)
@@ -31,7 +33,7 @@ export function AppTutorialDetector() {
   useEffect(() => {
     if (tutorialStep === 7) {
       setCookies(COOKIE_TUTORIAL, true, { maxAge: 60 * 60 * 24 * 365 })
-      toast.success('튜토리얼을 완료했습니다.')
+      toast.success(t('Tutorial.Done'))
     }
   }, [tutorialStep, setCookies])
 
