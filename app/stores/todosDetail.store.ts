@@ -280,7 +280,7 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
       api
         .patchSheetGoogleTodo(fileId, {
           index: todo.index,
-          description: encodeURIComponent(text),
+          description: text,
           modified,
         })
         .then((res) => {
@@ -376,6 +376,7 @@ export const useTodosDetailStore = create<TodosDetailStore>((set, get) => ({
           created: newTodo.created,
           modified: newTodo.modified,
           parent: todo.id,
+          tag: todo.tagId,
         })
         .then((res) => {
           if (res.ok) {

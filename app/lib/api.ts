@@ -60,23 +60,24 @@ export const api = {
   },
   postSheetGoogleTodo(
     fileId: string,
-    searchParams: {
+    body: {
       id: string
       created?: number
       modified?: number
       parent?: string
+      tag?: string
     }
   ) {
-    const init = { fileId, ...searchParams } as unknown as Record<string, string>
-    const params = new URLSearchParams(init)
-    return fetch(`/api/sheet/google/todo?${decodeURIComponent(params.toString())}`, {
+    return fetch(`/api/sheet/google/todo`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileId, ...body }),
     })
   },
 
   patchSheetGoogleTodo(
     fileId: string,
-    searchParams: {
+    body: {
       index?: number
       tag?: string
       modified?: number
@@ -91,10 +92,10 @@ export const api = {
       deleted?: boolean
     }
   ) {
-    const init = { fileId, ...searchParams } as unknown as Record<string, string>
-    const params = new URLSearchParams(init)
-    return fetch(`/api/sheet/google/todo?${decodeURIComponent(params.toString())}`, {
+    return fetch(`/api/sheet/google/todo`, {
       method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileId, ...body }),
     })
   },
 
@@ -113,7 +114,7 @@ export const api = {
 
   patchSheetGoogleTag(
     fileId: string,
-    searchParams: {
+    body: {
       index: number
       now: number
       color?: string
@@ -121,18 +122,19 @@ export const api = {
       deleted?: boolean
     }
   ) {
-    const init = { fileId, ...searchParams } as unknown as Record<string, string>
-    const params = new URLSearchParams(init)
-    return fetch(`/api/sheet/google/tag?${decodeURIComponent(params.toString())}`, {
+    return fetch(`/api/sheet/google/tag`, {
       method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileId, ...body }),
     })
   },
 
   postSheetGoogleTag(fileId: string, id: string, color: string, label: string, now: number) {
-    return fetch(
-      `/api/sheet/google/tag?fileId=${fileId}&id=${id}&color=${color}&label=${label}&now=${now}`,
-      { method: 'POST' }
-    )
+    return fetch(`/api/sheet/google/tag`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileId, id, color, label, now }),
+    })
   },
 
   postAlarmSubscribe(subscription: PushSubscription, device_id: string) {

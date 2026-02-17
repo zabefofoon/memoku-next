@@ -3,15 +3,15 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
-  const url = new URL(req.url)
+  const body = await req.json().catch(() => ({}))
 
-  const fileId = url.searchParams.get('fileId') ?? ''
+  const fileId = String(body.fileId ?? '')
   if (!fileId) return NextResponse.json({ ok: false })
 
-  const id = url.searchParams.get('id') ?? ''
-  const color = url.searchParams.get('color') ?? ''
-  const label = url.searchParams.get('label') ?? ''
-  const modified = url.searchParams.get('now') ?? ''
+  const id = String(body.id ?? '')
+  const color = String(body.color ?? '')
+  const label = String(body.label ?? '')
+  const modified = String(body.now ?? '')
 
   const headerCookies = await cookies()
   const access = headerCookies.get('x-google-access-token')?.value
@@ -46,16 +46,16 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const url = new URL(req.url)
+  const body = await req.json().catch(() => ({}))
 
-  const fileId = url.searchParams.get('fileId') ?? ''
-  const index = url.searchParams.get('index') ?? ''
+  const fileId = String(body.fileId ?? '')
+  const index = String(body.index ?? '')
   if (!fileId || !index) return NextResponse.json({ ok: false })
 
-  const color = url.searchParams.get('color') ?? ''
-  const label = url.searchParams.get('label') ?? ''
-  const modified = url.searchParams.get('now') ?? ''
-  const deleted = url.searchParams.get('deleted') ?? ''
+  const color = String(body.color ?? '')
+  const label = String(body.label ?? '')
+  const modified = String(body.now ?? '')
+  const deleted = String(body.deleted ?? '')
 
   const headerCookies = await cookies()
   const access = headerCookies.get('x-google-access-token')?.value

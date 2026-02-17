@@ -3,15 +3,16 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
-  const url = new URL(req.url)
+  const body = await req.json().catch(() => ({}))
 
-  const fileId = url.searchParams.get('fileId') ?? ''
+  const fileId = String(body.fileId ?? '')
   if (!fileId) return NextResponse.json({ ok: false })
 
-  const id = url.searchParams.get('id') ?? ''
-  const created = url.searchParams.get('created') ?? ''
-  const modified = url.searchParams.get('modified') ?? ''
-  const parent = url.searchParams.get('parent') ?? ''
+  const id = String(body.id ?? '')
+  const created = String(body.created ?? '')
+  const modified = String(body.modified ?? '')
+  const parent = String(body.parent ?? '')
+  const tag = String(body.tag ?? '')
 
   const headerCookies = await cookies()
   const access = headerCookies.get('x-google-access-token')?.value
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
     valueInputOption: 'RAW',
     range: 'todo2',
     requestBody: {
-      values: [[id, '', '', +created, +modified, '', 'created', parent.replace('undefined', '')]],
+      values: [[id, '', tag, +created, +modified, '', 'created', parent.replace('undefined', '')]],
     },
   })
 
@@ -46,23 +47,23 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const url = new URL(req.url)
+  const body = await req.json().catch(() => ({}))
 
-  const fileId = url.searchParams.get('fileId') ?? ''
-  const index = url.searchParams.get('index') ?? ''
+  const fileId = String(body.fileId ?? '')
+  const index = String(body.index ?? '')
   if (!fileId || !index) return NextResponse.json({ ok: false })
 
-  const description = url.searchParams.get('description') ?? ''
-  const tag = url.searchParams.get('tag') ?? ''
-  const start = url.searchParams.get('start') ?? ''
-  const end = url.searchParams.get('end') ?? ''
-  const images = url.searchParams.get('images') ?? ''
-  const status = url.searchParams.get('status') ?? ''
-  const childId = url.searchParams.get('child') ?? ''
-  const parentId = url.searchParams.get('parent') ?? ''
-  const deleted = url.searchParams.get('deleted') ?? ''
-  const modified = url.searchParams.get('modified') ?? ''
-  const daysParam = url.searchParams.get('days')
+  const description = String(body.description ?? '')
+  const tag = String(body.tag ?? '')
+  const start = String(body.start ?? '')
+  const end = String(body.end ?? '')
+  const images = String(body.images ?? '')
+  const status = String(body.status ?? '')
+  const childId = String(body.child ?? '')
+  const parentId = String(body.parent ?? '')
+  const deleted = String(body.deleted ?? '')
+  const modified = String(body.modified ?? '')
+  const daysParam = String(body.days ?? '')
   const days = daysParam ? daysParam.split(',') : undefined
 
   const headerCookies = await cookies()
